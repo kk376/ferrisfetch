@@ -7,3 +7,7 @@ vendor/
 *.dsc
 *.buildinfo
 *.changes
+*.sh
+*.upload
+prep_*.sh
+build_*.sh
