@@ -95,6 +95,21 @@ pub mod ffi {
         pub fn RegCloseKey(hKey: isize) -> i32;
     }
 
+    #[repr(C)]
+    #[allow(non_snake_case)]
+    pub struct PROCESSENTRY32W {
+        pub dwSize: u32,
+        pub cntUsage: u32,
+        pub th32ProcessID: u32,
+        pub th32DefaultHeapID: usize,
+        pub th32ModuleID: u32,
+        pub cntThreads: u32,
+        pub th32ParentProcessID: u32,
+        pub pcPriClassBase: i32,
+        pub dwFlags: u32,
+        pub szExeFile: [u16; 260],
+    }
+
     #[link(name = "kernel32")]
     extern "system" {
         pub fn GetTickCount64() -> u64;
@@ -119,6 +134,11 @@ pub mod ffi {
             lpFileSystemNameBuffer: *mut u16,
             nFileSystemNameSize: u32,
         ) -> i32;
+        pub fn CreateToolhelp32Snapshot(dwFlags: u32, th32ProcessID: u32) -> isize;
+        pub fn Process32FirstW(hSnapshot: isize, lppe: *mut PROCESSENTRY32W) -> i32;
+        pub fn Process32NextW(hSnapshot: isize, lppe: *mut PROCESSENTRY32W) -> i32;
+        pub fn GetCurrentProcessId() -> u32;
+        pub fn CloseHandle(hObject: isize) -> i32;
     }
 
     fn to_wide(s: &str) -> Vec<u16> {
@@ -309,5 +329,48 @@ pub mod ffi {
 
         reg_close_key(hkey);
         subkeys
+    }
+
+    pub fn get_parent_process_chain(max_depth: usize) -> Vec<(u32, String)> {
+        let mut chain = Vec::new();
+        let h_snap = unsafe { CreateToolhelp32Snapshot(0x00000002, 0) };
+        if h_snap == 0 || h_snap == -1 {
+            return chain;
+        }
+
+        let mut processes = std::collections::HashMap::new();
+        let mut entry = unsafe { std::mem::zeroed::<PROCESSENTRY32W>() };
+        entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
+
+        if unsafe { Process32FirstW(h_snap, &mut entry) } != 0 {
+            loop {
+                let name_len = entry
+                    .szExeFile
+                    .iter()
+                    .position(|&c| c == 0)
+                    .unwrap_or(entry.szExeFile.len());
+                let exe_name = String::from_utf16_lossy(&entry.szExeFile[..name_len]);
+                processes.insert(entry.th32ProcessID, (entry.th32ParentProcessID, exe_name));
+
+                if unsafe { Process32NextW(h_snap, &mut entry) } == 0 {
+                    break;
+                }
+            }
+        }
+        unsafe { CloseHandle(h_snap) };
+
+        let mut curr_pid = unsafe { GetCurrentProcessId() };
+        for _ in 0..max_depth {
+            if let Some(&(ppid, ref name)) = processes.get(&curr_pid) {
+                if ppid == 0 || ppid == curr_pid {
+                    break;
+                }
+                chain.push((ppid, name.clone()));
+                curr_pid = ppid;
+            } else {
+                break;
+            }
+        }
+        chain
     }
 }

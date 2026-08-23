@@ -4,47 +4,47 @@ This directory contains the Gentoo Linux ebuild recipe and package metadata for 
 
 ## Files
 
-- `ferrisfetch-0.9.9.ebuild`: Portage ebuild using `EAPI=8`, `cargo.eclass`, and `shell-completion.eclass`.
-- `metadata.xml`: Package metadata conforming to Gentoo upstream standards.
+- `ferrisfetch-0.9.10.ebuild`: Portage ebuild using `EAPI=8`, `cargo.eclass`, and `shell-completion.eclass`.
+- `metadata.xml`: Package metadata with maintainer contact and upstream repository.
 
-## Adding to a Local Overlay
+## Installation / Usage in Local Overlay
 
-1. Create a local overlay category directory:
+1. **Create local overlay structure** (if not already existing):
    ```bash
    mkdir -p /var/db/repos/localrepo/app-misc/ferrisfetch
    ```
 
-2. Copy the ebuild and metadata files:
+2. **Copy the ebuild and metadata**:
    ```bash
-   cp ferrisfetch-0.9.9.ebuild metadata.xml /var/db/repos/localrepo/app-misc/ferrisfetch/
+   cp ferrisfetch-0.9.10.ebuild metadata.xml /var/db/repos/localrepo/app-misc/ferrisfetch/
    ```
 
-3. Generate the Manifest file:
+3. **Generate Manifest with cargo checksums**:
    ```bash
    cd /var/db/repos/localrepo/app-misc/ferrisfetch
-   ebuild ferrisfetch-0.9.9.ebuild manifest
+   ebuild ferrisfetch-0.9.10.ebuild manifest
    ```
 
-4. Test compilation and installation:
+4. **Test build locally**:
    ```bash
-   ebuild ferrisfetch-0.9.9.ebuild clean compile
-   ebuild ferrisfetch-0.9.9.ebuild install
+   ebuild ferrisfetch-0.9.10.ebuild clean compile
+   ebuild ferrisfetch-0.9.10.ebuild install
    ```
 
-5. Install using `emerge`:
+5. **Emerge ferrisfetch**:
    ```bash
    emerge --ask app-misc/ferrisfetch
    ```
 
-## Gentoo GURU Overlay Submission
+## Contributing to GURU / Gentoo Main Tree
 
-For submission to Gentoo's GURU repository:
-1. Verify with `pkgcheck`:
+To submit `ferrisfetch` to the [Gentoo GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU):
+
+1. Fork the `gentoo/guru` repository on GitHub / GitLab.
+2. Clone your fork and create a new branch: `git checkout -b ferrisfetch-0.9.10`
+3. Add the package to `app-misc/ferrisfetch/`.
+4. Run `pkgcheck scan` and `repoman full` to verify Gentoo QA compliance.
+5. Commit with standard Gentoo commit message:
    ```bash
-   pkgcheck scan
-   ```
-2. Commit conforming to Gentoo git conventions:
-   ```bash
-   git add app-misc/ferrisfetch/
-   git commit -m "app-misc/ferrisfetch: new package, add 0.9.9"
+   git commit -m "app-misc/ferrisfetch: new package, add 0.9.10"
    ```

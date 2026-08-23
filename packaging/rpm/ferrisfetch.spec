@@ -1,9 +1,9 @@
 %global debug_package %{nil}
 
 Name:           ferrisfetch
-Version:        0.9.9
+Version:        0.9.10
 Release:        1%{?dist}
-Summary:        Fast, lightweight Linux system information fetch tool written in Rust
+Summary:        A fast, lightweight Linux, macOS, and Windows system information fetch tool written in Rust
 
 License:        MIT
 URL:            https://github.com/kk376/ferrisfetch
@@ -52,6 +52,9 @@ install -Dpm 0644 README.md %{buildroot}%{_docdir}/%{name}/README.md
 %{_datadir}/fish/vendor_completions.d/%{name}.fish
 
 %changelog
+* Sun Aug 23 2026 FerrisFetch Packaging Team <packaging@ferrisfetch.rs> - 0.9.10-1
+- Release version 0.9.10: Zero-subprocess Windows Toolhelp32 process snapshot shell and terminal detection
+
 * Sun Aug 23 2026 FerrisFetch Packaging Team <packaging@ferrisfetch.rs> - 0.9.9-1
 - Release version 0.9.9
 - Preserve package checksum hashes in vendored crates

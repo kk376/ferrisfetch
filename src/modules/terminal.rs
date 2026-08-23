@@ -228,6 +228,8 @@ pub fn detect_windows_terminal_from_env(
 /// Inspects environment variables and process ancestry to detect terminal emulator.
 #[cfg(windows)]
 pub fn detect_terminal() -> Option<String> {
+    use crate::modules::win_util::ffi;
+
     let term_prog = std::env::var("TERM_PROGRAM").ok();
     let term_prog_ver = std::env::var("TERM_PROGRAM_VERSION").ok();
 
@@ -257,6 +259,27 @@ pub fn detect_terminal() -> Option<String> {
         None,
     ) {
         return Some(term);
+    }
+
+    // Check parent process chain for terminal emulator
+    let chain = ffi::get_parent_process_chain(5);
+    for (_pid, name) in &chain {
+        let lower = name.to_lowercase();
+        if lower.contains("windowsterminal") {
+            return Some("Windows Terminal".to_string());
+        }
+        if lower.contains("alacritty") {
+            return Some("Alacritty".to_string());
+        }
+        if lower.contains("wezterm") {
+            return Some("WezTerm".to_string());
+        }
+        if lower.contains("code") {
+            return Some("Visual Studio Code".to_string());
+        }
+        if lower.contains("mintty") {
+            return Some("MinTTY".to_string());
+        }
     }
 
     Some("Console Window Host (ConHost)".to_string())

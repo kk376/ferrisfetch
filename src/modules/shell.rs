@@ -111,6 +111,7 @@ pub fn format_shell_name_version(
     clean_name.to_string()
 }
 
+#[cfg(not(windows))]
 fn get_shell_cli_version(shell_name: &str) -> Option<String> {
     let cache_dir = std::env::var_os("XDG_CACHE_HOME")
         .map(std::path::PathBuf::from)
@@ -160,6 +161,7 @@ fn get_shell_cli_version(shell_name: &str) -> Option<String> {
     None
 }
 
+#[cfg(not(windows))]
 fn format_shell_with_version(shell_name: &str) -> String {
     // Fast-path: query shell version environment variables before spawning subprocesses
     let mut bash_ver = std::env::var("BASH_VERSION").ok();
@@ -296,42 +298,67 @@ pub fn detect_windows_shell_from_env(env_vars: &[(&str, &str)]) -> String {
 /// Probes process hierarchy or environment to determine active user shell.
 #[cfg(windows)]
 pub fn detect_shell() -> Option<String> {
-    // 1. Check $SHELL (Git Bash, MSYS2, Cygwin)
+    use crate::modules::win_util::ffi;
+
+    // 1. Traverse process parent chain to identify the active interactive shell
+    let chain = ffi::get_parent_process_chain(5);
+    for (_pid, name) in &chain {
+        let lower = name.to_lowercase();
+        let clean = lower.trim_end_matches(".exe");
+
+        if clean == "cmd" {
+            let key = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
+            let build = ffi::reg_read_string(ffi::HKEY_LOCAL_MACHINE, key, "CurrentBuildNumber")
+                .or_else(|| ffi::reg_read_string(ffi::HKEY_LOCAL_MACHINE, key, "CurrentBuild"));
+            let ubr = ffi::reg_read_u32(ffi::HKEY_LOCAL_MACHINE, key, "UBR");
+
+            if let Some(b) = build {
+                if let Some(u) = ubr {
+                    return Some(format!("CMD 10.0.{}.{}", b, u));
+                }
+                return Some(format!("CMD 10.0.{}", b));
+            }
+            return Some("cmd.exe".to_string());
+        }
+
+        if clean == "pwsh" {
+            if let Ok(ver) = std::env::var("POWERSHELL_VERSION") {
+                return Some(format!("pwsh {}", ver.trim()));
+            }
+            return Some("pwsh".to_string());
+        }
+
+        if clean == "powershell" {
+            if let Ok(ver) = std::env::var("PSVERSION") {
+                return Some(format!("PowerShell {}", ver.trim()));
+            }
+            return Some("PowerShell 5.1".to_string());
+        }
+
+        if clean == "nu" {
+            if let Ok(ver) = std::env::var("NU_VERSION") {
+                return Some(format!("nu {}", ver.trim()));
+            }
+            return Some("nu".to_string());
+        }
+
+        if is_known_shell(clean) {
+            return Some(clean.to_string());
+        }
+    }
+
+    // 2. Fallback to environment variables
     if let Ok(shell_path) = std::env::var("SHELL") {
         let name_clean = extract_shell_name(&shell_path);
         if !name_clean.is_empty() && is_known_shell(&name_clean) {
-            return Some(format_shell_with_version(&name_clean));
+            return Some(name_clean);
         }
     }
 
-    // 2. Check PowerShell Core / 7 signature
-    if std::env::var("POWERSHELL_DISTRIBUTION_CHANNEL").is_ok() {
-        return Some(format_shell_with_version("pwsh"));
-    }
-
-    // 3. Check Nushell signature
-    if std::env::var("NU_VERSION").is_ok() {
-        return Some(format_shell_with_version("nu"));
-    }
-
-    // 4. Check PSModulePath
-    if let Ok(ps_mod) = std::env::var("PSModulePath") {
-        if ps_mod.contains("PowerShell\\7")
-            || ps_mod.contains("PowerShell/7")
-            || ps_mod.to_lowercase().contains("pwsh")
-        {
-            return Some(format_shell_with_version("pwsh"));
-        }
-        if ps_mod.contains("WindowsPowerShell") {
-            return Some(format_shell_with_version("powershell"));
-        }
-    }
-
-    // 5. Check COMSPEC and PROMPT
     if let Ok(comspec) = std::env::var("COMSPEC") {
         let name = extract_shell_name(&comspec);
         if name == "cmd" || is_known_shell(&name) {
-            return Some(format_shell_with_version(&name));
+            return Some("cmd.exe".to_string());
         }
     }
 

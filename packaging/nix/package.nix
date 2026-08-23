@@ -7,7 +7,7 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "ferrisfetch";
-  version = "0.9.9";
+  version = "0.9.10";
 
   src = if src != null then src else fetchFromGitHub {
     owner = "kk376";

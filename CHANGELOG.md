@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.10] - 2026-08-23
+
+### Optimized
+- **Zero-Subprocess Windows Shell & Terminal Resolution**: Replaced process spawning with native Win32 Toolhelp32 process snapshot ancestry traversal (`CreateToolhelp32Snapshot`), eliminating 200ms–400ms startup latency.
+- **Accurate Windows Shell Detection**: Resolved Command Prompt (`cmd.exe`) version directly from Registry `CurrentBuildNumber` + `UBR` (`CMD 10.0.<build>.<ubr>`).
+- **Dedicated Windows Package Manager Pipeline**: Added Scoop package manager discovery (`%USERPROFILE%\scoop\apps`) and bypassed Linux filesystem probes on Windows.
+
 ## [0.9.9] - 2026-08-23
 
 ### Fixed

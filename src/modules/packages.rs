@@ -439,6 +439,43 @@ pub fn count_winget() -> Option<usize> {
     count_winget_from_dirs(&packages, &links)
 }
 
+/// Counts installed Scoop packages from apps directory.
+pub fn count_scoop_from_dir(apps_dir: &Path) -> Option<usize> {
+    if let Ok(entries) = fs::read_dir(apps_dir) {
+        let count = entries
+            .flatten()
+            .filter(|e| {
+                if let Ok(ft) = e.file_type() {
+                    if ft.is_dir() {
+                        let name = e.file_name();
+                        let s = name.to_string_lossy();
+                        return !s.starts_with('.') && s != "scoop";
+                    }
+                }
+                false
+            })
+            .count();
+        if count > 0 {
+            return Some(count);
+        }
+    }
+    None
+}
+
+/// Counts installed Scoop packages.
+pub fn count_scoop() -> Option<usize> {
+    if let Ok(scoop_dir) = std::env::var("SCOOP") {
+        if let Some(c) = count_scoop_from_dir(&Path::new(&scoop_dir).join("apps")) {
+            return Some(c);
+        }
+    }
+    let home = std::env::var("USERPROFILE")
+        .or_else(|_| std::env::var("HOME"))
+        .ok()?;
+    let apps_dir = Path::new(&home).join("scoop").join("apps");
+    count_scoop_from_dir(&apps_dir)
+}
+
 /// Counts installed Chocolatey packages from lib directory.
 pub fn count_choco_from_dir(lib_path: &Path) -> Option<usize> {
     if let Ok(entries) = fs::read_dir(lib_path) {
@@ -658,7 +695,42 @@ pub fn count_pip() -> Option<usize> {
     None
 }
 
-/// Gathers and formats package counts across all active package managers.
+/// Gathers and formats package counts across all active package managers on Windows.
+#[cfg(windows)]
+pub fn get_packages_summary() -> Option<String> {
+    let mut parts = Vec::new();
+
+    if let Some(winget) = count_winget() {
+        parts.push(format!("{} (winget)", winget));
+    }
+    if let Some(scoop) = count_scoop() {
+        parts.push(format!("{} (scoop)", scoop));
+    }
+    if let Some(choco) = count_choco() {
+        parts.push(format!("{} (choco)", choco));
+    }
+    if let Some(pacman) = count_pacman_from_dir(Path::new("C:\\msys64\\var\\lib\\pacman\\local")) {
+        parts.push(format!("{} (pacman)", pacman));
+    }
+    if let Some(cargo) = count_cargo() {
+        parts.push(format!("{} (cargo)", cargo));
+    }
+    if let Some(npm) = count_npm() {
+        parts.push(format!("{} (npm)", npm));
+    }
+    if let Some(pip) = count_pip() {
+        parts.push(format!("{} (pip)", pip));
+    }
+
+    if !parts.is_empty() {
+        Some(parts.join(", "))
+    } else {
+        None
+    }
+}
+
+/// Gathers and formats package counts across all active package managers on Unix / Linux / macOS.
+#[cfg(not(windows))]
 pub fn get_packages_summary() -> Option<String> {
     let mut parts = Vec::new();
 
@@ -691,6 +763,9 @@ pub fn get_packages_summary() -> Option<String> {
     }
     if let Some(winget) = count_winget() {
         parts.push(format!("{} (winget)", winget));
+    }
+    if let Some(scoop) = count_scoop() {
+        parts.push(format!("{} (scoop)", scoop));
     }
     if let Some(choco) = count_choco() {
         parts.push(format!("{} (choco)", choco));
@@ -977,6 +1052,21 @@ Section: libs
         fs::create_dir(site_packages.join("__pycache__")).unwrap();
 
         assert_eq!(count_pip_from_dir(&site_packages), Some(3));
+    }
+
+    #[test]
+    fn test_count_scoop_from_dir_mock() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let apps_dir = temp_dir.path().join("apps");
+        fs::create_dir_all(&apps_dir).unwrap();
+
+        fs::create_dir(apps_dir.join("git")).unwrap();
+        fs::create_dir(apps_dir.join("curl")).unwrap();
+        fs::create_dir(apps_dir.join("fastfetch")).unwrap();
+        fs::create_dir(apps_dir.join("scoop")).unwrap(); // excluded self
+        fs::create_dir(apps_dir.join(".git")).unwrap(); // excluded hidden
+
+        assert_eq!(count_scoop_from_dir(&apps_dir), Some(3));
     }
 
     #[test]
