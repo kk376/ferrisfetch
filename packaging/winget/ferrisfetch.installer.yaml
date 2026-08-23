@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
 
 PackageIdentifier: Kushagra.FerrisFetch
-PackageVersion: 0.9.8
+PackageVersion: 0.9.9
 InstallerType: zip
 NestedInstallerType: portable
 NestedInstallerFiles:
@@ -10,7 +10,7 @@ NestedInstallerFiles:
     PortableCommandAlias: ferrisfetch
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/kk376/ferrisfetch/releases/download/v0.9.8/ferrisfetch-windows-x86_64.zip
+    InstallerUrl: https://github.com/kk376/ferrisfetch/releases/download/v0.9.9/ferrisfetch-windows-x86_64.zip
     InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
 ManifestType: installer
 ManifestVersion: 1.6.0

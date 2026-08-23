@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:           ferrisfetch
-Version:        0.9.8
+Version:        0.9.9
 Release:        1%{?dist}
 Summary:        Fast, lightweight Linux system information fetch tool written in Rust
 
@@ -52,6 +52,10 @@ install -Dpm 0644 README.md %{buildroot}%{_docdir}/%{name}/README.md
 %{_datadir}/fish/vendor_completions.d/%{name}.fish
 
 %changelog
+* Sun Aug 23 2026 FerrisFetch Packaging Team <packaging@ferrisfetch.rs> - 0.9.9-1
+- Release version 0.9.9
+- Preserve package checksum hashes in vendored crates
+
 * Sun Aug 23 2026 FerrisFetch Packaging Team <packaging@ferrisfetch.rs> - 0.9.8-1
 - Release version 0.9.8
 - Fix vendored cargo checksums and offline paths

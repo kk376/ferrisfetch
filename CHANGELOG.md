@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.9] - 2026-08-23
+
+### Fixed
+- **Vendored Package Checksum Preservation**: Preserved crate package checksum hashes while zeroing file-level maps in `.cargo-checksum.json` for full compatibility with Cargo lockfile verification during offline builds.
+
 ## [0.9.8] - 2026-08-23
 
 ### Fixed
