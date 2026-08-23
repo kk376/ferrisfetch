@@ -1,3 +1,9 @@
+ferrisfetch (0.9.8-1~ppa1~noble) noble; urgency=medium
+
+  * Release version 0.9.8: Fixed vendored cargo checksums and offline paths.
+
+ -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 16:10:00 +0530
+
 ferrisfetch (0.9.7-1~ppa2~noble) noble; urgency=medium
 
   * Fix vendored sources path in cargo config for Launchpad offline builds.
