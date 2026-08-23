@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.7] - 2026-08-23
+
+### Optimized
+- **RPM MTIME Package Caching**: Added persistent mtime-based disk caching for RPM database queries, slashing Fedora package query times from ~1.5s to <0.05ms.
+- **DRM-First Display Resolution**: Prioritized direct kernel sysfs DRM connector parsing over graphical server roundtrips, eliminating unnecessary `xrandr` / `wlr-randr` subprocesses on Wayland.
+- **Desktop Environment Caching**: Added persistent caching for desktop environment versions to eliminate heavy runtime subprocess spawning (e.g. `gnome-shell --version`).
+
 ## [0.9.6] - 2026-08-23
 
 ### Added

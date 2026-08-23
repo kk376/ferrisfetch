@@ -90,7 +90,37 @@ pub fn detect_display() -> Option<DisplayInfo> {
         }
     }
 
-    // 2. Query xrandr or wlr-randr if graphical display session (X11 or Wayland socket) is active
+    // 2. Sysfs DRM modes fast path (<0.05ms) for Linux (Wayland, X11, KMS, and TTY consoles)
+    let drm_dir = "/sys/class/drm";
+    if let Ok(entries) = fs::read_dir(drm_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if let Ok(status) = fs::read_to_string(path.join("status")) {
+                if status.trim() == "connected" {
+                    if let Ok(modes) = fs::read_to_string(path.join("modes")) {
+                        if let Some(first_mode) = modes.lines().next() {
+                            let clean = first_mode.trim();
+                            if clean.contains('x') {
+                                let info = DisplayInfo {
+                                    resolution: clean.to_string(),
+                                    refresh_rate: None,
+                                };
+                                if let Some(ref dir) = cache_dir {
+                                    let _ = fs::create_dir_all(dir);
+                                }
+                                if let Some(ref path) = cache_file {
+                                    let _ = fs::write(path, &info.resolution);
+                                }
+                                return Some(info);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Fallback: Query xrandr or wlr-randr if graphical display session is active and DRM sysfs is unavailable
     if std::env::var_os("DISPLAY").is_some() || std::env::var_os("WAYLAND_DISPLAY").is_some() {
         if let Ok(output) = Command::new("xrandr").output() {
             if output.status.success() {
@@ -126,29 +156,6 @@ pub fn detect_display() -> Option<DisplayInfo> {
                         let _ = fs::write(path, format!("{}{}", info.resolution, rate_str));
                     }
                     return Some(info);
-                }
-            }
-        }
-    }
-
-    // 3. Sysfs DRM modes fallback for KMS / TTY consoles when no X11/Wayland display server is running
-    let drm_dir = "/sys/class/drm";
-    if let Ok(entries) = fs::read_dir(drm_dir) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if let Ok(status) = fs::read_to_string(path.join("status")) {
-                if status.trim() == "connected" {
-                    if let Ok(modes) = fs::read_to_string(path.join("modes")) {
-                        if let Some(first_mode) = modes.lines().next() {
-                            let clean = first_mode.trim();
-                            if clean.contains('x') {
-                                return Some(DisplayInfo {
-                                    resolution: clean.to_string(),
-                                    refresh_rate: None,
-                                });
-                            }
-                        }
-                    }
                 }
             }
         }

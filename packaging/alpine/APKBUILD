@@ -1,7 +1,7 @@
 # Contributor: FerrisFetch Packaging Team <packaging@ferrisfetch.rs>
 # Maintainer: FerrisFetch Packaging Team <packaging@ferrisfetch.rs>
 pkgname=ferrisfetch
-pkgver=0.9.6
+pkgver=0.9.7
 pkgrel=0
 pkgdesc="Fast, lightweight Linux and Android system information fetch CLI written in Rust"
 url="https://github.com/kk376/ferrisfetch"

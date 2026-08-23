@@ -70,54 +70,87 @@ pub fn format_desktop_info(
     }
 }
 
-/// Probes desktop environment version from metadata files or fast version queries.
+/// Probes desktop environment version from metadata files or fast version queries with persistent caching.
 #[cfg(not(windows))]
 pub fn detect_de_version(de_name: &str) -> Option<String> {
     let lower = de_name.to_lowercase();
-    if lower.contains("gnome") {
+
+    let cache_dir = std::env::var_os("XDG_CACHE_HOME")
+        .map(std::path::PathBuf::from)
+        .or_else(|| std::env::var_os("HOME").map(|h| std::path::Path::new(&h).join(".cache")))
+        .map(|p| p.join("ferrisfetch"));
+    let cache_file = cache_dir
+        .as_ref()
+        .map(|d| d.join(format!("de_{}.cache", lower.replace(' ', "_"))));
+
+    if let Some(ref path) = cache_file {
+        if let Ok(cached) = fs::read_to_string(path) {
+            let trimmed = cached.trim().to_string();
+            if !trimmed.is_empty() {
+                return Some(trimmed);
+            }
+        }
+    }
+
+    let detected: Option<String> = if lower.contains("gnome") {
         // Fast path 1: Parse GNOME version XML metadata directly (<0.1ms) avoiding spawning gnome-shell
         if let Ok(xml) = fs::read_to_string("/usr/share/gnome/gnome-version.xml") {
             if let (Some(p_start), Some(m_start)) = (xml.find("<platform>"), xml.find("<minor>")) {
-                let platform = xml[p_start + 10..].split("</platform>").next()?.trim();
-                let minor = xml[m_start + 7..].split("</minor>").next()?.trim();
+                let platform = xml[p_start + 10..]
+                    .split("</platform>")
+                    .next()
+                    .unwrap_or("")
+                    .trim();
+                let minor = xml[m_start + 7..]
+                    .split("</minor>")
+                    .next()
+                    .unwrap_or("")
+                    .trim();
                 let micro = xml
                     .find("<micro>")
                     .and_then(|idx| xml[idx + 7..].split("</micro>").next())
                     .map(|s| s.trim())
                     .unwrap_or("");
-                if !micro.is_empty() && micro != "0" {
-                    return Some(format!("{}.{}.{}", platform, minor, micro));
+                if !platform.is_empty() && !minor.is_empty() {
+                    if !micro.is_empty() && micro != "0" {
+                        Some(format!("{}.{}.{}", platform, minor, micro))
+                    } else {
+                        Some(format!("{}.{}", platform, minor))
+                    }
                 } else {
-                    return Some(format!("{}.{}", platform, minor));
+                    None
                 }
+            } else {
+                None
             }
-        }
-        // Fast path 2: gnome-shell --version
-        if let Ok(out) = std::process::Command::new("gnome-shell")
+        } else if let Ok(out) = std::process::Command::new("gnome-shell")
             .arg("--version")
             .output()
         {
             if out.status.success() {
                 let text = String::from_utf8_lossy(&out.stdout);
-                if let Some(ver) = text.split_whitespace().last() {
-                    return Some(ver.to_string());
-                }
+                text.split_whitespace().last().map(|s| s.to_string())
+            } else {
+                None
             }
+        } else {
+            None
         }
     } else if lower.contains("kde") || lower.contains("plasma") {
-        if let Ok(out) = std::process::Command::new("plasmashell")
+        if let Ok(ver) = std::env::var("KDE_SESSION_VERSION") {
+            Some(ver)
+        } else if let Ok(out) = std::process::Command::new("plasmashell")
             .arg("--version")
             .output()
         {
             if out.status.success() {
                 let text = String::from_utf8_lossy(&out.stdout);
-                if let Some(ver) = text.split_whitespace().last() {
-                    return Some(ver.to_string());
-                }
+                text.split_whitespace().last().map(|s| s.to_string())
+            } else {
+                None
             }
-        }
-        if let Ok(ver) = std::env::var("KDE_SESSION_VERSION") {
-            return Some(ver);
+        } else {
+            None
         }
     } else if lower.contains("xfce") {
         if let Ok(out) = std::process::Command::new("xfce4-session")
@@ -126,12 +159,15 @@ pub fn detect_de_version(de_name: &str) -> Option<String> {
         {
             if out.status.success() {
                 let text = String::from_utf8_lossy(&out.stdout);
-                if let Some(line) = text.lines().next() {
-                    if let Some(ver) = line.split_whitespace().last() {
-                        return Some(ver.to_string());
-                    }
-                }
+                text.lines()
+                    .next()
+                    .and_then(|l| l.split_whitespace().last())
+                    .map(|s| s.to_string())
+            } else {
+                None
             }
+        } else {
+            None
         }
     } else if lower.contains("mate") {
         if let Ok(out) = std::process::Command::new("mate-session")
@@ -140,10 +176,12 @@ pub fn detect_de_version(de_name: &str) -> Option<String> {
         {
             if out.status.success() {
                 let text = String::from_utf8_lossy(&out.stdout);
-                if let Some(ver) = text.split_whitespace().last() {
-                    return Some(ver.to_string());
-                }
+                text.split_whitespace().last().map(|s| s.to_string())
+            } else {
+                None
             }
+        } else {
+            None
         }
     } else if lower.contains("cinnamon") {
         if let Ok(out) = std::process::Command::new("cinnamon")
@@ -152,13 +190,27 @@ pub fn detect_de_version(de_name: &str) -> Option<String> {
         {
             if out.status.success() {
                 let text = String::from_utf8_lossy(&out.stdout);
-                if let Some(ver) = text.split_whitespace().last() {
-                    return Some(ver.to_string());
-                }
+                text.split_whitespace().last().map(|s| s.to_string())
+            } else {
+                None
             }
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    if let Some(ref ver) = detected {
+        if let Some(ref dir) = cache_dir {
+            let _ = fs::create_dir_all(dir);
+        }
+        if let Some(ref path) = cache_file {
+            let _ = fs::write(path, ver);
         }
     }
-    None
+
+    detected
 }
 
 /// Probes the system for active Desktop Environment (DE), Window Manager (WM), and session type.

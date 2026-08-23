@@ -139,22 +139,56 @@ pub fn parse_rpm_output(output: &[u8]) -> usize {
     count_newline_entries(output)
 }
 
-/// Counts installed packages for Red Hat / Fedora family via rpm.
-pub fn count_rpm() -> Option<usize> {
-    // Verify RPM BerkeleyDB or SQLite database files exist before invoking rpm to avoid subprocess overhead on non-RPM distros
-    let rpm_paths = [
-        "/var/lib/rpm/Packages",
-        "/var/lib/rpm/rpmdb.sqlite",
-        "/usr/lib/sysimage/rpm/Packages",
-        "/usr/lib/sysimage/rpm/rpmdb.sqlite",
-    ];
+/// Counts installed packages for Red Hat / Fedora family via rpm with mtime-based persistent disk caching.
+pub fn count_rpm_from_paths(db_paths: &[&str]) -> Option<usize> {
+    let cache_dir = std::env::var_os("XDG_CACHE_HOME")
+        .map(std::path::PathBuf::from)
+        .or_else(|| std::env::var_os("HOME").map(|h| std::path::Path::new(&h).join(".cache")))
+        .map(|p| p.join("ferrisfetch"));
 
-    let has_rpm_db = rpm_paths.iter().any(|p| Path::new(p).exists());
-    if has_rpm_db {
+    let cache_file = cache_dir.as_ref().map(|d| d.join("rpm_v1.cache"));
+
+    // Find the active RPM database path
+    let mut active_db: Option<(&str, u64)> = None;
+    for &p in db_paths {
+        if let Ok(meta) = fs::metadata(p) {
+            if let Ok(mtime) = meta.modified() {
+                let mtime_sec = mtime
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map(|d| d.as_secs())
+                    .unwrap_or(0);
+                active_db = Some((p, mtime_sec));
+                break;
+            }
+        }
+    }
+
+    if let Some((_path, mtime_sec)) = active_db {
+        if let Some(ref c_path) = cache_file {
+            if let Ok(cached) = fs::read_to_string(c_path) {
+                if let Some((saved_mtime, saved_count)) = cached.trim().split_once(' ') {
+                    if let (Ok(s_mtime), Ok(count)) =
+                        (saved_mtime.parse::<u64>(), saved_count.parse::<usize>())
+                    {
+                        if s_mtime == mtime_sec && count > 0 {
+                            return Some(count);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Cache miss or modified database: query rpm -qa once and persist to cache
         if let Ok(output) = Command::new("rpm").arg("-qa").output() {
             if output.status.success() {
                 let count = count_newline_entries(&output.stdout);
                 if count > 0 {
+                    if let Some(ref dir) = cache_dir {
+                        let _ = fs::create_dir_all(dir);
+                    }
+                    if let Some(ref c_path) = cache_file {
+                        let _ = fs::write(c_path, format!("{} {}", mtime_sec, count));
+                    }
                     return Some(count);
                 }
             }
@@ -162,6 +196,17 @@ pub fn count_rpm() -> Option<usize> {
     }
 
     None
+}
+
+/// Counts installed packages for Red Hat / Fedora family via rpm.
+pub fn count_rpm() -> Option<usize> {
+    let rpm_paths = [
+        "/var/lib/rpm/rpmdb.sqlite",
+        "/usr/lib/sysimage/rpm/rpmdb.sqlite",
+        "/var/lib/rpm/Packages",
+        "/usr/lib/sysimage/rpm/Packages",
+    ];
+    count_rpm_from_paths(&rpm_paths)
 }
 
 /// Parses APK installed db content.
@@ -932,5 +977,10 @@ Section: libs
         fs::create_dir(site_packages.join("__pycache__")).unwrap();
 
         assert_eq!(count_pip_from_dir(&site_packages), Some(3));
+    }
+
+    #[test]
+    fn test_count_rpm_from_paths_nonexistent() {
+        assert_eq!(count_rpm_from_paths(&["/nonexistent_rpm_db_12345"]), None);
     }
 }
