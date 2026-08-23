@@ -3,7 +3,7 @@ ferrisfetch (0.10.0-1~ppa1~noble) noble; urgency=medium
   * Release version 0.10.0: Milestone release with native Win32 zero-subprocess shell and terminal resolution.
   * Dedicated Windows package manager pipeline with Scoop support.
 
- -- Kushagra Kumar <kushagra376@users.noreply.github.com>  Sun, 23 Aug 2026 19:15:00 +0530
+ -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 19:15:00 +0530
 
 ferrisfetch (0.9.9-1~ppa1~noble) noble; urgency=medium
 
