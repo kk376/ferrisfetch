@@ -103,7 +103,7 @@ pub fn clean_gpu_name(name: &str) -> String {
     }
 
     // Fallback: strip residual brackets and normalize whitespace
-    let stripped = cleaned.replace('[', "").replace(']', "");
+    let stripped = cleaned.replace(['[', ']'], "");
     let tokens: Vec<&str> = stripped.split_whitespace().collect();
     tokens.join(" ")
 }
@@ -878,7 +878,9 @@ mod tests {
             "AMD Radeon RX 6700 XT"
         );
         assert_eq!(
-            clean_gpu_name("Advanced Micro Devices, Inc. [AMD/ATI] Rembrandt [Radeon 680M] (rev 0b)"),
+            clean_gpu_name(
+                "Advanced Micro Devices, Inc. [AMD/ATI] Rembrandt [Radeon 680M] (rev 0b)"
+            ),
             "AMD Radeon 680M"
         );
         assert_eq!(
