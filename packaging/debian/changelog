@@ -1,3 +1,9 @@
+ferrisfetch (0.10.0-1~ppa2~noble) noble; urgency=medium
+
+  * Fix vendored cargo edition compatibility for Launchpad MSRV 1.75.0.
+
+ -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 19:55:00 +0530
+
 ferrisfetch (0.10.0-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.10.0: Milestone release with native Win32 zero-subprocess shell and terminal resolution.
