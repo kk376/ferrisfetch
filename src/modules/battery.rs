@@ -48,7 +48,11 @@ fn is_ac_online() -> bool {
     if let Ok(entries) = fs::read_dir(power_supply_dir) {
         for entry in entries.flatten() {
             let name = entry.file_name().to_string_lossy().to_lowercase();
-            if name.starts_with("ac") || name.starts_with("mains") || name.starts_with("acad") {
+            if name.starts_with("ac")
+                || name.starts_with("mains")
+                || name.starts_with("acad")
+                || name.starts_with("adp")
+            {
                 if let Ok(online) = fs::read_to_string(entry.path().join("online")) {
                     if online.trim() == "1" {
                         return true;

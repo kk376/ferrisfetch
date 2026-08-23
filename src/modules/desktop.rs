@@ -253,7 +253,25 @@ pub fn detect_desktop() -> Option<String> {
         wm = Some(wayland_wm.to_string());
     }
 
-    // 3. Fallback WM check from running processes if WM is not yet identified
+    // 3. Fast path: Derive WM from active desktop environment if not already set
+    if wm.is_none() {
+        if let Some(ref de_str) = de {
+            let de_lower = de_str.to_lowercase();
+            if de_lower.contains("gnome") {
+                wm = Some("Mutter".to_string());
+            } else if de_lower.contains("kde") || de_lower.contains("plasma") {
+                wm = Some("KWin".to_string());
+            } else if de_lower.contains("xfce") {
+                wm = Some("Xfwm4".to_string());
+            } else if de_lower.contains("cinnamon") {
+                wm = Some("Muffin".to_string());
+            } else if de_lower.contains("mate") {
+                wm = Some("Marco".to_string());
+            }
+        }
+    }
+
+    // 4. Fallback WM check from running processes if WM is not yet identified
     if wm.is_none() {
         if let Ok(entries) = fs::read_dir("/proc") {
             for entry in entries.flatten() {

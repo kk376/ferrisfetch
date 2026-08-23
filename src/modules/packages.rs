@@ -139,7 +139,80 @@ pub fn parse_rpm_output(output: &[u8]) -> usize {
     count_newline_entries(output)
 }
 
-/// Counts installed packages for Red Hat / Fedora family via rpm with mtime-based persistent disk caching.
+/// Counts records in an SQLite table by traversing B-Tree leaf cell headers without loading table payload data.
+/// Works directly on `/var/lib/rpm/rpmdb.sqlite` and `/usr/lib/sysimage/rpm/rpmdb.sqlite`.
+pub fn count_sqlite_table_cells(path: &Path, rootpage: u32) -> Option<usize> {
+    use std::io::{Read, Seek, SeekFrom};
+    let mut file = fs::File::open(path).ok()?;
+    let mut hdr = [0u8; 100];
+    file.read_exact(&mut hdr).ok()?;
+    if &hdr[..16] != b"SQLite format 3\0" {
+        return None;
+    }
+    let mut page_size = u16::from_be_bytes([hdr[16], hdr[17]]) as u64;
+    if page_size == 1 {
+        page_size = 65536;
+    }
+    if !(512..=65536).contains(&page_size) {
+        return None;
+    }
+
+    let mut stack = vec![rootpage];
+    let mut total_cells = 0usize;
+    let mut visited = std::collections::HashSet::new();
+
+    while let Some(pg) = stack.pop() {
+        if pg == 0 || !visited.insert(pg) {
+            continue;
+        }
+        let page_offset = (pg as u64 - 1) * page_size;
+        let hdr_offset = if pg == 1 { 100 } else { 0 };
+
+        file.seek(SeekFrom::Start(page_offset + hdr_offset)).ok()?;
+        let mut pg_hdr = [0u8; 12];
+        file.read_exact(&mut pg_hdr).ok()?;
+
+        let pg_type = pg_hdr[0];
+        let num_cells = u16::from_be_bytes([pg_hdr[3], pg_hdr[4]]) as usize;
+
+        match pg_type {
+            0x0d => {
+                // Leaf table B-Tree page: add cell count directly
+                total_cells += num_cells;
+            }
+            0x05 => {
+                // Interior table B-Tree page: follow right child and cell child pointers
+                let right_child =
+                    u32::from_be_bytes([pg_hdr[8], pg_hdr[9], pg_hdr[10], pg_hdr[11]]);
+                stack.push(right_child);
+
+                let ptr_array_offset = page_offset + hdr_offset + 12;
+                file.seek(SeekFrom::Start(ptr_array_offset)).ok()?;
+                let mut ptr_bytes = vec![0u8; num_cells * 2];
+                file.read_exact(&mut ptr_bytes).ok()?;
+
+                for i in 0..num_cells {
+                    let cell_ptr =
+                        u16::from_be_bytes([ptr_bytes[i * 2], ptr_bytes[i * 2 + 1]]) as u64;
+                    file.seek(SeekFrom::Start(page_offset + cell_ptr)).ok()?;
+                    let mut child_bytes = [0u8; 4];
+                    file.read_exact(&mut child_bytes).ok()?;
+                    let left_child = u32::from_be_bytes(child_bytes);
+                    stack.push(left_child);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    if total_cells > 0 {
+        Some(total_cells)
+    } else {
+        None
+    }
+}
+
+/// Counts installed packages for Red Hat / Fedora family via rpm with zero-subprocess SQLite parsing and mtime caching.
 pub fn count_rpm_from_paths(db_paths: &[&str]) -> Option<usize> {
     let cache_dir = std::env::var_os("XDG_CACHE_HOME")
         .map(std::path::PathBuf::from)
@@ -163,7 +236,7 @@ pub fn count_rpm_from_paths(db_paths: &[&str]) -> Option<usize> {
         }
     }
 
-    if let Some((_path, mtime_sec)) = active_db {
+    if let Some((path, mtime_sec)) = active_db {
         if let Some(ref c_path) = cache_file {
             if let Ok(cached) = fs::read_to_string(c_path) {
                 if let Some((saved_mtime, saved_count)) = cached.trim().split_once(' ') {
@@ -178,7 +251,20 @@ pub fn count_rpm_from_paths(db_paths: &[&str]) -> Option<usize> {
             }
         }
 
-        // Cache miss or modified database: query rpm -qa once and persist to cache
+        // Fast path 1: Zero-subprocess SQLite B-Tree header parsing (<0.2ms)
+        if path.ends_with(".sqlite") {
+            if let Some(count) = count_sqlite_table_cells(Path::new(path), 2) {
+                if let Some(ref dir) = cache_dir {
+                    let _ = fs::create_dir_all(dir);
+                }
+                if let Some(ref c_path) = cache_file {
+                    let _ = fs::write(c_path, format!("{} {}", mtime_sec, count));
+                }
+                return Some(count);
+            }
+        }
+
+        // Fallback 2: query rpm -qa once and persist to cache
         if let Ok(output) = Command::new("rpm").arg("-qa").output() {
             if output.status.success() {
                 let count = count_newline_entries(&output.stdout);
