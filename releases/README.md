@@ -94,8 +94,8 @@ sudo apt update && sudo apt install -y ferrisfetch
 
 **Via Pre-built `.deb`:**
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.9.10/ferrisfetch_0.9.10-1_amd64.deb
-sudo dpkg -i ferrisfetch_0.9.10-1_amd64.deb
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.10.0/ferrisfetch_0.10.0-1_amd64.deb
+sudo dpkg -i ferrisfetch_0.10.0-1_amd64.deb
 ```
 
 ---
@@ -114,16 +114,18 @@ sudo dnf install -y ferrisfetch
 
 **Via Pre-built Pacman Package:**
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.9.10/ferrisfetch-0.9.10-1-x86_64.pkg.tar.zst
-sudo pacman -U ferrisfetch-0.9.10-1-x86_64.pkg.tar.zst
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.10.0/ferrisfetch-0.10.0-1-x86_64.pkg.tar.zst
+sudo pacman -U ferrisfetch-0.10.0-1-x86_64.pkg.tar.zst
 ```
 
 ---
 
-### macOS / Linux (Homebrew Tap)
+### macOS
 
+**Via Homebrew:**
 ```bash
-brew install kk376/tap/ferrisfetch
+brew tap kk376/tap
+brew install ferrisfetch
 ```
 
 ---
@@ -131,21 +133,19 @@ brew install kk376/tap/ferrisfetch
 ### Android (Termux)
 
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.9.10/ferrisfetch_0.9.10-1_termux_aarch64.deb
-dpkg -i ferrisfetch_0.9.10-1_termux_aarch64.deb
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.10.0/ferrisfetch_0.10.0-1_termux_aarch64.deb
+dpkg -i ferrisfetch_0.10.0-1_termux_aarch64.deb
 ```
 
 ---
 
-### Windows (PowerShell / WinGet)
+### Windows (Native Win32 CLI)
 
-*Note: WinGet manifest submission is currently pending review in `microsoft/winget-pkgs`. Once merged, installation will be available via `winget install ferrisfetch`.*
-
-**Manual Download & Run via PowerShell:**
+No dependencies, pure standalone executable:
 
 ```powershell
 # 1. Download
-curl.exe -LO https://github.com/kk376/ferrisfetch/releases/download/v0.9.10/ferrisfetch-windows-x86_64.zip
+curl.exe -LO https://github.com/kk376/ferrisfetch/releases/download/v0.10.0/ferrisfetch-windows-x86_64.zip
 
 # 2. Extract
 tar.exe -xf ferrisfetch-windows-x86_64.zip
@@ -156,14 +156,24 @@ tar.exe -xf ferrisfetch-windows-x86_64.zip
 
 ---
 
-### Universal Standalone Binary (Any 64-bit Linux)
+### Alpine Linux / Musl / Static Binary
 
 Statically linked with musl (zero external dependencies):
 
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.9.10/ferrisfetch-linux-musl-x86_64
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.10.0/ferrisfetch-linux-musl-x86_64
 chmod +x ferrisfetch-linux-musl-x86_64
 sudo mv ferrisfetch-linux-musl-x86_64 /usr/local/bin/ferrisfetch
+```
+
+---
+
+### Pre-built Tarball Archive
+
+```bash
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.10.0/ferrisfetch-0.10.0-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf ferrisfetch-0.10.0-x86_64-unknown-linux-gnu.tar.gz
+sudo ./install.sh
 ```
 
 ---
@@ -282,7 +292,7 @@ Package definitions and build specifications are organized in [`packaging/`](pac
 * **Debian / Ubuntu**: [`packaging/debian/`](packaging/debian/) (`control`, `rules`, `changelog`)
 * **Fedora / RHEL (Copr)**: [`packaging/rpm/`](packaging/rpm/) (`ferrisfetch.spec`)
 * **Alpine Linux**: [`packaging/alpine/`](packaging/alpine/) (`APKBUILD`)
-* **Gentoo Linux**: [`packaging/gentoo/`](packaging/gentoo/) (`ferrisfetch-0.9.10.ebuild`)
+* **Gentoo Linux**: [`packaging/gentoo/`](packaging/gentoo/) (`ferrisfetch-0.10.0.ebuild`)
 * **Void Linux**: [`packaging/void/`](packaging/void/) (`template`)
 * **Nix / NixOS**: [`packaging/nix/`](packaging/nix/) (`package.nix`)
 * **Homebrew Tap**: [`packaging/homebrew/`](packaging/homebrew/) (`ferrisfetch.rb`)
