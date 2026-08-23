@@ -105,10 +105,25 @@ fn get_metadata_ctime(path: &str) -> Option<u64> {
 /// Probes OS installation timestamp via filesystem root birth time and installer logs.
 #[cfg(not(windows))]
 pub fn detect_install_timestamp() -> Option<u64> {
+    let now_sec = std::time::SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(u64::MAX);
+
     // 1. Filesystem root `/` birth time is the primary installation indicator
-    if let Some(ts) = get_statx_birth_time("/") {
+    if let Some(mut ts) = get_statx_birth_time("/") {
         // Sanity check: must be after year 2000 (946684800) to filter uninitialized RTC timestamps (e.g. 1970-01-01)
         if ts > 946684800 {
+            // Handle dual-boot RTC clock skew during Live USB installation:
+            // When Linux Live USB boots on a system where Windows stores RTC in local time,
+            // the installer assumes RTC is UTC and applies the timezone offset, recording a birth time
+            // in the future. We normalize it back by subtracting the offset.
+            if ts > now_sec {
+                let offset = get_local_timezone_offset_secs(ts);
+                if offset > 0 && ts.saturating_sub(offset as u64) <= now_sec {
+                    ts = ts.saturating_sub(offset as u64);
+                }
+            }
             return Some(ts);
         }
     }
@@ -127,8 +142,14 @@ pub fn detect_install_timestamp() -> Option<u64> {
     ];
 
     for &path in &candidate_paths {
-        if let Some(ts) = get_statx_birth_time(path).or_else(|| get_metadata_ctime(path)) {
+        if let Some(mut ts) = get_statx_birth_time(path).or_else(|| get_metadata_ctime(path)) {
             if ts > 946684800 {
+                if ts > now_sec {
+                    let offset = get_local_timezone_offset_secs(ts);
+                    if offset > 0 && ts.saturating_sub(offset as u64) <= now_sec {
+                        ts = ts.saturating_sub(offset as u64);
+                    }
+                }
                 return Some(ts);
             }
         }
