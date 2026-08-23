@@ -33,8 +33,10 @@ pub fn vendor_id_to_name(vendor: &str) -> Option<&'static str> {
 }
 
 /// Cleans redundant vendor suffixes and bracketed tags from GPU names.
+/// When pci.ids includes bracketed marketing names (e.g. `GA107 [GeForce RTX 2050]` or `Rembrandt [Radeon 680M]`),
+/// extracts the consumer product name and formats it cleanly with the vendor prefix.
 pub fn clean_gpu_name(name: &str) -> String {
-    let cleaned = name
+    let mut cleaned = name
         .replace("(R)", "")
         .replace("(r)", "")
         .replace("(TM)", "")
@@ -44,14 +46,65 @@ pub fn clean_gpu_name(name: &str) -> String {
         .replace("Advanced Micro Devices, Inc.", "AMD")
         .replace("Advanced Micro Devices", "AMD")
         .replace("[AMD/ATI]", "")
+        .replace("[AMD]", "")
+        .replace("[ATI]", "")
         .replace("Inc.", "")
-        .replace("Inc", "")
-        .replace("(rev a1)", "")
-        .replace("(rev 02)", "")
-        .replace("(rev 07)", "")
-        .replace("(rev 08)", "");
+        .replace("Inc", "");
 
-    let tokens: Vec<&str> = cleaned.split_whitespace().collect();
+    // Remove any revision tags like (rev a1), (rev 02), (rev 0b), etc.
+    while let Some(rev_idx) = cleaned.find("(rev ") {
+        if let Some(close_idx) = cleaned[rev_idx..].find(')') {
+            cleaned.replace_range(rev_idx..=rev_idx + close_idx, "");
+        } else {
+            break;
+        }
+    }
+
+    // Determine vendor prefix
+    let vendor = if cleaned.contains("NVIDIA") || cleaned.contains("GeForce") {
+        Some("NVIDIA")
+    } else if cleaned.contains("AMD") || cleaned.contains("Radeon") {
+        Some("AMD")
+    } else if cleaned.contains("Intel") || cleaned.contains("Iris") || cleaned.contains("Arc") {
+        Some("Intel")
+    } else if cleaned.contains("Qualcomm") || cleaned.contains("Adreno") {
+        Some("Qualcomm")
+    } else if cleaned.contains("Apple") {
+        Some("Apple")
+    } else {
+        None
+    };
+
+    // If there is a bracketed marketing name like `[GeForce RTX 2050]` or `[Radeon 680M]`:
+    if let (Some(start), Some(end)) = (cleaned.find('['), cleaned.rfind(']')) {
+        if start < end {
+            let inside = cleaned[start + 1..end].trim();
+            // Handle multiple slash-separated aliases like `[Radeon Vega Series / Radeon Vega Mobile Series]`
+            let chosen = if let Some(first) = inside.split('/').next() {
+                first.trim()
+            } else {
+                inside
+            };
+
+            if !chosen.is_empty() {
+                let formatted = if let Some(v) = vendor {
+                    if chosen.starts_with(v) {
+                        chosen.to_string()
+                    } else {
+                        format!("{} {}", v, chosen)
+                    }
+                } else {
+                    chosen.to_string()
+                };
+                let tokens: Vec<&str> = formatted.split_whitespace().collect();
+                return tokens.join(" ");
+            }
+        }
+    }
+
+    // Fallback: strip residual brackets and normalize whitespace
+    let stripped = cleaned.replace('[', "").replace(']', "");
+    let tokens: Vec<&str> = stripped.split_whitespace().collect();
     tokens.join(" ")
 }
 
@@ -781,8 +834,8 @@ mod tests {
 "#;
         let parsed = parse_lspci_mm_output(text);
         assert_eq!(parsed.len(), 2);
-        assert!(parsed[0].contains("Intel CometLake-H GT2 [UHD Graphics]"));
-        assert!(parsed[1].contains("NVIDIA TU117M [GeForce GTX 1650 Ti Mobile]"));
+        assert_eq!(parsed[0], "Intel UHD Graphics");
+        assert_eq!(parsed[1], "NVIDIA GeForce GTX 1650 Ti Mobile");
     }
 
     #[test]
@@ -801,11 +854,11 @@ mod tests {
         );
         assert_eq!(
             parse_pci_ids_file(sample, "8086", "3e92"),
-            Some("Intel CoffeeLake-S GT2 [UHD Graphics 630]".to_string())
+            Some("Intel UHD Graphics 630".to_string())
         );
         assert_eq!(
             parse_pci_ids_file(sample, "10de", "1f95"),
-            Some("NVIDIA TU117M [GeForce GTX 1650 Ti Mobile]".to_string())
+            Some("NVIDIA GeForce GTX 1650 Ti Mobile".to_string())
         );
         assert_eq!(parse_pci_ids_file(sample, "8086", "9999"), None);
     }
@@ -818,11 +871,19 @@ mod tests {
         );
         assert_eq!(
             clean_gpu_name("NVIDIA Corporation GA106 [GeForce RTX 3060]"),
-            "NVIDIA GA106 [GeForce RTX 3060]"
+            "NVIDIA GeForce RTX 3060"
         );
         assert_eq!(
             clean_gpu_name("Advanced Micro Devices, Inc. [AMD/ATI] Navi 22 [Radeon RX 6700 XT]"),
-            "AMD Navi 22 [Radeon RX 6700 XT]"
+            "AMD Radeon RX 6700 XT"
+        );
+        assert_eq!(
+            clean_gpu_name("Advanced Micro Devices, Inc. [AMD/ATI] Rembrandt [Radeon 680M] (rev 0b)"),
+            "AMD Radeon 680M"
+        );
+        assert_eq!(
+            clean_gpu_name("NVIDIA Corporation GA107 [GeForce RTX 2050] (rev a1)"),
+            "NVIDIA GeForce RTX 2050"
         );
     }
 

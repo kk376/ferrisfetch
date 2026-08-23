@@ -373,8 +373,8 @@ fn test_fixture_lspci_samples() {
     let content = include_str!("fixtures/gpu/lspci_samples.txt");
     let gpus = parse_lspci_mm_output(content);
     assert_eq!(gpus.len(), 2);
-    assert!(gpus[0].contains("Intel CometLake-H GT2 [UHD Graphics]"));
-    assert!(gpus[1].contains("NVIDIA TU117M [GeForce GTX 1650 Ti Mobile]"));
+    assert_eq!(gpus[0], "Intel UHD Graphics");
+    assert_eq!(gpus[1], "NVIDIA GeForce GTX 1650 Ti Mobile");
 }
 
 #[test]

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2026-08-24
+
+### Fixed
+- **Clean GPU Marketing Model Resolution**: Automatically extracts consumer product brand names from bracketed PCI hardware identifiers (e.g. `[GeForce RTX 2050]`, `[Radeon 680M]`), eliminating internal raw silicon codenames (`GA107`, `Rembrandt`).
+- **Dual-Boot RTC Installer Skew Normalization**: Automatically detects and normalizes filesystem birth time offsets caused by Live USB installer hardware clock assumptions on dual-boot Windows/Linux systems.
+
 ## [0.10.0] - 2026-08-23
 
 ### Optimized
