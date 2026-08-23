@@ -206,10 +206,8 @@ fn query_gsettings_theme() -> ThemeInfo {
                         "icon-theme" => info.icon_theme = Some(v.to_string()),
                         "font-name" => info.font = Some(v.to_string()),
                         "cursor-theme" => info.cursor = Some(v.to_string()),
-                        "color-scheme" => {
-                            if v.to_ascii_lowercase().contains("dark") {
-                                info.dark_mode = true;
-                            }
+                        "color-scheme" if v.to_ascii_lowercase().contains("dark") => {
+                            info.dark_mode = true;
                         }
                         _ => {}
                     }

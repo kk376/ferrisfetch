@@ -312,27 +312,115 @@ pub fn count_apk() -> Option<usize> {
     None
 }
 
-/// Counts installed packages for Void Linux.
+/// Counts installed packages for Void Linux by parsing pkgdb plist directly (<0.1ms).
 pub fn count_xbps() -> Option<usize> {
     let path = Path::new("/var/db/xbps");
     if let Ok(entries) = fs::read_dir(path) {
-        let count = entries
-            .flatten()
-            .filter(|e| {
-                let name = e.file_name();
-                let s = name.to_string_lossy();
-                s.starts_with("pkgdb")
-            })
-            .count();
-        if count > 0 {
-            if let Ok(output) = Command::new("xbps-query").arg("-l").output() {
-                if output.status.success() {
-                    let c = count_newline_entries(&output.stdout);
-                    if c > 0 {
-                        return Some(c);
+        for entry in entries.flatten() {
+            let name = entry.file_name();
+            let s = name.to_string_lossy();
+            if s.starts_with("pkgdb") {
+                if let Ok(content) = fs::read_to_string(entry.path()) {
+                    let count = content.matches("<key>pkgver</key>").count();
+                    if count > 0 {
+                        return Some(count);
                     }
                 }
             }
+        }
+    }
+    None
+}
+
+/// Counts installed packages in active Nix profiles without running nix-env.
+pub fn count_nix() -> Option<usize> {
+    let mut total = 0;
+    let standard_paths = [
+        Path::new("/run/current-system/sw/bin"),
+        Path::new("/nix/var/nix/profiles/default/bin"),
+    ];
+
+    for path in &standard_paths {
+        if let Ok(entries) = fs::read_dir(path) {
+            total += entries
+                .flatten()
+                .filter(|e| !e.file_name().to_string_lossy().starts_with('.'))
+                .count();
+        }
+    }
+
+    if let Ok(home) = std::env::var("HOME") {
+        let user_profile = Path::new(&home).join(".nix-profile/bin");
+        if let Ok(entries) = fs::read_dir(user_profile) {
+            total += entries
+                .flatten()
+                .filter(|e| !e.file_name().to_string_lossy().starts_with('.'))
+                .count();
+        }
+    }
+
+    if total > 0 {
+        Some(total)
+    } else {
+        None
+    }
+}
+
+/// Counts installed packages in active Guix profile without running guix package.
+pub fn count_guix() -> Option<usize> {
+    let mut total = 0;
+    if let Ok(home) = std::env::var("HOME") {
+        let user_profile = Path::new(&home).join(".guix-profile/bin");
+        if let Ok(entries) = fs::read_dir(user_profile) {
+            total += entries
+                .flatten()
+                .filter(|e| !e.file_name().to_string_lossy().starts_with('.'))
+                .count();
+        }
+    }
+
+    if total > 0 {
+        Some(total)
+    } else {
+        None
+    }
+}
+
+/// Counts installed packages for FreeBSD, OpenBSD, and NetBSD.
+pub fn count_pkg() -> Option<usize> {
+    // FreeBSD / DragonFly: /var/db/pkg/local.sqlite
+    let freebsd_db = Path::new("/var/db/pkg/local.sqlite");
+    if freebsd_db.is_file() {
+        if let Some(count) = count_sqlite_table_cells(freebsd_db, 2) {
+            return Some(count);
+        }
+    }
+
+    // OpenBSD / NetBSD: /var/db/pkg directory
+    let bsd_pkg_dir = Path::new("/var/db/pkg");
+    if let Ok(entries) = fs::read_dir(bsd_pkg_dir) {
+        let count = entries
+            .flatten()
+            .filter(|e| {
+                e.file_type().map(|ft| ft.is_dir()).unwrap_or(false)
+                    && !e.file_name().to_string_lossy().starts_with('.')
+                    && e.file_name() != "local.sqlite"
+            })
+            .count();
+        if count > 0 {
+            return Some(count);
+        }
+    }
+
+    None
+}
+
+/// Counts installed MacPorts packages on macOS via local SQLite registry.
+pub fn count_macports() -> Option<usize> {
+    let macports_db = Path::new("/opt/local/var/macports/registry/registry.db");
+    if macports_db.is_file() {
+        if let Some(count) = count_sqlite_table_cells(macports_db, 2) {
+            return Some(count);
         }
     }
     None
@@ -855,6 +943,18 @@ pub fn get_packages_summary() -> Option<String> {
     }
     if let Some(choco) = count_choco() {
         parts.push(format!("{} (choco)", choco));
+    }
+    if let Some(nix) = count_nix() {
+        parts.push(format!("{} (nix)", nix));
+    }
+    if let Some(guix) = count_guix() {
+        parts.push(format!("{} (guix)", guix));
+    }
+    if let Some(pkg) = count_pkg() {
+        parts.push(format!("{} (pkg)", pkg));
+    }
+    if let Some(macports) = count_macports() {
+        parts.push(format!("{} (macports)", macports));
     }
     if let Some(cargo) = count_cargo() {
         parts.push(format!("{} (cargo)", cargo));

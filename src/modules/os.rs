@@ -291,6 +291,19 @@ pub fn detect_wsl_version() -> Option<String> {
         }
     }
 
+    // Fast-path 1: Read directly from /mnt/wslg/versions.txt without spawning wsl.exe (<0.01ms)
+    if let Ok(versions_txt) = fs::read_to_string("/mnt/wslg/versions.txt") {
+        if let Some(ver) = parse_wsl_version_output(&versions_txt) {
+            if let Some(ref dir) = cache_dir {
+                let _ = fs::create_dir_all(dir);
+            }
+            if let Some(ref path) = cache_file {
+                let _ = fs::write(path, &ver);
+            }
+            return Some(ver);
+        }
+    }
+
     for cmd in &[
         "wsl.exe",
         "/mnt/c/Windows/System32/wsl.exe",
