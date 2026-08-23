@@ -8,7 +8,7 @@ export DH_VERBOSE = 1
 override_dh_auto_build:
 	mkdir -p .cargo
 	cp debian/vendor-config.toml .cargo/config.toml
-	sed -i 's/edition = "2024"/edition = "2021"/' vendor/clap_lex/Cargo.toml
+	find vendor -name Cargo.toml -exec sed -i -e 's/edition = "2024"/edition = "2021"/' -e 's/rust-version = "1.85"/rust-version = "1.74"/' {} +
 	cargo build --release --offline
 
 override_dh_auto_test:

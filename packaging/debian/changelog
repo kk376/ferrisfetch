@@ -1,3 +1,9 @@
+ferrisfetch (0.10.0-1~ppa3~noble) noble; urgency=medium
+
+  * Patch rust-version and edition in vendor crates for Cargo 1.75.0 compatibility.
+
+ -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 20:18:00 +0530
+
 ferrisfetch (0.10.0-1~ppa2~noble) noble; urgency=medium
 
   * Fix vendored cargo edition compatibility for Launchpad MSRV 1.75.0.
