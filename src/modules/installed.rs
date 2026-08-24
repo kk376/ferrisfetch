@@ -102,6 +102,35 @@ fn get_metadata_ctime(path: &str) -> Option<u64> {
     Some(duration.as_secs())
 }
 
+/// Checks if the Linux system is configured with RTC in local time (common in Windows dual-boot setups).
+/// Reads `/etc/adjtime` where line 3 is `LOCAL`.
+#[cfg(not(windows))]
+fn is_rtc_local() -> bool {
+    if let Ok(content) = fs::read_to_string("/etc/adjtime") {
+        for line in content.lines() {
+            if line.trim() == "LOCAL" {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+/// Normalizes birth timestamps created during Live USB installation on dual-boot machines.
+#[cfg(not(windows))]
+fn normalize_dual_boot_timestamp(mut ts: u64, now_sec: u64, rtc_local: bool) -> u64 {
+    let offset = get_local_timezone_offset_secs(ts);
+    if offset != 0 {
+        if rtc_local {
+            // When RTC is local time, mkfs recorded local time as UTC (shifted forward by offset)
+            ts = (ts as i64 - offset).max(0) as u64;
+        } else if ts > now_sec && ts.saturating_sub(offset.max(0) as u64) <= now_sec {
+            ts = ts.saturating_sub(offset.max(0) as u64);
+        }
+    }
+    ts
+}
+
 /// Probes OS installation timestamp via filesystem root birth time and installer logs.
 #[cfg(not(windows))]
 pub fn detect_install_timestamp() -> Option<u64> {
@@ -109,21 +138,13 @@ pub fn detect_install_timestamp() -> Option<u64> {
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(u64::MAX);
+    let rtc_local = is_rtc_local();
 
     // 1. Filesystem root `/` birth time is the primary installation indicator
     if let Some(mut ts) = get_statx_birth_time("/") {
         // Sanity check: must be after year 2000 (946684800) to filter uninitialized RTC timestamps (e.g. 1970-01-01)
         if ts > 946684800 {
-            // Handle dual-boot RTC clock skew during Live USB installation:
-            // When Linux Live USB boots on a system where Windows stores RTC in local time,
-            // the installer assumes RTC is UTC and applies the timezone offset, recording a birth time
-            // in the future. We normalize it back by subtracting the offset.
-            if ts > now_sec {
-                let offset = get_local_timezone_offset_secs(ts);
-                if offset > 0 && ts.saturating_sub(offset as u64) <= now_sec {
-                    ts = ts.saturating_sub(offset as u64);
-                }
-            }
+            ts = normalize_dual_boot_timestamp(ts, now_sec, rtc_local);
             return Some(ts);
         }
     }
@@ -144,12 +165,7 @@ pub fn detect_install_timestamp() -> Option<u64> {
     for &path in &candidate_paths {
         if let Some(mut ts) = get_statx_birth_time(path).or_else(|| get_metadata_ctime(path)) {
             if ts > 946684800 {
-                if ts > now_sec {
-                    let offset = get_local_timezone_offset_secs(ts);
-                    if offset > 0 && ts.saturating_sub(offset as u64) <= now_sec {
-                        ts = ts.saturating_sub(offset as u64);
-                    }
-                }
+                ts = normalize_dual_boot_timestamp(ts, now_sec, rtc_local);
                 return Some(ts);
             }
         }
@@ -395,6 +411,16 @@ mod tests {
         let offset = get_local_timezone_offset_secs(1787140000);
         // Valid earth timezones range from -12h (-43200s) to +14h (+50400s)
         assert!((-43200..=50400).contains(&offset));
+    }
+
+    #[cfg(not(windows))]
+    #[test]
+    fn test_normalize_dual_boot_timestamp() {
+        let btime = 1787525611; // Stamped during local RTC install
+        let now = 1787545000;
+        let normalized = normalize_dual_boot_timestamp(btime, now, true);
+        let offset = get_local_timezone_offset_secs(btime);
+        assert_eq!(normalized, (btime as i64 - offset) as u64);
     }
 
     #[cfg(not(windows))]
