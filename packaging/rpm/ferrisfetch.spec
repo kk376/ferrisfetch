@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:           ferrisfetch
-Version:        0.10.1
+Version:        0.10.2
 Release:        1%{?dist}
 Summary:        A fast, lightweight Linux, macOS, and Windows system information fetch tool written in Rust
 

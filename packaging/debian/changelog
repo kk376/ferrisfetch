@@ -1,3 +1,10 @@
+ferrisfetch (0.10.2-1~ppa1~noble) noble; urgency=medium
+
+  * Release version 0.10.2: Permanent dual-boot RTC local mode detection via /etc/adjtime.
+  * Localized calendar-day relative time calculation (displaying yesterday).
+
+ -- Kushagra Kumar <kkushagra86@gmail.com>  Mon, 24 Aug 2026 16:00:00 +0530
+
 ferrisfetch (0.10.1-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.10.1: Clean GPU marketing model resolution.

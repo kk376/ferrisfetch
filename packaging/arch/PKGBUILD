@@ -1,6 +1,6 @@
 # Maintainer: FerrisFetch Packaging Team <packaging@ferrisfetch.rs>
 pkgname=ferrisfetch
-pkgver=0.10.1
+pkgver=0.10.2
 pkgrel=1
 pkgdesc="A fast, lightweight Linux system information fetch tool written in Rust"
 arch=('x86_64' 'aarch64')

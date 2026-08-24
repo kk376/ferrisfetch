@@ -46,9 +46,17 @@ pub fn format_desktop_info(
 
     match (de_clean, wm_clean, sess_clean) {
         (Some(d), Some(w), Some(sess)) => {
-            if d.to_lowercase() == w.to_lowercase()
-                || (d.to_lowercase() == "gnome" && w.to_lowercase() == "mutter")
-                || (d.to_lowercase() == "kde" && w.to_lowercase() == "kwin")
+            let d_lower = d.to_lowercase();
+            let w_lower = w.to_lowercase();
+            if d_lower.contains(&w_lower)
+                || (d_lower.contains("gnome") && w_lower.contains("mutter"))
+                || (d_lower.contains("kde") && w_lower.contains("kwin"))
+                || (d_lower.contains("xfce") && w_lower.contains("xfwm"))
+                || (d_lower.contains("mate")
+                    && (w_lower.contains("marco") || w_lower.contains("metacity")))
+                || (d_lower.contains("cinnamon") && w_lower.contains("muffin"))
+                || (d_lower.contains("lxqt")
+                    && (w_lower.contains("kwin") || w_lower.contains("openbox")))
             {
                 Some(format!("{} ({})", d, capitalize_first(sess)))
             } else {
@@ -56,7 +64,18 @@ pub fn format_desktop_info(
             }
         }
         (Some(d), Some(w), None) => {
-            if d.to_lowercase() == w.to_lowercase() {
+            let d_lower = d.to_lowercase();
+            let w_lower = w.to_lowercase();
+            if d_lower.contains(&w_lower)
+                || (d_lower.contains("gnome") && w_lower.contains("mutter"))
+                || (d_lower.contains("kde") && w_lower.contains("kwin"))
+                || (d_lower.contains("xfce") && w_lower.contains("xfwm"))
+                || (d_lower.contains("mate")
+                    && (w_lower.contains("marco") || w_lower.contains("metacity")))
+                || (d_lower.contains("cinnamon") && w_lower.contains("muffin"))
+                || (d_lower.contains("lxqt")
+                    && (w_lower.contains("kwin") || w_lower.contains("openbox")))
+            {
                 Some(d.to_string())
             } else {
                 Some(format!("{} (WM: {})", d, w))

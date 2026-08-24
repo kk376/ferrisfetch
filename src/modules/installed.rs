@@ -274,13 +274,15 @@ pub fn format_install_date_with_offset(timestamp: u64, now_sec: u64, offset_secs
         day, month, year, h12, minute, ampm
     );
 
-    let diff_sec = now_sec.saturating_sub(timestamp);
-    let total_days = diff_sec / 86400;
+    let local_now = (now_sec as i64 + offset_secs).max(0) as u64;
+    let install_day = local_ts / 86400;
+    let now_day = local_now / 86400;
+    let total_days = now_day.saturating_sub(install_day);
 
     let relative_str = if total_days == 0 {
         "today".to_string()
     } else if total_days == 1 {
-        "1 day ago".to_string()
+        "yesterday".to_string()
     } else if total_days < 365 {
         format!("{} days ago", total_days)
     } else {
@@ -290,7 +292,7 @@ pub fn format_install_date_with_offset(timestamp: u64, now_sec: u64, offset_secs
         if rem_days == 0 {
             format!("{} {} ago", years, y_label)
         } else if rem_days == 1 {
-            format!("{} {}, 1 day ago", years, y_label)
+            format!("{} {}, yesterday", years, y_label)
         } else {
             format!("{} {}, {} days ago", years, y_label, rem_days)
         }
@@ -338,6 +340,14 @@ mod tests {
         let now = 1787140000;
         let s = format_install_date(now, now);
         assert!(s.contains("(today)"));
+    }
+
+    #[test]
+    fn test_format_install_date_yesterday() {
+        let now = 1787140000;
+        let yesterday = now - 86400;
+        let s = format_install_date(yesterday, now);
+        assert!(s.contains("(yesterday)"));
     }
 
     #[test]

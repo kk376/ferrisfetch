@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] - 2026-08-24
+
+### Fixed
+- **Permanent Dual-Boot RTC Skew Detection**: Inspects `/etc/adjtime` for `LOCAL` mode to deterministically normalize rootfs birth timestamps on dual-boot Windows/Linux machines regardless of current uptime or time-of-day.
+- **Calendar-Day Relative Time Resolution**: Computes installation age based on localized calendar day midnight boundaries, correctly displaying `yesterday` (instead of `today`) when crossed over midnight.
+- **Deduplicated Desktop & Window Manager Display**: Suppresses redundant default compositor annotations in Desktop module (e.g. `GNOME 50.4 (Wayland)` instead of repeating `Mutter` alongside the dedicated `WM` module).
+
 ## [0.10.1] - 2026-08-24
 
 ### Fixed
