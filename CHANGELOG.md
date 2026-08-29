@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-08-29
+
+### Added
+- **Zero-Dependency TOML Configuration System**: Added hierarchical configuration parser loading `~/.config/ferrisfetch/config.toml` (and `/etc/ferrisfetch/config.toml`) supporting module ordering, custom labels, logo presets, colors, separator formatting, and per-module settings.
+- **Custom Info Module Loader & Script Plugin System**: Parallel execution of external scripts in `~/.config/ferrisfetch/plugins/` and custom command modules declared in `config.toml`.
+- **CPU Topology & Dual Live Clock Frequency**: Physical cores vs logical threads reporting (`6c 12t`) alongside live instantaneous core clock and rated maximum turbo boost frequency (`@ 4.351GHz [4.60GHz max]`).
+- **Extended Zero-Fork Sysfs EDID DRM Parser**: Decodes 128-byte EDID binary payloads from `/sys/class/drm/card*-*/edid` to extract PNP monitor manufacturer code, diagonal physical inch size, native resolution, refresh rate, and connector type.
+- **System Font, WM Theme, and Terminal Font Collectors**: Native parsers for GTK 2/3/4 `settings.ini`, GNOME GSettings/dconf, KDE `kdeglobals`, and Kitty, Alacritty, and Foot dotfiles.
+- **Cursor Theme & Pixel Size Collector**: Resolves cursor theme and size from GTK, GNOME, and KDE configurations.
+- **Terminal Emulator Version Detection**: Probes version numbers across all major terminal emulators (Kitty, Alacritty, Foot, WezTerm, Ghostty, GNOME Terminal, GNOME Console, Konsole, XFCE Terminal, MATE Terminal, Tilix, Terminator, tmux, Zellij, Rio, Contour, BlackBox, Ptyxis, xterm, VS Code).
+- **Deep Terminal Capability Probing**: Real-time detection of 24-bit TrueColor, UTF-8 Unicode, and Nerd Fonts support.
+- **Multi-OS Support & Dedicated ASCII Art Logos**: Added brand-colored ASCII logos and native OS detection for **Android** (Termux), **macOS** (Darwin), **OpenBSD**, and **NetBSD**.
+- **Microsecond Profiling Mode (`--timings`)**: Per-module latency diagnostics showing individual execution durations and wall-clock times.
+
 ## [0.10.2] - 2026-08-24
 
 ### Fixed

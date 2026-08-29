@@ -1,3 +1,11 @@
+ferrisfetch (0.11.0-1~ppa1~noble) noble; urgency=medium
+
+  * Release version 0.11.0: Zero-dependency config parser (~/.config/ferrisfetch/config.toml).
+  * Custom script plugins, CPU topology, dual clock, sysfs EDID, font, wmtheme, cursor, and terminal versioning.
+  * Added dedicated ASCII logos and multi-OS detection for Android, macOS, OpenBSD, NetBSD.
+
+ -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 29 Aug 2026 06:18:00 +0530
+
 ferrisfetch (0.10.2-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.10.2: Permanent dual-boot RTC local mode detection via /etc/adjtime.
