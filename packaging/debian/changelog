@@ -1,3 +1,11 @@
+ferrisfetch (0.11.1-1~ppa1~noble) noble; urgency=medium
+
+  * Release version 0.11.1: Dedicated GPU VRAM memory probing and PCI resource parsing.
+  * Windows display adapter VRAM resolution.
+  * Updated benchmark suites and documentation.
+
+ -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 29 Aug 2026 06:40:00 +0530
+
 ferrisfetch (0.11.0-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.11.0: Zero-dependency config parser (~/.config/ferrisfetch/config.toml).

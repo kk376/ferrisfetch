@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1] - 2026-08-29
+
+### Added
+- **Dedicated GPU VRAM Memory Probing**: Zero-fork GPU memory scanning parsing `mem_info_vram_total` from sysfs and 64-bit prefetchable memory apertures from `/sys/bus/pci/devices/*/resource` to report dedicated VRAM size (e.g. `512 MiB`, `4 GiB`).
+- **Windows Display Adapter VRAM Parsing**: Extracted `HardwareInformation.qwMemorySize` and `HardwareInformation.MemorySize` directly from Windows display adapter registry classes.
+- **Updated Statistical Benchmarks**: Re-benchmarked on Fedora Linux 44 with sub-3ms average latency across all 27 active modules.
+
 ## [0.11.0] - 2026-08-29
 
 ### Added
