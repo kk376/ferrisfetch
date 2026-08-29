@@ -351,9 +351,10 @@ cargo fmt --check
 
 ## Community Acknowledgements
 
-Special thanks to community contributors for architectural recommendations:
+Special thanks to community contributors for architectural recommendations and security research:
 
 * **[@Laynsb](https://github.com/Laynsb)**:
+  * **Comprehensive Security Audit & Vulnerability Reporting (`v0.11.7`)**: Conducted the independent security review across all 20 modules, identifying the plugin directory auto-execution vector (F2), privilege escalation boundaries under `sudo` (F1), canonical `$PATH` subprocess resolution (F3), user-isolated private cache permissions (F4), terminal OSC control sequence sanitization (F5), and JSON serializer key escaping.
   * **System Installation Date Module (`Installed`)**: Suggested adding OS installation date detection via root filesystem `statx` birth time (`stx_btime`) with relative time deltas.
   * **Localized Installation Timestamps**: Suggested local timezone conversion for wall-clock consistency.
   * **Filesystem Type Detection (`Disk`)**: Suggested partition filesystem labeling.
