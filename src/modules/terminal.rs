@@ -317,6 +317,51 @@ pub fn append_version_if_missing(term_display_name: &str, version: Option<&str>)
 }
 
 #[cfg(not(windows))]
+fn get_terminal_cache_path(binary: &str) -> std::path::PathBuf {
+    if let Ok(runtime_dir) = std::env::var("XDG_RUNTIME_DIR") {
+        let dir = std::path::Path::new(&runtime_dir);
+        if dir.is_dir() {
+            return dir.join(format!("ferrisfetch_term_{}.cache", binary));
+        }
+    }
+    let uid = unsafe { libc::getuid() };
+    std::path::PathBuf::from(format!("/tmp/ferrisfetch_term_{}_{}.cache", binary, uid))
+}
+
+#[cfg(not(windows))]
+fn get_binary_mtime(binary: &str) -> Option<u64> {
+    let standard_paths = [
+        format!("/usr/bin/{}", binary),
+        format!("/usr/local/bin/{}", binary),
+        format!("/bin/{}", binary),
+    ];
+
+    for p in &standard_paths {
+        let path = std::path::Path::new(p);
+        if let Ok(meta) = fs::metadata(path) {
+            if let Ok(mtime) = meta.modified() {
+                if let Ok(dur) = mtime.duration_since(std::time::UNIX_EPOCH) {
+                    return Some(dur.as_secs());
+                }
+            }
+        }
+    }
+
+    if let Ok(home) = std::env::var("HOME") {
+        let local_bin = std::path::Path::new(&home).join(format!(".local/bin/{}", binary));
+        if let Ok(meta) = fs::metadata(&local_bin) {
+            if let Ok(mtime) = meta.modified() {
+                if let Ok(dur) = mtime.duration_since(std::time::UNIX_EPOCH) {
+                    return Some(dur.as_secs());
+                }
+            }
+        }
+    }
+
+    None
+}
+
+#[cfg(not(windows))]
 pub fn probe_terminal_cli_version(term_name: &str) -> Option<String> {
     static CACHE: std::sync::OnceLock<
         std::sync::Mutex<std::collections::HashMap<String, Option<String>>>,
@@ -383,15 +428,39 @@ fn probe_terminal_cli_version_uncached(term_name: &str) -> Option<String> {
         return None;
     };
 
+    let cache_path = get_terminal_cache_path(binary);
+    let bin_mtime = get_binary_mtime(binary);
+
+    // 1. Try reading from mtime-validated tmpfs runtime cache (< 2 µs)
+    if let Some(current_mtime) = bin_mtime {
+        if let Ok(content) = fs::read_to_string(&cache_path) {
+            if let Some((cached_mtime_str, ver)) = content.split_once('|') {
+                if let Ok(cached_mtime) = cached_mtime_str.parse::<u64>() {
+                    if cached_mtime == current_mtime && !ver.trim().is_empty() {
+                        return Some(ver.trim().to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Cache miss: execute subprocess once and persist to tmpfs
     if let Ok(output) = std::process::Command::new(binary).args(args).output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
-        if let Some(ver) = extract_terminal_version_from_output(&stdout) {
-            return Some(ver);
+        let ver = if let Some(v) = extract_terminal_version_from_output(&stdout) {
+            Some(v)
+        } else {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            extract_terminal_version_from_output(&stderr)
+        };
+
+        if let Some(ref version_str) = ver {
+            if let Some(current_mtime) = bin_mtime {
+                let _ = fs::write(&cache_path, format!("{}|{}", current_mtime, version_str));
+            }
         }
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        if let Some(ver) = extract_terminal_version_from_output(&stderr) {
-            return Some(ver);
-        }
+
+        return ver;
     }
     None
 }

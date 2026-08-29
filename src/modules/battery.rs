@@ -58,8 +58,8 @@ fn read_cached_battery() -> Option<BatteryInfo> {
     let metadata = fs::metadata(&path).ok()?;
     let modified = metadata.modified().ok()?;
     let age = modified.elapsed().ok()?;
-    // Use 15-second TTL cache to prevent ACPI EC bus lockups from stalling user fetches
-    if age.as_secs() > 15 {
+    // Use 60-second TTL cache to prevent ACPI EC bus lockups from stalling user fetches
+    if age.as_secs() > 60 {
         return None;
     }
     let content = fs::read_to_string(path).ok()?;

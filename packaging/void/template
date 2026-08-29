@@ -1,6 +1,6 @@
 # Template file for 'ferrisfetch'
 pkgname=ferrisfetch
-version=0.11.4
+version=0.11.5
 revision=1
 build_style=cargo
 short_desc="Fast, lightweight Linux and Android system information fetch CLI written in Rust"

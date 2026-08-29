@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.5] - 2026-08-29
+
+### Optimized
+- **Instantaneous Terminal Version Probing & Tmpfs Runtime Caching**: Added mtime-aware persistent tmpfs runtime caching for GUI terminal emulator version detection (`Ptyxis`, `GNOME Terminal`, `Kitty`, `Alacritty`, `Konsole`, `WezTerm`, `Foot`), reducing terminal module latency from ~65ms down to **26 µs** and dropping total wall-clock runtime below **1 ms**.
+
 ## [0.11.4] - 2026-08-29
 
 ### Added
