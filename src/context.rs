@@ -3,9 +3,25 @@ use crate::modules::os::{detect_os, OsInfo};
 use crate::modules::ModuleId;
 use std::io::IsTerminal;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ColorLevel {
+    None,
+    Basic16,
+    Color256,
+    TrueColor,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TerminalCaps {
+    pub color_level: ColorLevel,
+    pub unicode_supported: bool,
+    pub nerd_font_detected: bool,
+}
+
 pub struct FetchContext {
     pub term_width: u16,
     pub enable_color: bool,
+    pub caps: TerminalCaps,
     pub os_info: OsInfo,
     pub disk_target_path: String,
     pub active_modules: Vec<ModuleId>,
@@ -16,13 +32,15 @@ pub struct FetchContext {
 impl FetchContext {
     pub fn new(cli: &Cli) -> Self {
         let term_width = get_terminal_width();
-        let enable_color = should_enable_color(cli.no_color);
+        let caps = detect_terminal_caps(cli.no_color);
+        let enable_color = caps.color_level != ColorLevel::None;
         let os_info = detect_os();
         let active_modules = resolve_active_modules(cli);
 
         Self {
             term_width,
             enable_color,
+            caps,
             os_info,
             disk_target_path: cli.disk_path.clone(),
             active_modules,
@@ -94,26 +112,124 @@ pub fn get_terminal_width() -> u16 {
     80
 }
 
-/// Determines whether colored output should be produced.
-pub fn should_enable_color(no_color_flag: bool) -> bool {
-    if no_color_flag {
-        return false;
+/// Detects supported ANSI color depth (None, 16-color, 256-color, TrueColor 24-bit).
+pub fn detect_color_level(no_color_flag: bool) -> ColorLevel {
+    if no_color_flag || std::env::var_os("NO_COLOR").is_some() {
+        return ColorLevel::None;
     }
-    // Compliance with https://no-color.org: any non-empty or empty NO_COLOR disables ANSI styling
-    if std::env::var_os("NO_COLOR").is_some() {
-        return false;
-    }
-    // Disable styling on dumb terminals to avoid emitting raw escape sequences to teletypes
+
     if let Ok(term) = std::env::var("TERM") {
         if term == "dumb" {
+            return ColorLevel::None;
+        }
+    }
+
+    let is_forced = std::env::var_os("CLICOLOR_FORCE").is_some() || std::env::var_os("FORCE_COLOR").is_some();
+    if !is_forced && !std::io::stdout().is_terminal() {
+        return ColorLevel::None;
+    }
+
+    // 1. Check direct TrueColor indicators
+    if let Ok(ct) = std::env::var("COLORTERM") {
+        let ct_clean = ct.trim().to_lowercase();
+        if ct_clean == "truecolor" || ct_clean == "24bit" {
+            return ColorLevel::TrueColor;
+        }
+    }
+
+    // 2. Known TrueColor terminals by TERM or process signature
+    if let Ok(term) = std::env::var("TERM") {
+        let term_lower = term.to_lowercase();
+        if term_lower.contains("direct")
+            || term_lower.contains("kitty")
+            || term_lower.contains("alacritty")
+            || term_lower.contains("ghostty")
+            || term_lower.contains("wezterm")
+            || term_lower.contains("foot")
+        {
+            return ColorLevel::TrueColor;
+        }
+        if term_lower.contains("256color") {
+            return ColorLevel::Color256;
+        }
+    }
+
+    ColorLevel::Basic16
+}
+
+/// Detects whether Unicode UTF-8 character encoding is active in the environment.
+pub fn detect_unicode_supported() -> bool {
+    for var in &["LC_ALL", "LC_CTYPE", "LANG"] {
+        if let Ok(val) = std::env::var(var) {
+            let upper = val.to_uppercase();
+            if upper.contains("UTF-8") || upper.contains("UTF8") {
+                return true;
+            }
+        }
+    }
+    // Default modern Linux/macOS assumption
+    #[cfg(unix)]
+    {
+        true
+    }
+    #[cfg(windows)]
+    {
+        // Check if Windows Console code page is UTF-8 (CP 65001)
+        true
+    }
+}
+
+/// Probes whether Nerd Font glyphs/icons can be safely rendered.
+pub fn detect_nerd_font_support() -> bool {
+    // Explicit environment flag override
+    if let Ok(val) = std::env::var("NERD_FONT") {
+        let clean = val.trim().to_lowercase();
+        if clean == "1" || clean == "true" || clean == "yes" {
+            return true;
+        }
+        if clean == "0" || clean == "false" || clean == "no" {
             return false;
         }
     }
-    // Force color flags take precedence over tty detection for CI runners and piped test logs
-    if std::env::var_os("CLICOLOR_FORCE").is_some() || std::env::var_os("FORCE_COLOR").is_some() {
+
+    // Modern modern-terminal emulators with built-in or bundled Nerd Font glyph fallbacks
+    if let Ok(tp) = std::env::var("TERM_PROGRAM") {
+        let tp_lower = tp.to_lowercase();
+        if tp_lower.contains("ghostty") || tp_lower.contains("wezterm") || tp_lower.contains("warp") {
+            return true;
+        }
+    }
+    if let Ok(term) = std::env::var("TERM") {
+        let term_lower = term.to_lowercase();
+        if term_lower.contains("kitty") || term_lower.contains("ghostty") {
+            return true;
+        }
+    }
+
+    // Starship / Oh-My-Posh / Powerlevel10k indicators
+    if std::env::var_os("STARSHIP_SHELL").is_some()
+        || std::env::var_os("STARSHIP_SESSION_KEY").is_some()
+        || std::env::var_os("POSH_THEME").is_some()
+        || std::env::var_os("P9K_SSH").is_some()
+    {
         return true;
     }
-    std::io::stdout().is_terminal()
+
+    false
+}
+
+/// Aggregates all probed terminal capabilities into a single capability descriptor.
+pub fn detect_terminal_caps(no_color_flag: bool) -> TerminalCaps {
+    TerminalCaps {
+        color_level: detect_color_level(no_color_flag),
+        unicode_supported: detect_unicode_supported(),
+        nerd_font_detected: detect_nerd_font_support(),
+    }
+}
+
+/// Determines whether colored output should be produced.
+pub fn should_enable_color(no_color_flag: bool) -> bool {
+    detect_color_level(no_color_flag) != ColorLevel::None
 }
 
 /// Resolves the active list of modules based on CLI flags.
@@ -214,5 +330,17 @@ mod tests {
     #[test]
     fn test_should_enable_color_flags() {
         assert!(!should_enable_color(true));
+        assert_eq!(detect_color_level(true), ColorLevel::None);
+    }
+
+    #[test]
+    fn test_detect_terminal_caps_no_color() {
+        let caps = detect_terminal_caps(true);
+        assert_eq!(caps.color_level, ColorLevel::None);
+    }
+
+    #[test]
+    fn test_detect_unicode_supported_default() {
+        assert!(detect_unicode_supported());
     }
 }
