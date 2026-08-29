@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.4] - 2026-08-29
+
+### Added
+- **Exhaustive Multi-Vendor Integrated & SoC GPU Taxonomy**: Added comprehensive hardware taxonomy catalog spanning AMD APU generations (Mendocino, Phoenix, Rembrandt, Hawk Point, Strix Point, A-series, E-series, D-series desktop APUs, R2-R7), Intel (Arc iGPUs, Lunar Lake 140V/130V, Meteor Lake, Iris Xe, UHD, HD, GMA), Apple Silicon (M1-M4, A-series), Qualcomm Snapdragon Adreno (all 5xx-8xx & X Elite), ARM Mali/Immortalis, Broadcom VideoCore, Samsung Xclipse, NVIDIA Tegra, and virtual hypervisor adapters (VirtIO, VMware, VirtualBox, Hyper-V, QXL, BMC ASPEED/Matrox).
+
 ## [0.11.3] - 2026-08-29
 
 ### Fixed

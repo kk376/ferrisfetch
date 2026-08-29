@@ -566,55 +566,187 @@ pub fn detect_wsl_gpus() -> Vec<String> {
     gpus
 }
 
-/// Classifies whether a GPU model name is an integrated graphics processor.
+/// Classifies whether a GPU model name is an integrated graphics processor or SoC graphics adapter.
+/// Uses an exhaustive multi-vendor taxonomy covering Intel, AMD APUs (mobile & desktop), Apple Silicon,
+/// Qualcomm Snapdragon Adreno, ARM Mali/Immortalis, Broadcom VideoCore, Samsung Xclipse, NVIDIA Tegra,
+/// and virtualized hypervisor display adapters.
 pub fn is_integrated_gpu(gpu_name: &str) -> bool {
     let lower = gpu_name.to_lowercase();
 
-    // Explicit discrete GPU markers (must be checked first)
-    if lower.contains("geforce")
-        || lower.contains("rtx")
-        || lower.contains("gtx")
-        || lower.contains("quadro")
-        || lower.contains("tesla")
-        || lower.contains("arc a")
-        || lower.contains("arc b")
-        || lower.contains("arc pro")
-        || lower.contains("radeon rx")
-        || lower.contains("rx ")
-        || lower.contains("radeon pro")
-        || lower.contains("firepro")
-        || lower.contains("radeon vii")
-        || lower.contains("radeon r9")
-    {
-        return false;
+    // 1. Explicit discrete GPU markers (must be checked first, unless it's a Tegra SoC)
+    if !lower.contains("tegra") {
+        const DISCRETE_MARKERS: &[&str] = &[
+            "geforce",
+            "rtx",
+            "gtx",
+            "gt ",
+            "gt2",
+            "gt4",
+            "gt7",
+            "gt10",
+            "quadro",
+            "tesla",
+            "grid",
+            "nvs",
+            "radeon rx",
+            "rx ",
+            "radeon pro",
+            "firepro",
+            "firegl",
+            "radeon vii",
+            "radeon r9",
+            "radeon r7 240",
+            "radeon r7 250",
+            "radeon r7 260",
+            "radeon r7 360",
+            "radeon r7 370",
+            "radeon r5 230",
+            "radeon r5 240",
+            "radeon r5 340",
+            "radeon hd 77",
+            "radeon hd 78",
+            "radeon hd 79",
+            "radeon hd 67",
+            "radeon hd 68",
+            "radeon hd 69",
+            "radeon hd 57",
+            "radeon hd 58",
+            "radeon hd 59",
+            "arc a",
+            "arc b",
+            "arc pro",
+            "iris xe max",
+            "flex 140",
+            "flex 170",
+            "data center gpu",
+            "ponte vecchio",
+        ];
+
+        for marker in DISCRETE_MARKERS {
+            if lower.contains(marker) {
+                return false;
+            }
+        }
     }
 
-    // Explicit integrated GPU markers
-    if lower.contains("radeon graphics")
-        || lower.contains("radeon vega")
-        || lower.contains("vega ")
-        || lower.contains("iris")
-        || lower.contains("uhd graphics")
-        || lower.contains("hd graphics")
-        || lower.contains("intel graphics")
-        || lower.contains("intel arc graphics")
-        || (lower.contains("intel")
-            && !lower.contains("arc a")
-            && !lower.contains("arc b")
-            && !lower.contains("arc pro"))
-        || lower.contains("adreno")
-        || lower.contains("mali")
-        || lower.contains("immortalis")
-        || lower.contains("videocore")
-        || lower.contains("powervr")
-        || lower.contains("apple m")
-        || lower.contains("xclipse")
+    // 2. Explicit integrated / SoC / virtualized GPU markers
+    const INTEGRATED_MARKERS: &[&str] = &[
+        // Intel
+        "iris",
+        "uhd graphics",
+        "hd graphics",
+        "intel graphics",
+        "intel arc graphics",
+        "gma",
+        "graphics media accelerator",
+        "extreme graphics",
+        // AMD APU & Vega
+        "radeon graphics",
+        "radeon(tm) graphics",
+        "radeon vega",
+        "vega ",
+        // AMD APU Silicon & Codenames
+        "mendocino",
+        "rembrandt",
+        "phoenix",
+        "hawk point",
+        "strix point",
+        "strix halo",
+        "barcelo",
+        "lucienne",
+        "cezanne",
+        "renoir",
+        "picasso",
+        "raven",
+        "bristol",
+        "carrizo",
+        "kaveri",
+        "richland",
+        "trinity",
+        "llano",
+        "kabini",
+        "temash",
+        "beema",
+        "mullins",
+        "stoney",
+        // Apple Silicon
+        "apple m",
+        "apple a",
+        "apple gpu",
+        // ARM & Mobile SoC
+        "adreno",
+        "snapdragon",
+        "mali",
+        "immortalis",
+        "videocore",
+        "powervr",
+        "xclipse",
+        "tegra",
+        // Virtual & Hypervisor & BMC
+        "virtio",
+        "vmware",
+        "virtualbox",
+        "vbox",
+        "qemu",
+        "bochs",
+        "cirrus",
+        "microsoft direct3d",
+        "microsoft basic",
+        "hyper-v",
+        "qxl",
+        "aspeed",
+        "matrox",
+    ];
+
+    for marker in INTEGRATED_MARKERS {
+        if lower.contains(marker) {
+            return true;
+        }
+    }
+
+    // 3. Intel Vendor Catch-All (all Intel GPUs without discrete Arc A/B/Pro or Iris Xe Max)
+    if lower.contains("intel")
+        && !lower.contains("arc a")
+        && !lower.contains("arc b")
+        && !lower.contains("arc pro")
+        && !lower.contains("iris xe max")
     {
         return true;
     }
 
-    // Match AMD Radeon mobile APU iGPUs (e.g. "610M", "660M", "680M", "740M", "760M", "780M", "880M", "890M")
+    // 4. AMD Radeon APU Patterns
     if lower.contains("radeon") {
+        // A-series APU graphics (e.g. "Radeon R2 Graphics", "Radeon R5 Graphics", "Radeon R7 Graphics")
+        if lower.contains("graphics")
+            && (lower.contains("r2")
+                || lower.contains("r3")
+                || lower.contains("r4")
+                || lower.contains("r5")
+                || lower.contains("r6")
+                || lower.contains("r7"))
+        {
+            return true;
+        }
+
+        // Desktop APUs with D suffix (e.g. HD 6410D, HD 7480D, HD 7560D, HD 8470D, HD 8570D, HD 8670D)
+        for word in lower.split_whitespace() {
+            let clean = word.trim_matches(|c: char| !c.is_alphanumeric());
+            if clean.ends_with('d') && clean.len() >= 4 {
+                let num_part = &clean[..clean.len() - 1];
+                if num_part.chars().all(|c| c.is_ascii_digit()) {
+                    return true;
+                }
+            }
+        }
+
+        // Low-power E-series APU models (HD 62xx, HD 63xx, HD 73xx, HD 82xx, HD 83xx, HD 84xx)
+        for prefix in &["hd 62", "hd 63", "hd 73", "hd 82", "hd 83", "hd 84"] {
+            if lower.contains(prefix) {
+                return true;
+            }
+        }
+
+        // 3-digit Mobile APU iGPUs (e.g. "610M", "620M", "640M", "660M", "680M", "740M", "760M", "780M", "840M", "860M", "880M", "890M")
         for word in lower.split_whitespace() {
             let clean_word = word.trim_matches(|c: char| !c.is_alphanumeric());
             if clean_word.len() == 4 && clean_word.ends_with('m') {
@@ -1137,25 +1269,84 @@ mod tests {
 
     #[test]
     fn test_is_integrated_gpu() {
+        // AMD APU & Silicon
         assert!(is_integrated_gpu("AMD Radeon 610M (512 MiB)"));
         assert!(is_integrated_gpu("AMD Radeon 660M"));
         assert!(is_integrated_gpu("AMD Radeon 680M (512 MiB)"));
+        assert!(is_integrated_gpu("AMD Radeon 740M"));
+        assert!(is_integrated_gpu("AMD Radeon 760M"));
         assert!(is_integrated_gpu("AMD Radeon 780M"));
+        assert!(is_integrated_gpu("AMD Radeon 880M"));
         assert!(is_integrated_gpu("AMD Radeon 890M"));
+        assert!(is_integrated_gpu("AMD Radeon Vega 3"));
         assert!(is_integrated_gpu("AMD Radeon Vega 8"));
+        assert!(is_integrated_gpu("AMD Radeon Vega 11"));
         assert!(is_integrated_gpu("AMD Radeon Graphics"));
+        assert!(is_integrated_gpu("AMD Radeon(TM) Graphics"));
+        assert!(is_integrated_gpu("AMD Rembrandt [Radeon 680M]"));
+        assert!(is_integrated_gpu("AMD Phoenix Graphics"));
+        assert!(is_integrated_gpu("AMD Radeon HD 6410D"));
+        assert!(is_integrated_gpu("AMD Radeon HD 7560D"));
+        assert!(is_integrated_gpu("AMD Radeon HD 8400"));
+        assert!(is_integrated_gpu("AMD Radeon R5 Graphics"));
+        assert!(is_integrated_gpu("AMD Radeon R7 Graphics"));
+
+        // Intel iGPUs
         assert!(is_integrated_gpu("Intel Iris Xe Graphics"));
         assert!(is_integrated_gpu("Intel UHD Graphics 620"));
+        assert!(is_integrated_gpu("Intel UHD Graphics 770"));
+        assert!(is_integrated_gpu("Intel HD Graphics 4000"));
+        assert!(is_integrated_gpu("Intel HD Graphics 530"));
         assert!(is_integrated_gpu("Intel Arc Graphics"));
-        assert!(is_integrated_gpu("Apple M3 Max"));
-        assert!(is_integrated_gpu("Qualcomm Adreno 730"));
+        assert!(is_integrated_gpu("Intel Arc 140V"));
+        assert!(is_integrated_gpu("Intel Arc 8-Cores"));
+        assert!(is_integrated_gpu("Intel GMA 4500MHD"));
+        assert!(is_integrated_gpu("Intel Extreme Graphics 2"));
 
+        // Apple Silicon
+        assert!(is_integrated_gpu("Apple M1"));
+        assert!(is_integrated_gpu("Apple M2 Pro"));
+        assert!(is_integrated_gpu("Apple M3 Max"));
+        assert!(is_integrated_gpu("Apple M4"));
+        assert!(is_integrated_gpu("Apple A17 Pro GPU"));
+
+        // ARM, Mobile & Virtual
+        assert!(is_integrated_gpu("Qualcomm Adreno 730"));
+        assert!(is_integrated_gpu("Qualcomm Snapdragon X Elite Adreno GPU"));
+        assert!(is_integrated_gpu("ARM Mali-G78"));
+        assert!(is_integrated_gpu("ARM Immortalis-G720"));
+        assert!(is_integrated_gpu("Broadcom VideoCore VII"));
+        assert!(is_integrated_gpu("Samsung Xclipse 940"));
+        assert!(is_integrated_gpu("NVIDIA Tegra Orin"));
+        assert!(is_integrated_gpu("VirtIO GPU"));
+        assert!(is_integrated_gpu("VMware SVGA II"));
+        assert!(is_integrated_gpu("VirtualBox Graphics Adapter"));
+        assert!(is_integrated_gpu("Microsoft Basic Display Adapter"));
+        assert!(is_integrated_gpu("Red Hat QXL"));
+        assert!(is_integrated_gpu("ASPEED AST2500"));
+        assert!(is_integrated_gpu("Matrox G200e"));
+
+        // Discrete GPUs (MUST BE FALSE)
+        assert!(!is_integrated_gpu("NVIDIA GeForce RTX 4090"));
         assert!(!is_integrated_gpu("NVIDIA GeForce RTX 2050 (4 GiB)"));
-        assert!(!is_integrated_gpu("NVIDIA GeForce GTX 1650"));
+        assert!(!is_integrated_gpu("NVIDIA GeForce GTX 1660 Ti"));
+        assert!(!is_integrated_gpu("NVIDIA GeForce GT 1030"));
+        assert!(!is_integrated_gpu("NVIDIA RTX A4000"));
+        assert!(!is_integrated_gpu("NVIDIA Quadro P2000"));
+        assert!(!is_integrated_gpu("NVIDIA Tesla T4"));
+        assert!(!is_integrated_gpu("AMD Radeon RX 7900 XTX"));
         assert!(!is_integrated_gpu("AMD Radeon RX 6800M"));
         assert!(!is_integrated_gpu("AMD Radeon RX 7600S"));
+        assert!(!is_integrated_gpu("AMD Radeon RX 580"));
+        assert!(!is_integrated_gpu("AMD Radeon Pro W6800"));
+        assert!(!is_integrated_gpu("AMD Radeon VII"));
+        assert!(!is_integrated_gpu("AMD Radeon R9 390X"));
+        assert!(!is_integrated_gpu("AMD Radeon R7 250"));
         assert!(!is_integrated_gpu("Intel Arc A770"));
+        assert!(!is_integrated_gpu("Intel Arc A380"));
         assert!(!is_integrated_gpu("Intel Arc B580"));
+        assert!(!is_integrated_gpu("Intel Arc Pro A60"));
+        assert!(!is_integrated_gpu("Intel Iris Xe MAX Graphics"));
     }
 
     #[test]
