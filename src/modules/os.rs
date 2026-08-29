@@ -151,7 +151,7 @@ pub fn detect_os() -> OsInfo {
             }
         }
         if android_ver.is_none() {
-            if let Ok(output) = std::process::Command::new("getprop")
+            if let Ok(output) = crate::modules::system_command("getprop")
                 .arg("ro.build.version.release")
                 .output()
             {

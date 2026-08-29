@@ -24,6 +24,29 @@ pub mod wm;
 
 use crate::context::FetchContext;
 
+/// Creates a `std::process::Command` using a trusted canonical system path on Unix
+/// to prevent untrusted $PATH search element attacks (F3).
+pub fn system_command(binary: &str) -> std::process::Command {
+    #[cfg(unix)]
+    {
+        const TRUSTED_PATHS: &[&str] = &[
+            "/usr/bin",
+            "/bin",
+            "/usr/sbin",
+            "/sbin",
+            "/usr/local/bin",
+            "/system/bin",
+        ];
+        for dir in TRUSTED_PATHS {
+            let full_path = std::path::Path::new(dir).join(binary);
+            if full_path.is_file() {
+                return std::process::Command::new(full_path);
+            }
+        }
+    }
+    std::process::Command::new(binary)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ModuleId {
     Title,

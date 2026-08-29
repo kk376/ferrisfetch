@@ -2,7 +2,6 @@ use crate::context::FetchContext;
 use crate::modules::{Collector, ModuleId, ModuleOutput};
 use std::fs;
 use std::path::Path;
-use std::process::Command;
 
 /// Parses Debian `/var/lib/dpkg/status` raw bytes and counts installed packages.
 /// Fast path: stream-parses status file directly without string allocations or UTF-8 decoding.
@@ -82,7 +81,7 @@ pub fn count_dpkg() -> Option<usize> {
     }
 
     // Fallback: dpkg-query command if status file is inaccessible (e.g. non-standard chroot)
-    if let Ok(output) = Command::new("dpkg-query")
+    if let Ok(output) = crate::modules::system_command("dpkg-query")
         .args(["-f", "${binary:Package}\n", "-W"])
         .output()
     {
@@ -265,7 +264,7 @@ pub fn count_rpm_from_paths(db_paths: &[&str]) -> Option<usize> {
         }
 
         // Fallback 2: query rpm -qa once and persist to cache
-        if let Ok(output) = Command::new("rpm").arg("-qa").output() {
+        if let Ok(output) = crate::modules::system_command("rpm").arg("-qa").output() {
             if output.status.success() {
                 let count = count_newline_entries(&output.stdout);
                 if count > 0 {

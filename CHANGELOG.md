@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.7] - 2026-08-29
+
+### Security
+- **Plugin Privilege Escalation Guardrail (F1)**: Automatically disable arbitrary shell plugin execution when `ferrisfetch` is invoked in elevated contexts (`sudo`, `su`, `setuid` where `euid == 0` or `euid != uid`) to prevent privilege escalation via untrusted user configs. *(Discovered & reported by Laysnb)*
+- **Strict Executable Bit & Ownership Validation for Plugins (F2)**: Enforce regular file ownership and executable permission bit (`+x`) checks on `~/.config/ferrisfetch/plugins/` scripts, ignoring non-executable files, hidden files, and editor swap/backup files. *(Discovered & reported by Laysnb)*
+- **Canonical System Path Resolution for Subprocesses (F3)**: Replaced bare-name `$PATH` resolution for all helper commands (`lspci`, `dpkg-query`, `rpm`, `gsettings`, `dconf`, `xrandr`, `wlr-randr`, `getprop`) with canonical trusted system directories (`/usr/bin`, `/bin`, `/usr/sbin`, `/sbin`, `/usr/local/bin`), eliminating untrusted PATH search hijacking. *(Discovered & reported by Laysnb)*
+- **User-Isolated Private Cache Path Resolution (F4)**: Hardened tmpfs caching in `battery` and `terminal` modules to prefer `$XDG_RUNTIME_DIR` (mode 0700) and `$XDG_CACHE_HOME` (`~/.cache/ferrisfetch/`), creating private user-owned directories (`/tmp/ferrisfetch-<uid>/`) with `0o700` permissions on temp fallback. *(Discovered & reported by Laysnb)*
+- **Terminal Control Sequence Sanitization & JSON Key Escaping (F5)**: Added `sanitize_terminal_string` to strip dangerous OSC terminal manipulation codes and raw non-printable C0 control characters from external display values, and implemented complete escaping for JSON output keys. *(Discovered & reported by Laysnb)*
+
 ## [0.11.6] - 2026-08-29
 
 ### Optimized

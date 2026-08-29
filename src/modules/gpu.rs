@@ -2,7 +2,6 @@ use crate::context::FetchContext;
 use crate::modules::{Collector, ModuleId, ModuleOutput};
 use std::fs;
 use std::path::Path;
-use std::process::Command;
 
 /// Maps PCI vendor hex IDs to human-readable manufacturer names.
 pub fn vendor_id_to_name(vendor: &str) -> Option<&'static str> {
@@ -374,7 +373,7 @@ pub fn parse_lspci_mm_output(text: &str) -> Vec<String> {
 pub fn detect_gpus_lspci() -> Vec<String> {
     let mut gpus = Vec::new();
     for class_filter in &["::0300", "::0302", "::0380"] {
-        if let Ok(output) = Command::new("lspci")
+        if let Ok(output) = crate::modules::system_command("lspci")
             .args(["-mm", "-d", class_filter])
             .output()
         {
@@ -505,7 +504,7 @@ pub fn detect_wsl_gpus() -> Vec<String> {
     // 3. Fallback: Query nvidia-smi with name, VRAM and clock speed
     let mut found_dgpu = false;
     for smi_path in &["/usr/lib/wsl/lib/nvidia-smi", "nvidia-smi"] {
-        if let Ok(output) = Command::new(smi_path)
+        if let Ok(output) = crate::modules::system_command(smi_path)
             .args([
                 "--query-gpu=name,memory.total,clocks.max.graphics",
                 "--format=csv,noheader",

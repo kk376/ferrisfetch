@@ -116,8 +116,8 @@ sudo apt update && sudo apt install -y ferrisfetch
 
 **Via Pre-built `.deb`:**
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.6/ferrisfetch_0.11.6-1_amd64.deb
-sudo dpkg -i ferrisfetch_0.11.6-1_amd64.deb
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch_0.11.7-1_amd64.deb
+sudo dpkg -i ferrisfetch_0.11.7-1_amd64.deb
 ```
 
 ---
@@ -136,8 +136,8 @@ sudo dnf install -y ferrisfetch
 
 **Via Pre-built Pacman Package:**
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.6/ferrisfetch-0.11.6-1-x86_64.pkg.tar.zst
-sudo pacman -U ferrisfetch-0.11.6-1-x86_64.pkg.tar.zst
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch-0.11.7-1-x86_64.pkg.tar.zst
+sudo pacman -U ferrisfetch-0.11.7-1-x86_64.pkg.tar.zst
 ```
 
 ---
@@ -155,8 +155,8 @@ brew install ferrisfetch
 ### Android (Termux)
 
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.6/ferrisfetch_0.11.6-1_termux_aarch64.deb
-dpkg -i ferrisfetch_0.11.6-1_termux_aarch64.deb
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch_0.11.7-1_termux_aarch64.deb
+dpkg -i ferrisfetch_0.11.7-1_termux_aarch64.deb
 ```
 
 ---
@@ -167,7 +167,7 @@ No dependencies, pure standalone executable:
 
 ```powershell
 # 1. Download
-curl.exe -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.6/ferrisfetch-windows-x86_64.zip
+curl.exe -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch-windows-x86_64.zip
 
 # 2. Extract
 tar.exe -xf ferrisfetch-windows-x86_64.zip
@@ -183,7 +183,7 @@ tar.exe -xf ferrisfetch-windows-x86_64.zip
 Statically linked with musl (zero external dependencies):
 
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.6/ferrisfetch-linux-musl-x86_64
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch-linux-musl-x86_64
 chmod +x ferrisfetch-linux-musl-x86_64
 sudo mv ferrisfetch-linux-musl-x86_64 /usr/local/bin/ferrisfetch
 ```
@@ -193,8 +193,8 @@ sudo mv ferrisfetch-linux-musl-x86_64 /usr/local/bin/ferrisfetch
 ### Pre-built Tarball Archive
 
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.6/ferrisfetch-0.11.6-x86_64-unknown-linux-gnu.tar.gz
-tar -xzf ferrisfetch-0.11.6-x86_64-unknown-linux-gnu.tar.gz
+curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch-0.11.7-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf ferrisfetch-0.11.7-x86_64-unknown-linux-gnu.tar.gz
 sudo ./install.sh
 ```
 

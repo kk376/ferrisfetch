@@ -142,7 +142,7 @@ pub fn detect_de_version(de_name: &str) -> Option<String> {
             } else {
                 None
             }
-        } else if let Ok(out) = std::process::Command::new("gnome-shell")
+        } else if let Ok(out) = crate::modules::system_command("gnome-shell")
             .arg("--version")
             .output()
         {
@@ -158,7 +158,7 @@ pub fn detect_de_version(de_name: &str) -> Option<String> {
     } else if lower.contains("kde") || lower.contains("plasma") {
         if let Ok(ver) = std::env::var("KDE_SESSION_VERSION") {
             Some(ver)
-        } else if let Ok(out) = std::process::Command::new("plasmashell")
+        } else if let Ok(out) = crate::modules::system_command("plasmashell")
             .arg("--version")
             .output()
         {
@@ -172,7 +172,7 @@ pub fn detect_de_version(de_name: &str) -> Option<String> {
             None
         }
     } else if lower.contains("xfce") {
-        if let Ok(out) = std::process::Command::new("xfce4-session")
+        if let Ok(out) = crate::modules::system_command("xfce4-session")
             .arg("--version")
             .output()
         {
@@ -189,7 +189,7 @@ pub fn detect_de_version(de_name: &str) -> Option<String> {
             None
         }
     } else if lower.contains("mate") {
-        if let Ok(out) = std::process::Command::new("mate-session")
+        if let Ok(out) = crate::modules::system_command("mate-session")
             .arg("--version")
             .output()
         {
@@ -203,7 +203,7 @@ pub fn detect_de_version(de_name: &str) -> Option<String> {
             None
         }
     } else if lower.contains("cinnamon") {
-        if let Ok(out) = std::process::Command::new("cinnamon")
+        if let Ok(out) = crate::modules::system_command("cinnamon")
             .arg("--version")
             .output()
         {

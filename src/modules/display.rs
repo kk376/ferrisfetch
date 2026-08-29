@@ -1,7 +1,6 @@
 use crate::context::FetchContext;
 use crate::modules::{Collector, ModuleId, ModuleOutput};
 use std::fs;
-use std::process::Command;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DisplayInfo {
@@ -201,7 +200,7 @@ pub fn detect_display() -> Option<DisplayInfo> {
 
     // 2. Fallback: Query xrandr or wlr-randr if graphical display session is active and DRM sysfs is unavailable
     if std::env::var_os("DISPLAY").is_some() || std::env::var_os("WAYLAND_DISPLAY").is_some() {
-        if let Ok(output) = Command::new("xrandr").output() {
+        if let Ok(output) = crate::modules::system_command("xrandr").output() {
             if output.status.success() {
                 let text = String::from_utf8_lossy(&output.stdout);
                 if let Some(info) = parse_xrandr_output(&text) {
@@ -210,7 +209,7 @@ pub fn detect_display() -> Option<DisplayInfo> {
             }
         }
 
-        if let Ok(output) = Command::new("wlr-randr").output() {
+        if let Ok(output) = crate::modules::system_command("wlr-randr").output() {
             if output.status.success() {
                 let text = String::from_utf8_lossy(&output.stdout);
                 if let Some(info) = parse_wlr_randr_output(&text) {

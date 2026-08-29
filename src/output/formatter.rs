@@ -54,11 +54,12 @@ pub fn render_layout(
     for out in outputs {
         if let Some(ref custom) = out.custom_rendered {
             for line in custom.lines() {
-                info_lines.push(line.to_string());
+                info_lines.push(sanitize_terminal_string(line));
             }
         } else if !out.value.is_empty() {
             let label = format_label(&out.label, distro_color, enable_color);
-            info_lines.push(format!("{} {}", label, out.value));
+            let clean_val = sanitize_terminal_string(&out.value);
+            info_lines.push(format!("{} {}", label, clean_val));
         }
     }
 
@@ -120,6 +121,42 @@ pub fn render_layout(
     rows.join("\n")
 }
 
+/// Sanitizes untrusted strings for safe human-readable terminal rendering by stripping
+/// dangerous OSC terminal manipulation sequences and raw unprintable ASCII control characters (F5).
+pub fn sanitize_terminal_string(s: &str) -> String {
+    let mut clean = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '\x1b' {
+            if chars.peek() == Some(&']') {
+                // Strip OSC sequences (e.g. \x1b]...\x07 or \x1b]...\x1b\)
+                chars.next(); // consume ']'
+                while let Some(osc_c) = chars.next() {
+                    if osc_c == '\x07' {
+                        break;
+                    }
+                    if osc_c == '\x1b' && chars.peek() == Some(&'\\') {
+                        chars.next();
+                        break;
+                    }
+                }
+                continue;
+            }
+            // Preserve standard ANSI styling sequences (\x1b[...m)
+            clean.push(c);
+        } else if (c as u32) < 0x20 && c != '\n' && c != '\t' {
+            // Drop raw non-printable C0 control characters
+            continue;
+        } else if (c as u32) == 0x7F {
+            // Drop DEL
+            continue;
+        } else {
+            clean.push(c);
+        }
+    }
+    clean
+}
+
 /// Escapes a string for valid JSON output.
 pub fn escape_json_string(s: &str) -> String {
     let mut out = String::with_capacity(s.len() + 8);
@@ -141,7 +178,7 @@ pub fn escape_json_string(s: &str) -> String {
     out
 }
 
-/// Renders collected module outputs into a formatted JSON string.
+/// Renders collected module outputs into a formatted JSON string with full key/value escaping.
 pub fn render_json(outputs: &[ModuleOutput]) -> String {
     use crate::modules::ModuleId;
 
@@ -156,8 +193,9 @@ pub fn render_json(outputs: &[ModuleOutput]) -> String {
             } else {
                 out.label.to_lowercase().replace(' ', "_")
             };
-            let escaped = escape_json_string(&out.value);
-            fields.push(format!("  \"{}\": \"{}\"", key, escaped));
+            let escaped_key = escape_json_string(&key);
+            let escaped_val = escape_json_string(&out.value);
+            fields.push(format!("  \"{}\": \"{}\"", escaped_key, escaped_val));
         }
     }
 
@@ -258,5 +296,40 @@ mod tests {
         assert_eq!(visible_width("こんにちは"), 10);
         assert_eq!(visible_width("你好世界"), 8);
         assert_eq!(visible_width("\x1b[31m你好\x1b[0m"), 4);
+    }
+
+    #[test]
+    fn test_sanitize_terminal_string_strips_osc_and_c0() {
+        // OSC sequence title injection
+        let malicious = "Fedora Linux\x1b]0;hacked_title\x07 (Workstation)";
+        assert_eq!(
+            sanitize_terminal_string(malicious),
+            "Fedora Linux (Workstation)"
+        );
+
+        // Retains regular ANSI color styling
+        let styled = "\x1b[38;5;208mFerris\x1b[0m";
+        assert_eq!(
+            sanitize_terminal_string(styled),
+            "\x1b[38;5;208mFerris\x1b[0m"
+        );
+
+        // Drops raw non-printable C0 control characters (like bell \x07, backspace \x08, etc.)
+        let c0_ctrl = "Hello\x07\x08World\x7f";
+        assert_eq!(sanitize_terminal_string(c0_ctrl), "HelloWorld");
+    }
+
+    #[test]
+    fn test_render_json_escapes_keys_and_values() {
+        let outputs = vec![ModuleOutput {
+            id: ModuleId::Plugin,
+            label: "custom \"key\"\nwith newline".to_string(),
+            value: "value with \"quotes\" and \t tabs".to_string(),
+            custom_rendered: None,
+        }];
+        let json = render_json(&outputs);
+        assert!(json.contains(
+            "\"custom_\\\"key\\\"\\nwith_newline\": \"value with \\\"quotes\\\" and \\t tabs\""
+        ));
     }
 }

@@ -290,21 +290,26 @@ No critical crash bugs, memory unsafety, or security vulnerabilities were identi
 
 ## 3. Security & Safety Evaluation
 
-| Security Aspect | Assessment | Notes |
+*Hardened in v0.11.7 based on the independent security audit by **Laysnb**.*
+
+| Security Aspect | Assessment | Notes & Hardening Controls |
 |---|---|---|
-| **Subprocess Injection** | Secure | All `Command::new` calls use static string slices (`dpkg-query`, `rpm`, `xbps-query`, `lspci`) with fixed argument vectors. No shell evaluation (`sh -c`) is used anywhere. |
-| **Privilege Escalation** | Secure | The application is entirely read-only. No temporary files or system state modifications are performed. |
-| **Credential Exposure** | Secure | Only standard system telemetry (`USER`, `LOGNAME`, `SHELL`, `TERM`, DE/WM session variables) is read. No secrets or tokens are accessed. |
+| **Subprocess Execution (F3)** | Secure | All external commands (`lspci`, `dpkg-query`, `rpm`, `gsettings`, `dconf`, `xrandr`, `wlr-randr`) are resolved via trusted canonical system paths (`/usr/bin`, `/bin`, `/usr/sbin`, `/sbin`, `/usr/local/bin`) via `system_command()`, eliminating `$PATH` hijacking vectors. |
+| **Plugin Isolation (F1, F2)** | Secure | User-configured plugins in `config.toml` and `~/.config/ferrisfetch/plugins/` are automatically **disabled in elevated contexts** (`sudo`, `su`, `setuid` where `euid == 0` or `euid != uid`) to prevent privilege escalation. Plugin directory scans strictly require regular files with the executable bit (`+x`) owned by the user. |
+| **Caching & State (F4)** | Secure | Runtime caching uses `$XDG_RUNTIME_DIR` (tmpfs, mode 0700) or `$XDG_CACHE_HOME` (`~/.cache/ferrisfetch/`). Temporary directory fallbacks create private user-isolated directories (`/tmp/ferrisfetch-<uid>/`) with strict `0o700` permissions. |
+| **Output Sanitization (F5)** | Secure | Untrusted external strings (disk labels, DHCP hostnames, plugin outputs) are sanitized with `sanitize_terminal_string()` to strip dangerous OSC terminal manipulation codes and raw C0 control characters. JSON output keys and values are escaped. |
 | **Path Traversal in CLI** | Secure | `--disk-path` is passed directly to `libc::statvfs` via `CString`. Path failure or null bytes return `None` safely without panic. |
-| **POSIX `unsafe` Usage** | Secure | All `unsafe` blocks (`uname`, `sysinfo`, `statvfs`, `ioctl`, `geteuid`, `getpwuid`) initialize memory with `MaybeUninit` or zeroed structs and validate return codes and null pointers before dereferencing. |
+| **POSIX `unsafe` Usage** | Secure | All `unsafe` FFI blocks (`uname`, `sysinfo`, `statvfs`, `ioctl`, `geteuid`, `getpwuid`, Win32 API) initialize memory with `MaybeUninit` or zeroed structs and validate return codes and null pointers before dereferencing. |
 
 ---
 
 ## 4. Test Suite & Coverage Assessment
 
-- **Total Test Count**: 127 automated tests (75 unit tests in `src/lib.rs`, 12 CLI integration tests in `tests/cli_tests.rs`, 40 fixture tests in `tests/parser_tests.rs`).
+- **Total Test Count**: 156 automated tests across unit tests in `src/`, CLI integration tests in `tests/cli_tests.rs`, completion tests in `tests/completion_tests.rs`, and multi-distro parser fixtures in `tests/parser_tests.rs`.
 - **Fixture Breadth**: Includes real-world fixtures for Debian 12, Ubuntu 24.04, Linux Mint 21, Pop!_OS 22, Fedora 40, RHEL 9, Rocky 9, AlmaLinux 9, CentOS Stream 9, Arch Linux, EndeavourOS, Manjaro 23, Alpine 3.19, Gentoo, Void, openSUSE, Intel/AMD/Xeon/EPYC/ARM/RISC-V/PowerPC cpuinfo, standard/low/large meminfo, and single/multi-day uptime.
-- **Recommendations for Test Additions**:
-  1. Add a test in `cli_tests.rs` for `--version` output format.
-  2. Add unit tests for `CLICOLOR_FORCE` / `FORCE_COLOR` environment handling in `src/context.rs`.
-  3. Add a test in `terminal.rs` ensuring process names containing `st` (like `starship` or `systemd`) do not match the `st` terminal emulator.
+
+---
+
+## 5. Acknowledgments & Security Credits
+
+Special thanks to **Laysnb** for conducting the thorough independent security audit of FerrisFetch v0.11.6, identifying the plugin directory auto-execution vector (F2), privilege escalation boundaries (F1), `$PATH` resolution hardening (F3), `/tmp` cache permissions (F4), and terminal control sequence escaping (F5). All findings were remediated and verified in v0.11.7.

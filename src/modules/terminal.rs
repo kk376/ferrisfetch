@@ -318,14 +318,36 @@ pub fn append_version_if_missing(term_display_name: &str, version: Option<&str>)
 
 #[cfg(not(windows))]
 fn get_terminal_cache_path(binary: &str) -> std::path::PathBuf {
+    // 1. Prefer $XDG_RUNTIME_DIR (user-private tmpfs, mode 0700)
     if let Ok(runtime_dir) = std::env::var("XDG_RUNTIME_DIR") {
         let dir = std::path::Path::new(&runtime_dir);
         if dir.is_dir() {
             return dir.join(format!("ferrisfetch_term_{}.cache", binary));
         }
     }
+    // 2. Prefer $XDG_CACHE_HOME or ~/.cache/ferrisfetch/
+    if let Ok(cache_home) = std::env::var("XDG_CACHE_HOME") {
+        let dir = std::path::PathBuf::from(cache_home).join("ferrisfetch");
+        let _ = std::fs::create_dir_all(&dir);
+        return dir.join(format!("term_{}.cache", binary));
+    }
+    if let Ok(home) = std::env::var("HOME") {
+        let dir = std::path::PathBuf::from(home)
+            .join(".cache")
+            .join("ferrisfetch");
+        let _ = std::fs::create_dir_all(&dir);
+        return dir.join(format!("term_{}.cache", binary));
+    }
+    // 3. Fallback to private user-isolated temporary directory (mode 0700)
     let uid = unsafe { libc::getuid() };
-    std::path::PathBuf::from(format!("/tmp/ferrisfetch_term_{}_{}.cache", binary, uid))
+    let temp_dir = std::env::temp_dir().join(format!("ferrisfetch-{}", uid));
+    let _ = std::fs::create_dir_all(&temp_dir);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = std::fs::set_permissions(&temp_dir, std::fs::Permissions::from_mode(0o700));
+    }
+    temp_dir.join(format!("term_{}.cache", binary))
 }
 
 #[cfg(not(windows))]
@@ -445,7 +467,7 @@ fn probe_terminal_cli_version_uncached(term_name: &str) -> Option<String> {
     }
 
     // 2. Cache miss: execute subprocess once and persist to tmpfs
-    if let Ok(output) = std::process::Command::new(binary).args(args).output() {
+    if let Ok(output) = crate::modules::system_command(binary).args(args).output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
         let ver = if let Some(v) = extract_terminal_version_from_output(&stdout) {
             Some(v)

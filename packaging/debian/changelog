@@ -1,3 +1,9 @@
+ferrisfetch (0.11.7-1) unstable; urgency=medium
+
+  * Security release 0.11.7 - Hardened plugin execution, canonical subprocess paths, user-isolated cache, and output sanitization.
+
+ -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 10:35:00 +0530
+
 ferrisfetch (0.11.6-1) unstable; urgency=medium
 
   * Release 0.11.6 - Zero-wait stale-while-revalidate battery architecture.

@@ -131,7 +131,7 @@ fn get_shell_cli_version(shell_name: &str) -> Option<String> {
         }
     }
 
-    let output = std::process::Command::new(shell_name)
+    let output = crate::modules::system_command(shell_name)
         .arg("--version")
         .output()
         .ok()?;

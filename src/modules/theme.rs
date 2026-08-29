@@ -1,7 +1,5 @@
 #[cfg(not(windows))]
 use std::path::{Path, PathBuf};
-#[cfg(not(windows))]
-use std::process::Command;
 
 use crate::context::FetchContext;
 use crate::modules::{Collector, ModuleId, ModuleOutput};
@@ -196,7 +194,7 @@ fn query_gsettings_theme() -> ThemeInfo {
     }
 
     // Fast path: Query all interface properties in a single dconf dump call (12ms) instead of 3 separate gsettings calls (36ms)
-    if let Ok(output) = Command::new("dconf")
+    if let Ok(output) = crate::modules::system_command("dconf")
         .args(["dump", "/org/gnome/desktop/interface/"])
         .output()
     {
@@ -243,7 +241,7 @@ fn query_gsettings_theme() -> ThemeInfo {
     }
 
     // Fallback: Individual GSettings queries
-    if let Ok(output) = Command::new("gsettings")
+    if let Ok(output) = crate::modules::system_command("gsettings")
         .args(["get", "org.gnome.desktop.interface", "gtk-theme"])
         .output()
     {
@@ -259,7 +257,7 @@ fn query_gsettings_theme() -> ThemeInfo {
         }
     }
 
-    if let Ok(output) = Command::new("gsettings")
+    if let Ok(output) = crate::modules::system_command("gsettings")
         .args(["get", "org.gnome.desktop.interface", "icon-theme"])
         .output()
     {
@@ -275,7 +273,7 @@ fn query_gsettings_theme() -> ThemeInfo {
         }
     }
 
-    if let Ok(output) = Command::new("gsettings")
+    if let Ok(output) = crate::modules::system_command("gsettings")
         .args(["get", "org.gnome.desktop.interface", "cursor-theme"])
         .output()
     {
@@ -291,7 +289,7 @@ fn query_gsettings_theme() -> ThemeInfo {
         }
     }
 
-    if let Ok(output) = Command::new("gsettings")
+    if let Ok(output) = crate::modules::system_command("gsettings")
         .args(["get", "org.gnome.desktop.interface", "cursor-size"])
         .output()
     {
@@ -303,7 +301,7 @@ fn query_gsettings_theme() -> ThemeInfo {
         }
     }
 
-    if let Ok(output) = Command::new("gsettings")
+    if let Ok(output) = crate::modules::system_command("gsettings")
         .args(["get", "org.gnome.desktop.interface", "color-scheme"])
         .output()
     {
