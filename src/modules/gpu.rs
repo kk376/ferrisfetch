@@ -570,7 +570,7 @@ pub fn detect_wsl_gpus() -> Vec<String> {
 pub fn is_integrated_gpu(gpu_name: &str) -> bool {
     let lower = gpu_name.to_lowercase();
 
-    // Explicit discrete GPU markers
+    // Explicit discrete GPU markers (must be checked first)
     if lower.contains("geforce")
         || lower.contains("rtx")
         || lower.contains("gtx")
@@ -583,29 +583,50 @@ pub fn is_integrated_gpu(gpu_name: &str) -> bool {
         || lower.contains("rx ")
         || lower.contains("radeon pro")
         || lower.contains("firepro")
+        || lower.contains("radeon vii")
+        || lower.contains("radeon r9")
     {
         return false;
     }
 
     // Explicit integrated GPU markers
-    lower.contains("660m")
-        || lower.contains("680m")
-        || lower.contains("760m")
-        || lower.contains("780m")
-        || lower.contains("740m")
-        || lower.contains("880m")
-        || lower.contains("890m")
-        || lower.contains("radeon graphics")
+    if lower.contains("radeon graphics")
         || lower.contains("radeon vega")
         || lower.contains("vega ")
         || lower.contains("iris")
         || lower.contains("uhd graphics")
         || lower.contains("hd graphics")
-        || (lower.contains("intel") && !lower.contains("arc"))
+        || lower.contains("intel graphics")
+        || lower.contains("intel arc graphics")
+        || (lower.contains("intel")
+            && !lower.contains("arc a")
+            && !lower.contains("arc b")
+            && !lower.contains("arc pro"))
         || lower.contains("adreno")
         || lower.contains("mali")
+        || lower.contains("immortalis")
         || lower.contains("videocore")
+        || lower.contains("powervr")
         || lower.contains("apple m")
+        || lower.contains("xclipse")
+    {
+        return true;
+    }
+
+    // Match AMD Radeon mobile APU iGPUs (e.g. "610M", "660M", "680M", "740M", "760M", "780M", "880M", "890M")
+    if lower.contains("radeon") {
+        for word in lower.split_whitespace() {
+            let clean_word = word.trim_matches(|c: char| !c.is_alphanumeric());
+            if clean_word.len() == 4 && clean_word.ends_with('m') {
+                let prefix = &clean_word[..3];
+                if prefix.chars().all(|c| c.is_ascii_digit()) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    false
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1115,6 +1136,29 @@ mod tests {
     }
 
     #[test]
+    fn test_is_integrated_gpu() {
+        assert!(is_integrated_gpu("AMD Radeon 610M (512 MiB)"));
+        assert!(is_integrated_gpu("AMD Radeon 660M"));
+        assert!(is_integrated_gpu("AMD Radeon 680M (512 MiB)"));
+        assert!(is_integrated_gpu("AMD Radeon 780M"));
+        assert!(is_integrated_gpu("AMD Radeon 890M"));
+        assert!(is_integrated_gpu("AMD Radeon Vega 8"));
+        assert!(is_integrated_gpu("AMD Radeon Graphics"));
+        assert!(is_integrated_gpu("Intel Iris Xe Graphics"));
+        assert!(is_integrated_gpu("Intel UHD Graphics 620"));
+        assert!(is_integrated_gpu("Intel Arc Graphics"));
+        assert!(is_integrated_gpu("Apple M3 Max"));
+        assert!(is_integrated_gpu("Qualcomm Adreno 730"));
+
+        assert!(!is_integrated_gpu("NVIDIA GeForce RTX 2050 (4 GiB)"));
+        assert!(!is_integrated_gpu("NVIDIA GeForce GTX 1650"));
+        assert!(!is_integrated_gpu("AMD Radeon RX 6800M"));
+        assert!(!is_integrated_gpu("AMD Radeon RX 7600S"));
+        assert!(!is_integrated_gpu("Intel Arc A770"));
+        assert!(!is_integrated_gpu("Intel Arc B580"));
+    }
+
+    #[test]
     fn test_group_and_index_gpus_with_vram() {
         let gpus = vec![
             "AMD Radeon 680M (512 MiB)".to_string(),
@@ -1128,6 +1172,16 @@ mod tests {
         assert_eq!(
             outputs[1].value,
             "NVIDIA GeForce RTX 2050 (4 GiB) [Discrete]"
+        );
+
+        // Single iGPU system (like Asus Vivobook Go with AMD Ryzen 3 7320U / Radeon 610M)
+        let single_igpu = vec!["AMD Radeon 610M (512 MiB)".to_string()];
+        let single_out = group_and_index_gpus(&single_igpu, 1);
+        assert_eq!(single_out.len(), 1);
+        assert_eq!(single_out[0].label, "GPU0");
+        assert_eq!(
+            single_out[0].value,
+            "AMD Radeon 610M (512 MiB) [Integrated]"
         );
     }
 }

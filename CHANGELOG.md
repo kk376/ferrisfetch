@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.3] - 2026-08-29
+
+### Fixed
+- **Mobile APU & SoC Integrated GPU Classification**: Expanded iGPU pattern detection to properly recognize AMD Radeon 610M (Mendocino APUs), 600/700/800-series mobile APU processors, Intel Arc iGPUs, and mobile SoCs as `[Integrated]` graphics on single-GPU and hybrid configurations (reported by [@Laynsb](https://github.com/Laynsb)).
+
 ## [0.11.2] - 2026-08-29
 
 ### Optimized

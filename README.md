@@ -358,6 +358,7 @@ Special thanks to community contributors for architectural recommendations:
   * **Localized Installation Timestamps**: Suggested local timezone conversion for wall-clock consistency.
   * **Filesystem Type Detection (`Disk`)**: Suggested partition filesystem labeling.
   * **ZRAM Compression Algorithm Discovery (`Swap`)**: Suggested detecting active swap compression algorithms from `/sys/block/zram*/comp_algorithm`.
+  * **Integrated GPU Classification (`GPU`)**: Reported false discrete classification on AMD Radeon 610M (Mendocino APU) single-GPU machines, leading to comprehensive mobile APU iGPU classification across RDNA and Intel Arc architectures.
 
 ---
 

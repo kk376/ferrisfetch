@@ -1,3 +1,9 @@
+ferrisfetch (0.11.3-1) unstable; urgency=medium
+
+  * Release 0.11.3 - Fix integrated GPU classification for AMD Radeon 610M and mobile APUs.
+
+ -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 07:45:00 +0530
+
 ferrisfetch (0.11.2-1) unstable; urgency=medium
 
   * Release 0.11.2 - Instantaneous battery probing & tmpfs runtime cache.
