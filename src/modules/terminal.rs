@@ -285,6 +285,117 @@ pub fn detect_terminal() -> Option<String> {
     Some("Console Window Host (ConHost)".to_string())
 }
 
+/// Extracts the first version-like token from terminal version stdout/stderr.
+pub fn extract_terminal_version_from_output(output: &str) -> Option<String> {
+    for line in output.lines() {
+        for word in line.split_whitespace() {
+            let clean = word
+                .trim_matches(|c: char| !c.is_alphanumeric() && c != '.' && c != '-' && c != '_');
+            if let Some(first) = clean.chars().next() {
+                if first.is_ascii_digit() && (clean.contains('.') || clean.len() >= 6) {
+                    return Some(clean.to_string());
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Appends version to terminal name if not already present.
+pub fn append_version_if_missing(term_display_name: &str, version: Option<&str>) -> String {
+    let Some(ver) = version else {
+        return term_display_name.to_string();
+    };
+    let clean_ver = ver.trim();
+    if clean_ver.is_empty() {
+        return term_display_name.to_string();
+    }
+    if term_display_name.contains(clean_ver) {
+        return term_display_name.to_string();
+    }
+    format!("{} {}", term_display_name, clean_ver)
+}
+
+#[cfg(not(windows))]
+pub fn probe_terminal_cli_version(term_name: &str) -> Option<String> {
+    static CACHE: std::sync::OnceLock<
+        std::sync::Mutex<std::collections::HashMap<String, Option<String>>>,
+    > = std::sync::OnceLock::new();
+    let cache_mutex = CACHE.get_or_init(|| std::sync::Mutex::new(std::collections::HashMap::new()));
+
+    if let Ok(guard) = cache_mutex.lock() {
+        if let Some(cached) = guard.get(term_name) {
+            return cached.clone();
+        }
+    }
+
+    let result = probe_terminal_cli_version_uncached(term_name);
+
+    if let Ok(mut guard) = cache_mutex.lock() {
+        guard.insert(term_name.to_string(), result.clone());
+    }
+
+    result
+}
+
+#[cfg(not(windows))]
+fn probe_terminal_cli_version_uncached(term_name: &str) -> Option<String> {
+    let lower = term_name.to_lowercase();
+    let (binary, args): (&str, &[&str]) = if lower.contains("kitty") {
+        ("kitty", &["--version"])
+    } else if lower.contains("alacritty") {
+        ("alacritty", &["--version"])
+    } else if lower.contains("foot") {
+        ("foot", &["--version"])
+    } else if lower.contains("wezterm") {
+        ("wezterm", &["--version"])
+    } else if lower.contains("ghostty") {
+        ("ghostty", &["--version"])
+    } else if lower.contains("gnome-terminal") || lower == "gnome terminal" {
+        ("gnome-terminal", &["--version"])
+    } else if lower.contains("gnome-console") || lower == "gnome console" || lower == "kgx" {
+        ("kgx", &["--version"])
+    } else if lower.contains("konsole") {
+        ("konsole", &["--version"])
+    } else if lower.contains("xfce4-terminal") || lower == "xfce terminal" {
+        ("xfce4-terminal", &["--version"])
+    } else if lower.contains("mate-terminal") || lower == "mate terminal" {
+        ("mate-terminal", &["--version"])
+    } else if lower.contains("tilix") {
+        ("tilix", &["--version"])
+    } else if lower.contains("terminator") {
+        ("terminator", &["--version"])
+    } else if lower == "tmux" {
+        ("tmux", &["-V"])
+    } else if lower == "zellij" {
+        ("zellij", &["--version"])
+    } else if lower == "rio" {
+        ("rio", &["--version"])
+    } else if lower == "contour" {
+        ("contour", &["--version"])
+    } else if lower == "blackbox" {
+        ("blackbox", &["--version"])
+    } else if lower == "ptyxis" {
+        ("ptyxis", &["--version"])
+    } else if lower == "xterm" {
+        ("xterm", &["-version"])
+    } else {
+        return None;
+    };
+
+    if let Ok(output) = std::process::Command::new(binary).args(args).output() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        if let Some(ver) = extract_terminal_version_from_output(&stdout) {
+            return Some(ver);
+        }
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        if let Some(ver) = extract_terminal_version_from_output(&stderr) {
+            return Some(ver);
+        }
+    }
+    None
+}
+
 /// Inspects environment variables and process ancestry to detect terminal emulator.
 #[cfg(not(windows))]
 pub fn detect_terminal() -> Option<String> {
@@ -325,7 +436,8 @@ pub fn detect_terminal() -> Option<String> {
         &ref_vars,
         None, // Defer generic $TERM fallback until process ancestry is checked
     ) {
-        return Some(term);
+        let ver = probe_terminal_cli_version(&term);
+        return Some(append_version_if_missing(&term, ver.as_deref()));
     }
 
     // 2. Process ancestry traversal: walk up to 8 levels of PPID to jump over subshells, tmux/screen, and sudo wrappers
@@ -352,7 +464,8 @@ pub fn detect_terminal() -> Option<String> {
                 .to_lowercase();
 
             if let Some(display_name) = match_terminal_proc(&comm) {
-                return Some(display_name.to_string());
+                let ver = probe_terminal_cli_version(display_name);
+                return Some(append_version_if_missing(display_name, ver.as_deref()));
             }
 
             current_pid = ppid;
@@ -606,5 +719,51 @@ mod tests {
         assert_eq!(match_terminal_proc("strace"), None);
         assert_eq!(match_terminal_proc("install"), None);
         assert_eq!(match_terminal_proc("gst-plugin"), None);
+    }
+
+    #[test]
+    fn test_extract_terminal_version_from_output() {
+        assert_eq!(
+            extract_terminal_version_from_output("kitty 0.48.2 created by Kovid Goyal").as_deref(),
+            Some("0.48.2")
+        );
+        assert_eq!(
+            extract_terminal_version_from_output("alacritty 0.17.0").as_deref(),
+            Some("0.17.0")
+        );
+        assert_eq!(
+            extract_terminal_version_from_output("foot version: 1.16.2").as_deref(),
+            Some("1.16.2")
+        );
+        assert_eq!(
+            extract_terminal_version_from_output("wezterm 20240203-110809-5046fc22").as_deref(),
+            Some("20240203-110809-5046fc22")
+        );
+        assert_eq!(
+            extract_terminal_version_from_output("GNOME Terminal 3.50.1 using VTE 0.74.0 +BFD")
+                .as_deref(),
+            Some("3.50.1")
+        );
+        assert_eq!(
+            extract_terminal_version_from_output("tmux 3.4").as_deref(),
+            Some("3.4")
+        );
+        assert_eq!(
+            extract_terminal_version_from_output("invalid output without version"),
+            None
+        );
+    }
+
+    #[test]
+    fn test_append_version_if_missing() {
+        assert_eq!(
+            append_version_if_missing("kitty", Some("0.48.2")),
+            "kitty 0.48.2"
+        );
+        assert_eq!(
+            append_version_if_missing("Ptyxis 47.0", Some("47.0")),
+            "Ptyxis 47.0"
+        );
+        assert_eq!(append_version_if_missing("Alacritty", None), "Alacritty");
     }
 }

@@ -16,7 +16,7 @@ A fast, lightweight, zero-subprocess system information fetch tool written in Ru
 cccccc;0MMKxdd:;MMMkddc.;cccccccccccc;   Desktop: GNOME 50.4 (Wayland)
 ccccc;XM0';cccc;MMM.;cccccccccccccccc'   WM: Mutter
 ccccc;MMo;ccccc;MMW.;ccccccccccccccc;    WM Theme: Adwaita
-ccccc;0MNc.ccc.xMMd;ccccccccccccccc;     Terminal: kitty
+ccccc;0MNc.ccc.xMMd;ccccccccccccccc;     Terminal: kitty 0.48.2
 cccccc;dNMWXXXWM0:;cccccccccccccc:,      Terminal Font: Fira Code (12.5pt)
 cccccccc;.:odl:.;cccccccccccccc:,.       CPU: AMD Ryzen 5 7535HS (6c 12t) @ 4.393GHz [4.60GHz max]
 :cccccccccccccccccccccccccccc:'.         GPU0: AMD Radeon 680M [Integrated]
