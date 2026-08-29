@@ -41,79 +41,116 @@ pub fn parse_windows_battery_status(
     })
 }
 
-/// Checks if any AC adapter power supply (`AC`, `ACAD`, `Mains`) is connected.
 #[cfg(not(windows))]
-fn is_ac_online() -> bool {
-    let power_supply_dir = "/sys/class/power_supply";
-    if let Ok(entries) = fs::read_dir(power_supply_dir) {
-        for entry in entries.flatten() {
-            let name = entry.file_name().to_string_lossy().to_lowercase();
-            if name.starts_with("ac")
-                || name.starts_with("mains")
-                || name.starts_with("acad")
-                || name.starts_with("adp")
-            {
-                if let Ok(online) = fs::read_to_string(entry.path().join("online")) {
-                    if online.trim() == "1" {
-                        return true;
-                    }
-                }
-            }
-        }
+fn get_cache_path() -> std::path::PathBuf {
+    if let Ok(runtime_dir) = std::env::var("XDG_RUNTIME_DIR") {
+        std::path::PathBuf::from(runtime_dir).join("ferrisfetch_battery.cache")
+    } else {
+        std::env::temp_dir().join(format!("ferrisfetch_battery_{}.cache", unsafe {
+            libc::getuid()
+        }))
     }
-    false
 }
 
-/// Probes battery capacity and state from `/sys/class/power_supply/BAT*`.
 #[cfg(not(windows))]
-pub fn detect_battery() -> Option<BatteryInfo> {
-    let power_supply_dir = "/sys/class/power_supply";
+fn read_cached_battery() -> Option<BatteryInfo> {
+    let path = get_cache_path();
+    let metadata = fs::metadata(&path).ok()?;
+    let modified = metadata.modified().ok()?;
+    let age = modified.elapsed().ok()?;
+    // Use 15-second TTL cache to prevent ACPI EC bus lockups from stalling user fetches
+    if age.as_secs() > 15 {
+        return None;
+    }
+    let content = fs::read_to_string(path).ok()?;
+    let mut parts = content.splitn(2, '|');
+    let capacity = parts.next()?.trim().parse::<u8>().ok()?;
+    let status = parts.next()?.trim().to_string();
+    if status.is_empty() {
+        return None;
+    }
+    Some(BatteryInfo { capacity, status })
+}
+
+#[cfg(not(windows))]
+fn write_cached_battery(info: &BatteryInfo) {
+    let path = get_cache_path();
+    let payload = format!("{}|{}", info.capacity, info.status);
+    let _ = fs::write(path, payload);
+}
+
+/// Probes battery capacity and state directly from `/sys/class/power_supply/BAT*` in a single sysfs pass.
+#[cfg(not(windows))]
+fn probe_sysfs_battery() -> Option<BatteryInfo> {
+    let power_supply_dir = std::path::Path::new("/sys/class/power_supply");
     let entries = fs::read_dir(power_supply_dir).ok()?;
 
+    let mut bat_path = None;
+    let mut ac_online = None;
+
     for entry in entries.flatten() {
-        let path = entry.path();
-        let file_name = path.file_name()?.to_string_lossy().to_lowercase();
+        let name = entry.file_name();
+        let name_str = name.to_string_lossy();
+        let lower = name_str.to_lowercase();
 
-        if !file_name.starts_with("bat") && !file_name.starts_with("battery") {
-            continue;
+        if (lower.starts_with("bat") || lower.starts_with("battery")) && bat_path.is_none() {
+            bat_path = Some(entry.path());
+        } else if (lower.starts_with("ac")
+            || lower.starts_with("mains")
+            || lower.starts_with("acad")
+            || lower.starts_with("adp"))
+            && ac_online.is_none()
+        {
+            if let Ok(online) = fs::read_to_string(entry.path().join("online")) {
+                ac_online = Some(online.trim() == "1");
+            }
         }
-
-        // Read percentage capacity (0-100)
-        let capacity_str = fs::read_to_string(path.join("capacity")).ok()?;
-        let capacity = capacity_str.trim().parse::<u8>().ok()?;
-
-        // Read status (Charging, Discharging, Full, Not charging)
-        let raw_status = fs::read_to_string(path.join("status"))
-            .map(|s| s.trim().to_string())
-            .unwrap_or_else(|_| "Unknown".to_string());
-
-        let ac_online = is_ac_online();
-
-        // When battery threshold limits (e.g. 80%) are enabled in BIOS, status reports "Not charging" while connected to AC
-        let status = if raw_status.eq_ignore_ascii_case("not charging") {
-            if ac_online {
-                "AC Connected".to_string()
-            } else {
-                "Not charging".to_string()
-            }
-        } else if raw_status.eq_ignore_ascii_case("charging") {
-            "Charging".to_string()
-        } else if raw_status.eq_ignore_ascii_case("discharging") {
-            "Discharging".to_string()
-        } else if raw_status.eq_ignore_ascii_case("full") {
-            if ac_online {
-                "Full [AC]".to_string()
-            } else {
-                "Full".to_string()
-            }
-        } else {
-            raw_status
-        };
-
-        return Some(BatteryInfo { capacity, status });
     }
 
-    None
+    let bat = bat_path?;
+    let capacity_str = fs::read_to_string(bat.join("capacity")).ok()?;
+    let capacity = capacity_str.trim().parse::<u8>().ok()?;
+
+    let raw_status = fs::read_to_string(bat.join("status"))
+        .map(|s| s.trim().to_string())
+        .unwrap_or_else(|_| "Unknown".to_string());
+
+    let is_ac = ac_online.unwrap_or(false);
+
+    // When battery threshold limits (e.g. 80%) are enabled in BIOS, status reports "Not charging" while connected to AC
+    let status = if raw_status.eq_ignore_ascii_case("not charging") {
+        if is_ac {
+            "AC Connected".to_string()
+        } else {
+            "Not charging".to_string()
+        }
+    } else if raw_status.eq_ignore_ascii_case("charging") {
+        "Charging".to_string()
+    } else if raw_status.eq_ignore_ascii_case("discharging") {
+        "Discharging".to_string()
+    } else if raw_status.eq_ignore_ascii_case("full") {
+        if is_ac {
+            "Full [AC]".to_string()
+        } else {
+            "Full".to_string()
+        }
+    } else {
+        raw_status
+    };
+
+    Some(BatteryInfo { capacity, status })
+}
+
+/// Detects battery status with microsecond tmpfs caching to prevent ACPI EC bus latency spikes.
+#[cfg(not(windows))]
+pub fn detect_battery() -> Option<BatteryInfo> {
+    if let Some(cached) = read_cached_battery() {
+        return Some(cached);
+    }
+
+    let info = probe_sysfs_battery()?;
+    write_cached_battery(&info);
+    Some(info)
 }
 
 /// Probes battery status on Windows via Win32 GetSystemPowerStatus API.

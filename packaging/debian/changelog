@@ -1,3 +1,9 @@
+ferrisfetch (0.11.2-1) unstable; urgency=medium
+
+  * Release 0.11.2 - Instantaneous battery probing & tmpfs runtime cache.
+
+ -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 07:27:00 +0530
+
 ferrisfetch (0.11.1-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.11.1: Dedicated GPU VRAM memory probing and PCI resource parsing.
