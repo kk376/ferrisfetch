@@ -65,6 +65,23 @@ Benchmarked against Fastfetch across **100 iterations** (20 warmup runs) on Fedo
 
 *FerrisFetch achieves lower CPU time and syscall overhead by reading `/proc` and `sysfs` directly in Rust, executing active module collectors concurrently in parallel using `std::thread::scope`, and compiling with Fat Link-Time Optimization (LTO).*
 
+### Benchmark Commands
+
+**1. Built-in Module Latency Profiler:**
+```bash
+ferrisfetch --timings
+```
+
+**2. Comparative Statistical Benchmark (via `hyperfine`):**
+```bash
+hyperfine --warmup 20 --runs 100 'ferrisfetch' 'fastfetch'
+```
+
+**3. Pure Sysfs / Fast Mode Benchmark:**
+```bash
+hyperfine --warmup 20 --runs 100 'ferrisfetch -d battery' 'fastfetch'
+```
+
 ---
 
 ## Supported Operating Systems & Logos
@@ -205,6 +222,7 @@ sudo cp target/release/ferrisfetch /usr/local/bin/
 | `--disk-path <PATH>` | Target filesystem path for disk statistics (default: `/`) |
 | `--list-modules` | Print all available information modules and exit |
 | `--json` | Output system information in structured JSON format |
+| `--timings` | Show execution latency breakdown per module in microseconds |
 | `-h, --help` | Print help information |
 | `-V, --version` | Print version information |
 
@@ -213,6 +231,11 @@ sudo cp target/release/ferrisfetch /usr/local/bin/
 **Custom module ordering:**
 ```bash
 ferrisfetch -m os,cpu,memory,disk
+```
+
+**Profile execution timings per module:**
+```bash
+ferrisfetch --timings
 ```
 
 **JSON output for scripts and status bars:**
