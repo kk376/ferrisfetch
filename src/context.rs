@@ -155,14 +155,8 @@ mod tests {
     #[test]
     fn test_resolve_active_modules_default() {
         let cli = Cli {
-            modules: None,
-            disable: None,
-            no_color: false,
-            logo: None,
-            no_logo: false,
-            list_modules: false,
             disk_path: "/".to_string(),
-            json: false,
+            ..Default::default()
         };
 
         let active = resolve_active_modules(&cli);
@@ -178,12 +172,8 @@ mod tests {
                 "memory".to_string(),
             ]),
             disable: Some(vec!["cpu".to_string()]),
-            no_color: false,
-            logo: None,
-            no_logo: false,
-            list_modules: false,
             disk_path: "/".to_string(),
-            json: false,
+            ..Default::default()
         };
 
         let active = resolve_active_modules(&cli);
@@ -200,13 +190,8 @@ mod tests {
                 "cpu".to_string(),
                 "cpu".to_string(),
             ]),
-            disable: None,
-            no_color: false,
-            logo: None,
-            no_logo: false,
-            list_modules: false,
             disk_path: "/".to_string(),
-            json: false,
+            ..Default::default()
         };
 
         let active = resolve_active_modules(&cli);
@@ -218,12 +203,8 @@ mod tests {
         let cli = Cli {
             modules: Some(vec!["os".to_string(), "cpu".to_string()]),
             disable: Some(vec!["os".to_string(), "cpu".to_string()]),
-            no_color: false,
-            logo: None,
-            no_logo: false,
-            list_modules: false,
             disk_path: "/".to_string(),
-            json: false,
+            ..Default::default()
         };
 
         let active = resolve_active_modules(&cli);

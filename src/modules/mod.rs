@@ -197,25 +197,50 @@ impl ModuleRegistry {
 
     /// Collects metrics from active modules concurrently using std::thread::scope while preserving deterministic ordering.
     pub fn collect_all(&self, ctx: &FetchContext) -> Vec<ModuleOutput> {
+        self.collect_all_timed(ctx).0
+    }
+
+    /// Collects metrics from active modules concurrently while recording microsecond execution duration per module.
+    pub fn collect_all_timed(
+        &self,
+        ctx: &FetchContext,
+    ) -> (Vec<ModuleOutput>, Vec<(ModuleId, std::time::Duration)>) {
         let active = &ctx.active_modules;
         if active.is_empty() {
-            return Vec::new();
+            return (Vec::new(), Vec::new());
         }
 
-        let outputs: Vec<Vec<ModuleOutput>> = std::thread::scope(|s| {
-            let mut handles = Vec::with_capacity(active.len());
-            for &module_id in active {
-                if let Some(collector) = self.collectors.iter().find(|c| c.id() == module_id) {
-                    handles.push(s.spawn(move || collector.collect_multiple(ctx)));
+        let results: Vec<(Vec<ModuleOutput>, ModuleId, std::time::Duration)> =
+            std::thread::scope(|s| {
+                let mut handles = Vec::with_capacity(active.len());
+                for &module_id in active {
+                    if let Some(collector) = self.collectors.iter().find(|c| c.id() == module_id) {
+                        handles.push(s.spawn(move || {
+                            let start = std::time::Instant::now();
+                            let outputs = collector.collect_multiple(ctx);
+                            let elapsed = start.elapsed();
+                            (outputs, module_id, elapsed)
+                        }));
+                    }
                 }
-            }
-            handles
-                .into_iter()
-                .map(|h| h.join().unwrap_or_default())
-                .collect()
-        });
+                handles
+                    .into_iter()
+                    .map(|h| {
+                        h.join()
+                            .unwrap_or_else(|_| (Vec::new(), ModuleId::Title, std::time::Duration::ZERO))
+                    })
+                    .collect()
+            });
 
-        outputs.into_iter().flatten().collect()
+        let mut all_outputs = Vec::new();
+        let mut timings = Vec::with_capacity(results.len());
+
+        for (outs, mod_id, dur) in results {
+            all_outputs.extend(outs);
+            timings.push((mod_id, dur));
+        }
+
+        (all_outputs, timings)
     }
 }
 

@@ -219,3 +219,29 @@ fn test_json_output_flag() {
     assert!(stdout.contains("\"os\":"));
     assert!(stdout.contains("\"kernel\":"));
 }
+
+#[test]
+fn test_timings_flag() {
+    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    cmd.args(["--no-color", "--no-logo", "--timings", "-m", "os,kernel,cpu"]);
+    let assert = cmd.assert().success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    assert!(stdout.contains("Module Execution Timings"));
+    assert!(stdout.contains("os"));
+    assert!(stdout.contains("kernel"));
+    assert!(stdout.contains("cpu"));
+    assert!(stdout.contains("Total Time"));
+}
+
+#[test]
+fn test_timings_with_json_flag() {
+    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    cmd.args(["--json", "--timings", "-m", "os,kernel"]);
+    let assert = cmd.assert().success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    let stderr = String::from_utf8(assert.get_output().stderr.clone()).unwrap();
+    assert!(stdout.starts_with('{'));
+    assert!(stderr.contains("Module Execution Timings"));
+    assert!(stderr.contains("os"));
+    assert!(stderr.contains("kernel"));
+}

@@ -19,11 +19,34 @@ fn main() {
     // Initialize execution context once to share terminal dimensions and OS release metadata
     let ctx = FetchContext::new(&cli);
     let registry = ModuleRegistry::new();
-    let outputs = registry.collect_all(&ctx);
+    let total_start = std::time::Instant::now();
+    let (outputs, timings) = registry.collect_all_timed(&ctx);
+    let total_elapsed = total_start.elapsed();
 
     // JSON export mode skips ANSI styling and ASCII logo formatting entirely
     if cli.json {
         println!("{}", render_json(&outputs));
+        if cli.timings {
+            eprintln!("\n=== Module Execution Timings ===");
+            for (mod_id, dur) in &timings {
+                let micros = dur.as_micros();
+                if micros < 1000 {
+                    eprintln!("  {:<14} : {:>6} µs", mod_id.as_str(), micros);
+                } else {
+                    eprintln!(
+                        "  {:<14} : {:>6.2} ms",
+                        mod_id.as_str(),
+                        dur.as_secs_f64() * 1000.0
+                    );
+                }
+            }
+            eprintln!("--------------------------------");
+            eprintln!(
+                "  {:<14} : {:>6.2} ms (parallel wall clock)",
+                "Total Time",
+                total_elapsed.as_secs_f64() * 1000.0
+            );
+        }
         return;
     }
 
@@ -42,5 +65,29 @@ fn main() {
     let rendered = render_layout(logo, &outputs, ctx.term_width, ctx.enable_color);
     if !rendered.is_empty() {
         println!("{}", rendered);
+    }
+
+    if cli.timings {
+        let cyan = if ctx.enable_color { "\x1b[1;36m" } else { "" };
+        let reset = if ctx.enable_color { "\x1b[0m" } else { "" };
+        println!("\n{}=== Module Execution Timings ==={}", cyan, reset);
+        for (mod_id, dur) in &timings {
+            let micros = dur.as_micros();
+            if micros < 1000 {
+                println!("  {:<14} : {:>6} µs", mod_id.as_str(), micros);
+            } else {
+                println!(
+                    "  {:<14} : {:>6.2} ms",
+                    mod_id.as_str(),
+                    dur.as_secs_f64() * 1000.0
+                );
+            }
+        }
+        println!("{}--------------------------------{}", cyan, reset);
+        println!(
+            "  {:<14} : {:>6.2} ms (parallel wall clock)",
+            "Total Time",
+            total_elapsed.as_secs_f64() * 1000.0
+        );
     }
 }

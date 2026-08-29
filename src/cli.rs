@@ -1,6 +1,6 @@
 use clap::Parser;
 
-#[derive(Parser, Debug, Clone)]
+#[derive(Parser, Debug, Clone, Default)]
 #[command(
     name = "ferrisfetch",
     about = "A fast, lightweight Linux system information fetch tool written in Rust",
@@ -38,4 +38,8 @@ pub struct Cli {
     /// Output system information in structured JSON format
     #[arg(long = "json")]
     pub json: bool,
+
+    /// Show execution latency breakdown per module in microseconds
+    #[arg(long = "timings")]
+    pub timings: bool,
 }
