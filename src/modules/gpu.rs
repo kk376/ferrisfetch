@@ -187,6 +187,85 @@ pub fn lookup_pci_ids(vendor_hex: &str, device_hex: &str) -> Option<String> {
     None
 }
 
+/// Formats a VRAM size in bytes into a human-readable string (e.g. `512 MiB`, `4 GiB`).
+pub fn format_vram_bytes(bytes: u64) -> Option<String> {
+    if bytes == 0 {
+        return None;
+    }
+    let mb = bytes / (1024 * 1024);
+    if mb >= 1024 {
+        let gib = mb as f64 / 1024.0;
+        if (gib.round() - gib).abs() < 0.05 {
+            Some(format!("{:.0} GiB", gib))
+        } else {
+            Some(format!("{:.1} GiB", gib))
+        }
+    } else if mb > 0 {
+        Some(format!("{} MiB", mb))
+    } else {
+        None
+    }
+}
+
+/// Probes GPU VRAM size in bytes from sysfs mem_info or PCI resource prefetchable memory BARs.
+pub fn detect_pci_vram_bytes(pci_dev_path: &Path) -> Option<u64> {
+    // 1. Direct sysfs mem_info_vram_total (AMD / modern drivers)
+    let vram_path = pci_dev_path.join("mem_info_vram_total");
+    if let Ok(content) = fs::read_to_string(vram_path) {
+        if let Ok(bytes) = content.trim().parse::<u64>() {
+            if bytes > 0 {
+                return Some(bytes);
+            }
+        }
+    }
+
+    // 2. DRM device subdirectory fallback: drm/card*/device/mem_info_vram_total
+    if let Ok(entries) = fs::read_dir(pci_dev_path.join("drm")) {
+        for entry in entries.flatten() {
+            let vf = entry.path().join("device/mem_info_vram_total");
+            if let Ok(content) = fs::read_to_string(vf) {
+                if let Ok(bytes) = content.trim().parse::<u64>() {
+                    if bytes > 0 {
+                        return Some(bytes);
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. PCI Resource 64-bit prefetchable memory BAR aperture
+    let res_path = pci_dev_path.join("resource");
+    if let Ok(content) = fs::read_to_string(res_path) {
+        let mut max_bar = 0u64;
+        for line in content.lines() {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            if parts.len() >= 3 {
+                let start = u64::from_str_radix(parts[0].trim_start_matches("0x"), 16).ok();
+                let end = u64::from_str_radix(parts[1].trim_start_matches("0x"), 16).ok();
+                let flags = u64::from_str_radix(parts[2].trim_start_matches("0x"), 16).ok();
+
+                if let (Some(s), Some(e), Some(f)) = (start, end, flags) {
+                    if s > 0 && e >= s {
+                        let size = e - s + 1;
+                        // Prefetchable BAR bit (0x200 or 0x8) and size >= 64MB
+                        if (f & 0x200 != 0 || f & 0x8 != 0)
+                            && size >= 64 * 1024 * 1024
+                            && size > max_bar
+                        {
+                            max_bar = size;
+                        }
+                    }
+                }
+            }
+        }
+        if max_bar > 0 {
+            return Some(max_bar);
+        }
+    }
+
+    None
+}
+
 /// Probes a given PCI sysfs directory for display controllers.
 /// Scans for PCI base class 0x03: VGA-compatible (0x0300), 3D controller (0x0302), and display (0x0380).
 pub fn detect_gpus_from_sysfs_dir(pci_dir: &Path) -> Vec<String> {
@@ -209,10 +288,19 @@ pub fn detect_gpus_from_sysfs_dir(pci_dir: &Path) -> Vec<String> {
                         .trim()
                         .to_string();
 
+                    let vram_bytes = detect_pci_vram_bytes(&path);
+
                     // 1. Resolve vendor/device IDs against local pci.ids database without spawning lspci
                     if let Some(pci_name) = lookup_pci_ids(&vendor_str, &device_str) {
-                        if !gpus.contains(&pci_name) {
-                            gpus.push(pci_name);
+                        let cleaned = clean_gpu_name(&pci_name);
+                        let final_name =
+                            if let Some(vram_str) = vram_bytes.and_then(format_vram_bytes) {
+                                format!("{} ({})", cleaned, vram_str)
+                            } else {
+                                cleaned
+                            };
+                        if !gpus.contains(&final_name) {
+                            gpus.push(final_name);
                             continue;
                         }
                     }
@@ -231,8 +319,15 @@ pub fn detect_gpus_from_sysfs_dir(pci_dir: &Path) -> Vec<String> {
                         "Display Controller".to_string()
                     };
 
-                    if !gpus.contains(&gpu_name) {
-                        gpus.push(gpu_name);
+                    let final_name = if let Some(vram_str) = vram_bytes.and_then(format_vram_bytes)
+                    {
+                        format!("{} ({})", gpu_name, vram_str)
+                    } else {
+                        gpu_name
+                    };
+
+                    if !gpus.contains(&final_name) {
+                        gpus.push(final_name);
                     }
                 }
             }
@@ -667,7 +762,7 @@ fn get_gpu_list_uncached() -> Vec<String> {
         .or_else(|| std::env::var_os("HOME").map(|h| std::path::Path::new(&h).join(".cache")))
         .map(|p| p.join("ferrisfetch"));
 
-    let cache_file = cache_dir.as_ref().map(|d| d.join("gpu_list_v1.cache"));
+    let cache_file = cache_dir.as_ref().map(|d| d.join("gpu_list_v2.cache"));
 
     if let Some(ref path) = cache_file {
         if let Ok(content) = fs::read_to_string(path) {
@@ -1006,5 +1101,33 @@ mod tests {
         assert_eq!(parsed.len(), 2);
         assert_eq!(parsed[0], "NVIDIA GeForce RTX 4080");
         assert_eq!(parsed[1], "Intel UHD Graphics 770");
+    }
+
+    #[test]
+    fn test_format_vram_bytes() {
+        assert_eq!(format_vram_bytes(536870912).as_deref(), Some("512 MiB"));
+        assert_eq!(format_vram_bytes(1073741824).as_deref(), Some("1 GiB"));
+        assert_eq!(format_vram_bytes(4294967296).as_deref(), Some("4 GiB"));
+        assert_eq!(format_vram_bytes(6442450944).as_deref(), Some("6 GiB"));
+        assert_eq!(format_vram_bytes(8589934592).as_deref(), Some("8 GiB"));
+        assert_eq!(format_vram_bytes(17179869184).as_deref(), Some("16 GiB"));
+        assert_eq!(format_vram_bytes(0), None);
+    }
+
+    #[test]
+    fn test_group_and_index_gpus_with_vram() {
+        let gpus = vec![
+            "AMD Radeon 680M (512 MiB)".to_string(),
+            "NVIDIA GeForce RTX 2050 (4 GiB)".to_string(),
+        ];
+        let outputs = group_and_index_gpus(&gpus, 1);
+        assert_eq!(outputs.len(), 2);
+        assert_eq!(outputs[0].label, "GPU0");
+        assert_eq!(outputs[0].value, "AMD Radeon 680M (512 MiB) [Integrated]");
+        assert_eq!(outputs[1].label, "GPU1");
+        assert_eq!(
+            outputs[1].value,
+            "NVIDIA GeForce RTX 2050 (4 GiB) [Discrete]"
+        );
     }
 }

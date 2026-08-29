@@ -19,8 +19,8 @@ ccccc;MMo;ccccc;MMW.;ccccccccccccccc;    WM Theme: Adwaita
 ccccc;0MNc.ccc.xMMd;ccccccccccccccc;     Terminal: kitty 0.48.2
 cccccc;dNMWXXXWM0:;cccccccccccccc:,      Terminal Font: Fira Code (12.5pt)
 cccccccc;.:odl:.;cccccccccccccc:,.       CPU: AMD Ryzen 5 7535HS (6c 12t) @ 4.393GHz [4.60GHz max]
-:cccccccccccccccccccccccccccc:'.         GPU0: AMD Radeon 680M [Integrated]
-.:cccccccccccccccccccccc:;,..            GPU1: NVIDIA GeForce RTX 2050 [Discrete]
+:cccccccccccccccccccccccccccc:'.         GPU0: AMD Radeon 680M (512 MiB) [Integrated]
+.:cccccccccccccccccccccc:;,..            GPU1: NVIDIA GeForce RTX 2050 (4 GiB) [Discrete]
   '::cccccccccccccc::;,.                 Memory: 7.00 GiB / 14.82 GiB (47%)
                                          Swap: 0.00 GiB / 14.82 GiB (0%) - ZSTD
                                          Disk0: (/) 42.5 GiB / 215.6 GiB (20%) - btrfs
@@ -42,8 +42,9 @@ cccccccc;.:odl:.;cccccccccccccc:,.       CPU: AMD Ryzen 5 7535HS (6c 12t) @ 4.39
 
 Most fetch tools either spawn multiple shell child processes (`neofetch`) or dynamically link heavy C runtime libraries (`fastfetch`). FerrisFetch is built with a different design philosophy:
 
-* **Sub-2ms Latency**: Queries virtual filesystems (`/proc`, `/sys`), POSIX syscalls, and Win32 APIs directly with zero child process spawning (`fork`/`execve`). In statistical benchmarks, it is **~10x faster than Fastfetch** on raw data collection.
+* **Sub-3ms Latency**: Queries virtual filesystems (`/proc`, `/sys`), POSIX syscalls, and Win32 APIs directly with zero child process spawning (`fork`/`execve`). In statistical benchmarks, it is **6x faster than Fastfetch** on raw data collection across all 27 active modules.
 * **Native OS Install Date**: Probes root filesystem creation timestamp (`statx` birth time) and installer logs, showing exact installation date and relative age (`6 days ago`).
+* **GPU Memory & Classification**: Probes dedicated VRAM and classifies graphics hardware into `[Integrated]` and `[Discrete]` tiers with sequential indexing.
 * **Zero-Fork Display EDID Parsing**: Probes monitor name, refresh rate, physical diagonal size, and panel type directly from DRM sysfs without spawning `xrandr` or display server queries.
 * **Declarative Configuration & Plugins**: Supports `~/.config/ferrisfetch/config.toml` and custom executable plugin modules with parallel execution.
 * **Standalone Static Binary**: Zero libc runtime dependencies when using the musl build. Drop the binary into any Linux system and it runs.
@@ -52,16 +53,15 @@ Most fetch tools either spawn multiple shell child processes (`neofetch`) or dyn
 
 ## Benchmarks
 
-Benchmarked against Fastfetch across **50 iterations** on Fedora Linux 44 (AMD Ryzen 5 7535HS with 6 physical cores and 12 threads):
+Benchmarked against Fastfetch across **100 iterations** (20 warmup runs) on Fedora Linux 44 (AMD Ryzen 5 7535HS with 6 physical cores and 12 threads):
 
 ### Results
 
 | Command | Mean Runtime | Median Latency | Min Latency | Max Latency | Relative Speedup |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| `fastfetch` | `16.23 ms` | `15.80 ms` | `14.34 ms` | `28.55 ms` | `1.00` (Baseline) |
-| `ferrisfetch` | **`1.66 ms`** | **`1.64 ms`** | **`1.45 ms`** | **`2.20 ms`** | **9.75x faster** |
-
-*FerrisFetch achieves lower CPU time and syscall overhead by reading `/proc` and `sysfs` directly in Rust, executing active module collectors concurrently in parallel using `std::thread::scope`, and compiling with Fat Link-Time Optimization (LTO).*
+| `fastfetch` | `17.93 ms` | `15.66 ms` | `14.67 ms` | `118.12 ms` | `1.00` (Baseline) |
+| `ferrisfetch` (All 27 Modules) | **`3.00 ms`** | **`2.72 ms`** | **`2.36 ms`** | **`12.91 ms`** | **5.97x faster** |
+| `ferrisfetch` (Pure sysfs/drm) | **`2.53 ms`** | **`2.48 ms`** | **`2.26 ms`** | **`4.11 ms`** | **7.08x faster** |
 
 *FerrisFetch achieves lower CPU time and syscall overhead by reading `/proc` and `sysfs` directly in Rust, executing active module collectors concurrently in parallel using `std::thread::scope`, and compiling with Fat Link-Time Optimization (LTO).*
 
