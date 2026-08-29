@@ -8,8 +8,10 @@ use std::fs;
 pub struct CpuInfo {
     pub model: String,
     pub cores: usize,
+    pub physical_cores: usize,
     pub sockets: usize,
     pub freq_ghz: Option<f64>,
+    pub max_freq_ghz: Option<f64>,
 }
 
 /// Cleans redundant marketing and frequency tokens from raw CPU model strings.
@@ -45,8 +47,7 @@ pub fn clean_cpu_model(raw: &str) -> String {
     tokens.join(" ").trim_end_matches(',').trim().to_string()
 }
 
-/// Parses `/proc/cpuinfo` into model, logical core count, physical socket count, and frequency.
-/// Supports x86 (`model name`), ARM (`Hardware`/`model`), and PowerPC (`cpu`) stanza layouts.
+/// Parses `/proc/cpuinfo` into model, logical core count, physical core count, socket count, and frequencies.
 pub fn parse_cpu_info(content: &str) -> Option<CpuInfo> {
     if content.trim().is_empty() {
         return None;
@@ -55,11 +56,21 @@ pub fn parse_cpu_info(content: &str) -> Option<CpuInfo> {
     let mut model_name: Option<String> = None;
     let mut processor_count = 0;
     let mut physical_ids = HashSet::new();
-    let mut freq_ghz: Option<f64> = None;
+    let mut core_pairs = HashSet::new();
+    let mut current_phys_id: Option<usize> = None;
+    let mut current_core_id: Option<usize> = None;
+    let mut cpu_cores_per_pkg: Option<usize> = None;
+    let mut live_freq_ghz: Option<f64> = None;
+    let mut rated_max_ghz: Option<f64> = None;
 
     for line in content.lines() {
         let trimmed = line.trim();
         if trimmed.is_empty() {
+            if let (Some(p), Some(c)) = (current_phys_id, current_core_id) {
+                core_pairs.insert((p, c));
+            }
+            current_phys_id = None;
+            current_core_id = None;
             continue;
         }
 
@@ -71,13 +82,13 @@ pub fn parse_cpu_info(content: &str) -> Option<CpuInfo> {
                 "model name" | "model_name" | "hardware" | "cpu model" => {
                     if model_name.is_none() && !val.is_empty() {
                         model_name = Some(val.to_string());
-                        if freq_ghz.is_none() {
+                        if rated_max_ghz.is_none() {
                             if let Some(at_idx) = val.find('@') {
                                 let after_at = val[at_idx + 1..].trim();
                                 if let Some(ghz_idx) = after_at.to_lowercase().find("ghz") {
                                     if let Ok(ghz_val) = after_at[..ghz_idx].trim().parse::<f64>() {
                                         if ghz_val > 0.0 {
-                                            freq_ghz = Some(ghz_val);
+                                            rated_max_ghz = Some(ghz_val);
                                         }
                                     }
                                 }
@@ -86,10 +97,10 @@ pub fn parse_cpu_info(content: &str) -> Option<CpuInfo> {
                     }
                 }
                 "cpu mhz" | "cpu_mhz" | "clock" => {
-                    if freq_ghz.is_none() {
+                    if live_freq_ghz.is_none() {
                         if let Ok(mhz) = val.parse::<f64>() {
                             if mhz > 0.0 {
-                                freq_ghz = Some(mhz / 1000.0);
+                                live_freq_ghz = Some(mhz / 1000.0);
                             }
                         }
                     }
@@ -122,11 +133,30 @@ pub fn parse_cpu_info(content: &str) -> Option<CpuInfo> {
                 "physical id" | "physical_id" => {
                     if let Ok(id) = val.parse::<usize>() {
                         physical_ids.insert(id);
+                        current_phys_id = Some(id);
+                    }
+                }
+                "core id" | "core_id" => {
+                    if let Ok(id) = val.parse::<usize>() {
+                        current_core_id = Some(id);
+                    }
+                }
+                "cpu cores" => {
+                    if cpu_cores_per_pkg.is_none() {
+                        if let Ok(c) = val.parse::<usize>() {
+                            if c > 0 {
+                                cpu_cores_per_pkg = Some(c);
+                            }
+                        }
                     }
                 }
                 _ => {}
             }
         }
+    }
+
+    if let (Some(p), Some(c)) = (current_phys_id, current_core_id) {
+        core_pairs.insert((p, c));
     }
 
     if model_name.is_none() && processor_count == 0 {
@@ -160,11 +190,21 @@ pub fn parse_cpu_info(content: &str) -> Option<CpuInfo> {
         1
     };
 
+    let physical_cores = if !core_pairs.is_empty() {
+        core_pairs.len()
+    } else if let Some(per_pkg) = cpu_cores_per_pkg {
+        per_pkg * sockets
+    } else {
+        cores
+    };
+
     Some(CpuInfo {
         model,
         cores,
+        physical_cores,
         sockets,
-        freq_ghz,
+        freq_ghz: live_freq_ghz,
+        max_freq_ghz: rated_max_ghz,
     })
 }
 
@@ -174,34 +214,62 @@ pub fn format_windows_cpu_info(model: &str, mhz: Option<u32>, cores: usize) -> C
     CpuInfo {
         model: model.to_string(),
         cores: if cores > 0 { cores } else { 1 },
+        physical_cores: if cores > 0 { cores } else { 1 },
         sockets: 1,
         freq_ghz,
+        max_freq_ghz: freq_ghz,
     }
 }
 
-/// Fallback cpufreq sysfs reader.
+/// Fallback cpufreq sysfs reader for live and max frequencies.
 #[cfg(not(windows))]
-pub fn get_cpu_freq_ghz() -> Option<f64> {
+pub fn get_cpu_freq_pair_ghz() -> (Option<f64>, Option<f64>) {
+    let mut cur = None;
+    let mut max = None;
+
+    if let Ok(content) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq") {
+        if let Ok(khz) = content.trim().parse::<f64>() {
+            if khz > 0.0 {
+                cur = Some(khz / 1_000_000.0);
+            }
+        }
+    }
+
     for path in &[
         "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq",
         "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq",
-        "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq",
     ] {
         if let Ok(content) = fs::read_to_string(path) {
             if let Ok(khz) = content.trim().parse::<f64>() {
                 if khz > 0.0 {
-                    return Some(khz / 1_000_000.0);
+                    max = Some(khz / 1_000_000.0);
+                    break;
                 }
             }
         }
     }
-    None
+
+    (cur, max)
+}
+
+#[cfg(not(windows))]
+pub fn get_cpu_freq_ghz() -> Option<f64> {
+    get_cpu_freq_pair_ghz().0.or_else(|| get_cpu_freq_pair_ghz().1)
 }
 
 #[cfg(not(windows))]
 pub fn get_cpu_info() -> Option<CpuInfo> {
     if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
-        return parse_cpu_info(&content);
+        if let Some(mut info) = parse_cpu_info(&content) {
+            let (sys_cur, sys_max) = get_cpu_freq_pair_ghz();
+            if sys_cur.is_some() {
+                info.freq_ghz = sys_cur;
+            }
+            if sys_max.is_some() {
+                info.max_freq_ghz = sys_max;
+            }
+            return Some(info);
+        }
     }
     None
 }
@@ -247,19 +315,40 @@ impl Collector for CpuCollector {
     fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
         let cpu = get_cpu_info()?;
         let cleaned = clean_cpu_model(&cpu.model);
-        let freq = cpu.freq_ghz.or_else(get_cpu_freq_ghz);
-        let freq_str = match freq {
-            Some(f) => format!(" @ {:.3}GHz", f),
-            None => String::new(),
+
+        // Core / thread layout formatting
+        let core_str = if cpu.physical_cores > 0 && cpu.physical_cores != cpu.cores {
+            format!("({}c {}t)", cpu.physical_cores, cpu.cores)
+        } else if cpu.cores > 0 {
+            format!("({})", cpu.cores)
+        } else {
+            String::new()
         };
 
-        let value = if cpu.sockets > 1 {
-            format!("{}x {} ({}){}", cpu.sockets, cleaned, cpu.cores, freq_str)
-        } else if cpu.cores > 0 {
-            format!("{} ({}){}", cleaned, cpu.cores, freq_str)
-        } else {
-            format!("{}{}", cleaned, freq_str)
+        // Dual frequency formatting: instantaneous live clock + rated max boost clock
+        let freq_str = match (cpu.freq_ghz, cpu.max_freq_ghz) {
+            (Some(live), Some(max)) => {
+                if (live - max).abs() > 0.05 {
+                    format!(" @ {:.3}GHz [{:.2}GHz max]", live, max)
+                } else {
+                    format!(" @ {:.3}GHz", live)
+                }
+            }
+            (Some(live), None) => format!(" @ {:.3}GHz", live),
+            (None, Some(max)) => format!(" @ {:.2}GHz", max),
+            (None, None) => String::new(),
         };
+
+        let mut parts = Vec::new();
+        if cpu.sockets > 1 {
+            parts.push(format!("{}x", cpu.sockets));
+        }
+        parts.push(cleaned);
+        if !core_str.is_empty() {
+            parts.push(core_str);
+        }
+
+        let value = format!("{}{}", parts.join(" "), freq_str);
 
         Some(ModuleOutput {
             id: ModuleId::Cpu,
@@ -347,11 +436,39 @@ physical id	: 1
         let info = format_windows_cpu_info("12th Gen Intel(R) Core(TM) i7-12700K", Some(3600), 20);
         assert_eq!(info.model, "12th Gen Intel(R) Core(TM) i7-12700K");
         assert_eq!(info.cores, 20);
+        assert_eq!(info.physical_cores, 20);
         assert_eq!(info.sockets, 1);
         assert_eq!(info.freq_ghz, Some(3.6));
         assert_eq!(
             clean_cpu_model(&info.model),
             "12th Gen Intel Core i7-12700K"
         );
+    }
+
+    #[test]
+    fn test_parse_cpu_info_cores_vs_threads() {
+        let fixture = r#"
+processor	: 0
+model name	: AMD Ryzen 5 7535HS with Radeon Graphics
+physical id	: 0
+core id		: 0
+cpu cores	: 6
+
+processor	: 1
+model name	: AMD Ryzen 5 7535HS with Radeon Graphics
+physical id	: 0
+core id		: 0
+cpu cores	: 6
+
+processor	: 2
+model name	: AMD Ryzen 5 7535HS with Radeon Graphics
+physical id	: 0
+core id		: 1
+cpu cores	: 6
+"#;
+        let info = parse_cpu_info(fixture).unwrap();
+        assert_eq!(info.cores, 3);
+        assert_eq!(info.physical_cores, 2); // 2 distinct core IDs: 0 and 1
+        assert_eq!(clean_cpu_model(&info.model), "AMD Ryzen 5 7535HS");
     }
 }
