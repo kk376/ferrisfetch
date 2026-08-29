@@ -68,16 +68,19 @@ Benchmarked against Fastfetch across **100 iterations** (20 warmup runs) on Fedo
 ### Benchmark Commands
 
 **1. Built-in Module Latency Profiler:**
+Runs FerrisFetch with the internal microsecond latency profiler, displaying precise wall-clock execution time for every active information collector (CPU, GPU, Memory, EDID Display, Packages, etc.):
 ```bash
 ferrisfetch --timings
 ```
 
 **2. Comparative Statistical Benchmark (via `hyperfine`):**
+Executes 100 statistical test runs (preceded by 20 warmup cycles) to calculate the mean runtime, median latency, standard deviation, and relative speedup between FerrisFetch and Fastfetch:
 ```bash
 hyperfine --warmup 20 --runs 100 'ferrisfetch' 'fastfetch'
 ```
 
-**3. Pure Sysfs / Fast Mode Benchmark:**
+**3. Pure Sysfs / Accelerated Mode Benchmark:**
+Measures the core sub-3ms performance of FerrisFetch with external bus latency disabled, highlighting zero-fork `/proc`, `sysfs`, and DRM kernel prober throughput against Fastfetch:
 ```bash
 hyperfine --warmup 20 --runs 100 'ferrisfetch -d battery' 'fastfetch'
 ```
