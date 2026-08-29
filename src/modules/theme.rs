@@ -562,6 +562,34 @@ impl Collector for IconsCollector {
     }
 }
 
+/// Formats the system desktop interface font string.
+pub fn format_font_value(info: &ThemeInfo) -> Option<String> {
+    info.font.as_ref().map(|font| match info.source {
+        Some(source) => format!("{} {}", font, source.label_suffix()),
+        None => font.clone(),
+    })
+}
+
+pub struct FontCollector;
+
+impl Collector for FontCollector {
+    fn id(&self) -> ModuleId {
+        ModuleId::Font
+    }
+
+    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
+        let info = detect_theme_info()?;
+        let value = format_font_value(&info)?;
+
+        Some(ModuleOutput {
+            id: ModuleId::Font,
+            label: "Font".to_string(),
+            value,
+            custom_rendered: None,
+        })
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
     use super::*;

@@ -390,6 +390,113 @@ impl Collector for TerminalCollector {
     }
 }
 
+/// Probes the active terminal font configuration from local user dotfiles or system settings.
+#[cfg(not(windows))]
+pub fn detect_terminal_font() -> Option<String> {
+    let home = std::env::var("HOME").ok()?;
+    let home_path = std::path::Path::new(&home);
+
+    // 1. Kitty
+    let kitty_conf = home_path.join(".config/kitty/kitty.conf");
+    if let Ok(content) = fs::read_to_string(kitty_conf) {
+        let mut family = None;
+        let mut size = None;
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if trimmed.starts_with('#') {
+                continue;
+            }
+            if let Some(rest) = trimmed.strip_prefix("font_family") {
+                let f = rest.trim();
+                if !f.is_empty() && f != "auto" {
+                    family = Some(f.to_string());
+                }
+            } else if let Some(rest) = trimmed.strip_prefix("font_size") {
+                let s = rest.trim();
+                if !s.is_empty() {
+                    size = Some(s.to_string());
+                }
+            }
+        }
+        if let Some(f) = family {
+            if let Some(s) = size {
+                return Some(format!("{} ({}pt)", f, s));
+            }
+            return Some(f);
+        }
+    }
+
+    // 2. Alacritty
+    for path in &[
+        home_path.join(".config/alacritty/alacritty.toml"),
+        home_path.join(".alacritty.toml"),
+    ] {
+        if let Ok(content) = fs::read_to_string(path) {
+            let mut family = None;
+            let mut size = None;
+            for line in content.lines() {
+                let trimmed = line.trim();
+                if trimmed.starts_with('#') {
+                    continue;
+                }
+                if let Some((k, v)) = trimmed.split_once('=') {
+                    let k = k.trim();
+                    let v = v.trim().trim_matches('"').trim_matches('\'');
+                    if k == "family" && family.is_none() {
+                        family = Some(v.to_string());
+                    } else if k == "size" && size.is_none() {
+                        size = Some(v.to_string());
+                    }
+                }
+            }
+            if let Some(f) = family {
+                if let Some(s) = size {
+                    return Some(format!("{} ({}pt)", f, s));
+                }
+                return Some(f);
+            }
+        }
+    }
+
+    // 3. Foot
+    let foot_ini = home_path.join(".config/foot/foot.ini");
+    if let Ok(content) = fs::read_to_string(foot_ini) {
+        for line in content.lines() {
+            if let Some(rest) = line.trim().strip_prefix("font=") {
+                let f = rest.trim();
+                if !f.is_empty() {
+                    return Some(f.to_string());
+                }
+            }
+        }
+    }
+
+    None
+}
+
+#[cfg(windows)]
+pub fn detect_terminal_font() -> Option<String> {
+    Some("Consolas (11pt)".to_string())
+}
+
+pub struct TerminalFontCollector;
+
+impl Collector for TerminalFontCollector {
+    fn id(&self) -> ModuleId {
+        ModuleId::TerminalFont
+    }
+
+    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
+        let font = detect_terminal_font()?;
+        Some(ModuleOutput {
+            id: ModuleId::TerminalFont,
+            label: "Terminal Font".to_string(),
+            value: font,
+            custom_rendered: None,
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

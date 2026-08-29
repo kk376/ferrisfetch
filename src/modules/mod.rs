@@ -36,7 +36,9 @@ pub enum ModuleId {
     Display,
     Desktop,
     Wm,
+    WmTheme,
     Terminal,
+    TerminalFont,
     Cpu,
     Gpu,
     Memory,
@@ -46,6 +48,7 @@ pub enum ModuleId {
     LocalIp,
     Theme,
     Icons,
+    Font,
     Colors,
 }
 
@@ -63,7 +66,9 @@ impl ModuleId {
             ModuleId::Display,
             ModuleId::Desktop,
             ModuleId::Wm,
+            ModuleId::WmTheme,
             ModuleId::Terminal,
+            ModuleId::TerminalFont,
             ModuleId::Cpu,
             ModuleId::Gpu,
             ModuleId::Memory,
@@ -73,6 +78,7 @@ impl ModuleId {
             ModuleId::LocalIp,
             ModuleId::Theme,
             ModuleId::Icons,
+            ModuleId::Font,
             ModuleId::Colors,
         ]
     }
@@ -90,7 +96,9 @@ impl ModuleId {
             ModuleId::Display => "display",
             ModuleId::Desktop => "desktop",
             ModuleId::Wm => "wm",
+            ModuleId::WmTheme => "wmtheme",
             ModuleId::Terminal => "terminal",
+            ModuleId::TerminalFont => "terminalfont",
             ModuleId::Cpu => "cpu",
             ModuleId::Gpu => "gpu",
             ModuleId::Memory => "memory",
@@ -100,6 +108,7 @@ impl ModuleId {
             ModuleId::LocalIp => "localip",
             ModuleId::Theme => "theme",
             ModuleId::Icons => "icons",
+            ModuleId::Font => "font",
             ModuleId::Colors => "colors",
         }
     }
@@ -126,7 +135,9 @@ impl FromStr for ModuleId {
             "display" | "resolution" | "screen" => Ok(ModuleId::Display),
             "desktop" | "de" => Ok(ModuleId::Desktop),
             "wm" | "windowmanager" => Ok(ModuleId::Wm),
+            "wmtheme" | "wm_theme" => Ok(ModuleId::WmTheme),
             "terminal" | "term" => Ok(ModuleId::Terminal),
+            "terminalfont" | "terminal_font" | "termfont" | "term_font" => Ok(ModuleId::TerminalFont),
             "cpu" => Ok(ModuleId::Cpu),
             "gpu" => Ok(ModuleId::Gpu),
             "memory" | "mem" => Ok(ModuleId::Memory),
@@ -136,6 +147,7 @@ impl FromStr for ModuleId {
             "localip" | "local_ip" | "ip" => Ok(ModuleId::LocalIp),
             "theme" | "gtk" | "gtktheme" => Ok(ModuleId::Theme),
             "icons" | "icontheme" => Ok(ModuleId::Icons),
+            "font" | "fonts" | "gtkfont" => Ok(ModuleId::Font),
             "colors" | "palette" => Ok(ModuleId::Colors),
             _ => Err(()),
         }
@@ -179,7 +191,9 @@ impl ModuleRegistry {
             Box::new(display::DisplayCollector),
             Box::new(desktop::DesktopCollector),
             Box::new(wm::WmCollector),
+            Box::new(wm::WmThemeCollector),
             Box::new(terminal::TerminalCollector),
+            Box::new(terminal::TerminalFontCollector),
             Box::new(cpu::CpuCollector),
             Box::new(gpu::GpuCollector),
             Box::new(memory::MemoryCollector),
@@ -189,6 +203,7 @@ impl ModuleRegistry {
             Box::new(localip::LocalIpCollector),
             Box::new(theme::ThemeCollector),
             Box::new(theme::IconsCollector),
+            Box::new(theme::FontCollector),
             Box::new(colors::ColorsCollector),
         ];
 
@@ -262,12 +277,15 @@ mod tests {
         assert_eq!(ModuleId::from_str("pkgs"), Some(ModuleId::Packages));
         assert_eq!(ModuleId::from_str("theme"), Some(ModuleId::Theme));
         assert_eq!(ModuleId::from_str("icons"), Some(ModuleId::Icons));
+        assert_eq!(ModuleId::from_str("font"), Some(ModuleId::Font));
+        assert_eq!(ModuleId::from_str("wmtheme"), Some(ModuleId::WmTheme));
+        assert_eq!(ModuleId::from_str("terminalfont"), Some(ModuleId::TerminalFont));
         assert_eq!(ModuleId::from_str("palette"), Some(ModuleId::Colors));
         assert_eq!(ModuleId::from_str("invalid_mod"), None);
     }
 
     #[test]
     fn test_module_id_all_count() {
-        assert_eq!(ModuleId::all().len(), 22);
+        assert_eq!(ModuleId::all().len(), 25);
     }
 }

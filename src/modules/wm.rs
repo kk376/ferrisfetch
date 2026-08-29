@@ -179,6 +179,64 @@ impl Collector for WmCollector {
     }
 }
 
+/// Probes active Window Manager decoration/window theme.
+#[cfg(not(windows))]
+pub fn detect_wm_theme() -> Option<String> {
+    let wm = detect_wm()?;
+    let wm_lower = wm.to_lowercase();
+
+    if wm_lower.contains("mutter") || wm_lower.contains("gnome") {
+        return Some("Adwaita".to_string());
+    }
+
+    if wm_lower.contains("kwin") {
+        let home = std::env::var("HOME").ok()?;
+        let kwinrc_path = std::path::Path::new(&home).join(".config/kwinrc");
+        if let Ok(content) = fs::read_to_string(kwinrc_path) {
+            for line in content.lines() {
+                if let Some((k, v)) = line.split_once('=') {
+                    if k.trim().eq_ignore_ascii_case("theme") || k.trim().eq_ignore_ascii_case("PluginName") {
+                        let clean = v.trim();
+                        if !clean.is_empty() {
+                            return Some(clean.to_string());
+                        }
+                    }
+                }
+            }
+        }
+        return Some("Breeze".to_string());
+    }
+
+    if wm_lower.contains("xfwm") {
+        return Some("Default".to_string());
+    }
+
+    None
+}
+
+#[cfg(windows)]
+pub fn detect_wm_theme() -> Option<String> {
+    Some("Mica / DWM".to_string())
+}
+
+pub struct WmThemeCollector;
+
+impl Collector for WmThemeCollector {
+    fn id(&self) -> ModuleId {
+        ModuleId::WmTheme
+    }
+
+    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
+        let theme = detect_wm_theme()?;
+        Some(ModuleOutput {
+            id: ModuleId::WmTheme,
+            label: "WM Theme".to_string(),
+            value: theme,
+            custom_rendered: None,
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
