@@ -1,4 +1,4 @@
-30cf6001d73fe368a6fa4a9f33c420b8d474259814c4011b31c21aab7dfeae11  ferrisfetch-0.11.5-1-x86_64.pkg.tar.zst
-3c887a216374b5e9b3b95275afbc7ce8678aa35504de16809434e63e4c5c6f8f  ferrisfetch-0.11.5-x86_64-unknown-linux-gnu.tar.gz
-7658a55bf207736a7e87fc9c65fe97a72b15a7914863c44207dddb0617454262  ferrisfetch_0.11.5-1_amd64.deb
-d3b361811322fa94894cc4f5fed373572ff44818c3141086d45c638ba375a20e  ferrisfetch_0.11.5-1_termux_aarch64.deb
+a9f14e74503ba9bc1c4ec8ffe2f37199832daa4cfb2104edd53641b9bd6feb3f  ferrisfetch-0.11.6-1-x86_64.pkg.tar.zst
+cdad53ae05921a4167a85ce02234975af0a14ae06b3d985d02636457fd7bd92b  ferrisfetch-0.11.6-x86_64-unknown-linux-gnu.tar.gz
+004c6324fa5e65007dbae8f7bf461f79d559d3b9f49bd14ea285299d48f504de  ferrisfetch_0.11.6-1_amd64.deb
+7641c597130c022b2d0113b02ed433d5eacdcfb1dd028292ae8de4c20189da7d  ferrisfetch_0.11.6-1_termux_aarch64.deb

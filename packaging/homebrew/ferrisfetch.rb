@@ -1,10 +1,10 @@
 class Ferrisfetch < Formula
   desc "Fast, lightweight Linux, macOS, and Windows system information fetch tool written in Rust"
   homepage "https://github.com/kk376/ferrisfetch"
-  url "https://github.com/kk376/ferrisfetch/releases/download/v0.11.5/ferrisfetch-0.11.5-x86_64-unknown-linux-gnu.tar.gz"
-  sha256 "3c887a216374b5e9b3b95275afbc7ce8678aa35504de16809434e63e4c5c6f8f"
+  url "https://github.com/kk376/ferrisfetch/releases/download/v0.11.6/ferrisfetch-0.11.6-x86_64-unknown-linux-gnu.tar.gz"
+  sha256 "cdad53ae05921a4167a85ce02234975af0a14ae06b3d985d02636457fd7bd92b"
   license "MIT"
-  version "0.11.5"
+  version "0.11.6"
 
   def install
     bin.install "ferrisfetch"
@@ -15,6 +15,6 @@ class Ferrisfetch < Formula
   end
 
   test do
-    assert_match "ferrisfetch 0.11.5", shell_output("#{bin}/ferrisfetch --version")
+    assert_match "ferrisfetch 0.11.6", shell_output("#{bin}/ferrisfetch --version")
   end
 end

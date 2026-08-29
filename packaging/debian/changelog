@@ -1,3 +1,9 @@
+ferrisfetch (0.11.6-1) unstable; urgency=medium
+
+  * Release 0.11.6 - Zero-wait stale-while-revalidate battery architecture.
+
+ -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 08:27:00 +0530
+
 ferrisfetch (0.11.5-1) unstable; urgency=medium
 
   * Release 0.11.5 - Instantaneous terminal version probing and tmpfs runtime caching.
