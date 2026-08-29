@@ -679,6 +679,93 @@ pub const ALL_LOGOS: &[Logo] = &[
         distro_color: "\x1b[38;5;33m",
         outer_color: WHITE_COLOR,
     },
+    Logo {
+        name: "android",
+        raw_lines: &[
+            "{c}         -o          o-",
+            "{c}          +hydNNNNdyh+",
+            "{c}        +mMMMMMMMMMMMMm+",
+            "{c}      `dMM{w}m:{c}NMMMMMMN{w}:m{c}MMd`",
+            "{c}      hMMMMMMMMMMMMMMMMMMh",
+            "{c}  ..  yyyyyyyyyyyyyyyyyyyy  ..",
+            "{c}.mMMm`MMMMMMMMMMMMMMMMMMMM`mMMm.",
+            "{c}:MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM:",
+            "{c}:MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM:",
+            "{c}:MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM:",
+            "{c}:MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM:",
+            "{c}-MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM-",
+            "{c} +yy+ MMMMMMMMMMMMMMMMMMMM +yy+",
+            "{c}      MMMMMMMMMMMMMMMMMMMM",
+            "{c}      MMMMMMMMMMMMMMMMMMMM",
+            "{c}      /++MMMMh++++hMMMM++/",
+            "{c}         MMMMo    oMMMM",
+            "{c}         MMMMo    oMMMM",
+            "{c}         ooss     ssoo",
+        ],
+        distro_color: "\x1b[38;5;118m",
+        outer_color: WHITE_COLOR,
+    },
+    Logo {
+        name: "macos",
+        raw_lines: &[
+            "{w}                    'c.",
+            "{w}                 ,xNMM.",
+            "{w}               .OMMMMo",
+            "{w}               lMM\"",
+            "{w}     .;loddo:.  .oa.       .looo:.",
+            "{w}   {c}cKMMMMMMMMMMNWMMMM4eecl{w}dMMMMMMMMMx",
+            "{w} {c}.KMMMMMMMMMMMMMMMMMMMMMMMWd{w}.kMMMMMMMMK",
+            "{w}{c}wMMMMMMMMMMMMMMMMMMMMMMMMMM{w}mo  Local",
+            "{w}{c}lMMMMMMMMMMMMMMMMMMMMMMMMMM{w}Mo",
+            "{w}{c} kMMMMMMMMMMMMMMMMMMMMMMMM{w}K'",
+            "{w}  {c}kMMMMMMMMMMMMMMMMMMMMMMd",
+            "{w}   {c}'xMMMMMMMMMMMMMMMMMMd.",
+            "{w}     {c}'xNMMMMMMMMMMMMMNk'",
+            "{w}        {c}';okkxOkkko;'.",
+        ],
+        distro_color: "\x1b[38;5;250m",
+        outer_color: WHITE_COLOR,
+    },
+    Logo {
+        name: "openbsd",
+        raw_lines: &[
+            "{w}                                       _",
+            "{w}                                      (_)",
+            "{c}              |    .",
+            "{c}          .   |L  /|   .          {w}_",
+            "{c}      _ . |\\ _| \\--+._/| .       {w}(_)",
+            "{c}     / ||\\| Y J  )   / |/| ./",
+            "{c}    J  |)'( |        ` F`.'/        {w}_",
+            "{c}  -<|  F         __     .-<        {w}(_)",
+            "{c}    | /       .-'.`}   . {'-.",
+            "{c}    + |      /  /`L   /  |  \\",
+            "{c}     `\\       [ [  _  [  |  ]",
+            "{c}       \\__     \\._/ \\_/__/ ./",
+            "{c}          `---._____.-'",
+        ],
+        distro_color: "\x1b[38;5;220m",
+        outer_color: WHITE_COLOR,
+    },
+    Logo {
+        name: "netbsd",
+        raw_lines: &[
+            "{c} \\\\`-______,----__",
+            "{c}  \\\\        __,---`._",
+            "{c}   \\\\       `.____",
+            "{c}    \\\\            `---.",
+            "{c}     \\\\                \\\\",
+            "{c}      \\\\                \\\\",
+            "{c}       \\\\  {w}`-----.{c}       \\\\",
+            "{c}        \\\\   {w}/\\\\__\\\\{c}        \\\\",
+            "{c}         \\\\ {w}/  __ \\\\{c}        \\\\",
+            "{c}          \\\\{w}/  /  \\\\ \\\\{c}        \\\\",
+            "{c}           {w}/  /    \\\\ \\\\{c}        \\\\",
+            "{c}          {w}/  /      \\\\ \\\\{c}        \\\\",
+            "{c}         {w}/__/{c}        {w}\\\\__\\\\{c}        \\\\",
+        ],
+        distro_color: "\x1b[38;5;208m",
+        outer_color: WHITE_COLOR,
+    },
 ];
 
 /// Resolves a matching `Logo` based on the detected OS string or user override.
@@ -719,24 +806,68 @@ pub fn match_logo(
         if name_lower == "win7" {
             return ALL_LOGOS.iter().find(|l| l.name == "windows7");
         }
+        if name_lower == "mac" || name_lower == "darwin" || name_lower == "apple" || name_lower == "osx" {
+            return ALL_LOGOS.iter().find(|l| l.name == "macos");
+        }
+        if name_lower == "bsd" {
+            return ALL_LOGOS.iter().find(|l| l.name == "freebsd");
+        }
     }
 
     let id_clean = distro_id.to_lowercase().replace(' ', "");
 
+    // 1. Direct exact match
     for logo in ALL_LOGOS {
-        if id_clean.contains(logo.name) || logo.name.contains(&id_clean) {
+        if id_clean == logo.name {
             return Some(logo);
         }
     }
 
+    // 2. Specific OS & Distribution keyword matching
+    if id_clean.contains("android") || id_clean.contains("termux") {
+        return ALL_LOGOS.iter().find(|l| l.name == "android");
+    }
+    if id_clean.contains("macos") || id_clean.contains("darwin") || id_clean.contains("osx") || id_clean.contains("apple") {
+        return ALL_LOGOS.iter().find(|l| l.name == "macos");
+    }
+    if id_clean.contains("freebsd") {
+        return ALL_LOGOS.iter().find(|l| l.name == "freebsd");
+    }
+    if id_clean.contains("openbsd") {
+        return ALL_LOGOS.iter().find(|l| l.name == "openbsd");
+    }
+    if id_clean.contains("netbsd") {
+        return ALL_LOGOS.iter().find(|l| l.name == "netbsd");
+    }
+    if id_clean.contains("windows11") || id_clean.contains("win11") {
+        return ALL_LOGOS.iter().find(|l| l.name == "windows11");
+    }
+    if id_clean.contains("windows10") || id_clean.contains("win10") {
+        return ALL_LOGOS.iter().find(|l| l.name == "windows10");
+    }
+    if id_clean.contains("windows7") || id_clean.contains("win7") {
+        return ALL_LOGOS.iter().find(|l| l.name == "windows7");
+    }
+    if id_clean.contains("windows") || id_clean.contains("win") {
+        return ALL_LOGOS.iter().find(|l| l.name == "windows11");
+    }
     if id_clean.contains("ubuntu") {
         return ALL_LOGOS.iter().find(|l| l.name == "ubuntu");
     }
-    if id_clean.contains("mint") {
+    if id_clean.contains("mint") || id_clean == "linuxmint" {
         return ALL_LOGOS.iter().find(|l| l.name == "linuxmint");
     }
     if id_clean.contains("fedora") {
         return ALL_LOGOS.iter().find(|l| l.name == "fedora");
+    }
+    if id_clean.contains("endeavour") {
+        return ALL_LOGOS.iter().find(|l| l.name == "endeavouros");
+    }
+    if id_clean.contains("manjaro") {
+        return ALL_LOGOS.iter().find(|l| l.name == "manjaro");
+    }
+    if id_clean.contains("artix") {
+        return ALL_LOGOS.iter().find(|l| l.name == "artix");
     }
     if id_clean.contains("arch") {
         return ALL_LOGOS.iter().find(|l| l.name == "arch");
@@ -744,7 +875,7 @@ pub fn match_logo(
     if id_clean.contains("debian") {
         return ALL_LOGOS.iter().find(|l| l.name == "debian");
     }
-    if id_clean.contains("redhat") || id_clean.contains("rhel") {
+    if id_clean.contains("redhat") || id_clean.contains("rhel") || id_clean.contains("centos") {
         return ALL_LOGOS.iter().find(|l| l.name == "rhel");
     }
     if id_clean.contains("rocky") {
@@ -774,33 +905,19 @@ pub fn match_logo(
     if id_clean.contains("kali") {
         return ALL_LOGOS.iter().find(|l| l.name == "kali");
     }
-    if id_clean.contains("freebsd") {
-        return ALL_LOGOS.iter().find(|l| l.name == "freebsd");
-    }
     if id_clean.contains("slackware") {
         return ALL_LOGOS.iter().find(|l| l.name == "slackware");
-    }
-    if id_clean.contains("artix") {
-        return ALL_LOGOS.iter().find(|l| l.name == "artix");
     }
     if id_clean.contains("zorin") {
         return ALL_LOGOS.iter().find(|l| l.name == "zorin");
     }
-    if id_clean.contains("windows11") || id_clean.contains("win11") {
-        return ALL_LOGOS.iter().find(|l| l.name == "windows11");
-    }
-    if id_clean.contains("windows10") || id_clean.contains("win10") {
-        return ALL_LOGOS.iter().find(|l| l.name == "windows10");
-    }
-    if id_clean.contains("windows7") || id_clean.contains("win7") {
-        return ALL_LOGOS.iter().find(|l| l.name == "windows7");
-    }
-    if id_clean.contains("windows") || id_clean.contains("win") {
-        return ALL_LOGOS.iter().find(|l| l.name == "windows11");
-    }
 
+    // 3. Parent ID_LIKE fallbacks
     for like in distro_like {
         let like_lower = like.to_lowercase();
+        if like_lower.contains("android") {
+            return ALL_LOGOS.iter().find(|l| l.name == "android");
+        }
         if like_lower.contains("ubuntu") {
             return ALL_LOGOS.iter().find(|l| l.name == "ubuntu");
         }
@@ -866,5 +983,40 @@ pub mod tests {
     fn test_match_logo_windows() {
         let logo = match_logo(None, "windows 11", &[]).unwrap();
         assert_eq!(logo.name, "windows11");
+        let logo_win10 = match_logo(None, "windows 10", &[]).unwrap();
+        assert_eq!(logo_win10.name, "windows10");
+        let logo_win7 = match_logo(None, "windows 7", &[]).unwrap();
+        assert_eq!(logo_win7.name, "windows7");
+    }
+
+    #[test]
+    fn test_match_logo_android() {
+        let logo = match_logo(None, "android", &[]).unwrap();
+        assert_eq!(logo.name, "android");
+        let logo_termux = match_logo(None, "termux", &[]).unwrap();
+        assert_eq!(logo.name, "android");
+        assert_eq!(logo_termux.name, "android");
+    }
+
+    #[test]
+    fn test_match_logo_macos_and_bsd() {
+        let logo_mac = match_logo(None, "macos", &[]).unwrap();
+        assert_eq!(logo_mac.name, "macos");
+        let logo_darwin = match_logo(None, "darwin", &[]).unwrap();
+        assert_eq!(logo_darwin.name, "macos");
+
+        let logo_freebsd = match_logo(None, "freebsd", &[]).unwrap();
+        assert_eq!(logo_freebsd.name, "freebsd");
+        let logo_openbsd = match_logo(None, "openbsd", &[]).unwrap();
+        assert_eq!(logo_openbsd.name, "openbsd");
+        let logo_netbsd = match_logo(None, "netbsd", &[]).unwrap();
+        assert_eq!(logo_netbsd.name, "netbsd");
+    }
+
+    #[test]
+    fn test_match_logo_linux_generic_does_not_match_mint() {
+        let logo = match_logo(None, "linux", &[]).unwrap();
+        assert_eq!(logo.name, "generic");
+        assert_ne!(logo.name, "linuxmint");
     }
 }

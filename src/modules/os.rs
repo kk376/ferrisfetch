@@ -128,10 +128,80 @@ pub fn parse_windows_os_info(
     }
 }
 
-/// Detects the operating system using standard and legacy paths.
+/// Detects the operating system using standard, Android, macOS, and BSD detection paths.
 #[cfg(not(windows))]
 pub fn detect_os() -> OsInfo {
-    // 1. Primary standard os-release files (/usr/lib fallback handles stateless/immutable systems)
+    // 1. Android / Termux Detection
+    if std::env::var_os("ANDROID_ROOT").is_some()
+        || std::env::var_os("ANDROID_DATA").is_some()
+        || std::env::var_os("TERMUX_VERSION").is_some()
+        || Path::new("/system/build.prop").exists()
+        || Path::new("/system/bin/getprop").exists()
+    {
+        let mut android_ver = None;
+        if let Ok(content) = fs::read_to_string("/system/build.prop") {
+            for line in content.lines() {
+                if let Some(rest) = line.strip_prefix("ro.build.version.release=") {
+                    let v = rest.trim();
+                    if !v.is_empty() {
+                        android_ver = Some(v.to_string());
+                        break;
+                    }
+                }
+            }
+        }
+        if android_ver.is_none() {
+            if let Ok(output) = std::process::Command::new("getprop")
+                .arg("ro.build.version.release")
+                .output()
+            {
+                if output.status.success() {
+                    let v = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                    if !v.is_empty() {
+                        android_ver = Some(v);
+                    }
+                }
+            }
+        }
+        let display_name = match android_ver {
+            Some(v) => format!("Android {}", v),
+            None => "Android".to_string(),
+        };
+        return OsInfo {
+            display_name,
+            distro_id: "android".to_string(),
+            distro_like: vec!["linux".to_string()],
+        };
+    }
+
+    // 2. macOS / Darwin Detection
+    if Path::new("/System/Library/CoreServices/SystemVersion.plist").exists() {
+        let mut ver = None;
+        if let Ok(content) = fs::read_to_string("/System/Library/CoreServices/SystemVersion.plist") {
+            if let Some(pos) = content.find("<key>ProductVersion</key>") {
+                let rest = &content[pos..];
+                if let Some(start) = rest.find("<string>") {
+                    if let Some(end) = rest[start + 8..].find("</string>") {
+                        let v = rest[start + 8..start + 8 + end].trim();
+                        if !v.is_empty() {
+                            ver = Some(v.to_string());
+                        }
+                    }
+                }
+            }
+        }
+        let display_name = match ver {
+            Some(v) => format!("macOS {}", v),
+            None => "macOS".to_string(),
+        };
+        return OsInfo {
+            display_name,
+            distro_id: "macos".to_string(),
+            distro_like: vec!["darwin".to_string(), "bsd".to_string()],
+        };
+    }
+
+    // 3. Primary standard os-release files (/usr/lib fallback handles stateless/immutable systems)
     for path in &["/etc/os-release", "/usr/lib/os-release"] {
         if let Ok(content) = fs::read_to_string(path) {
             let info = parse_os_release(&content);
@@ -141,7 +211,7 @@ pub fn detect_os() -> OsInfo {
         }
     }
 
-    // 2. Legacy distribution release files for pre-systemd environments
+    // 4. Legacy distribution release files for pre-systemd environments
     if let Ok(deb) = fs::read_to_string("/etc/debian_version") {
         let trimmed = deb.trim();
         if !trimmed.is_empty() {
@@ -194,7 +264,31 @@ pub fn detect_os() -> OsInfo {
         }
     }
 
-    // 3. Fallback to generic kernel sysname
+    // 5. BSD Kernel Checks
+    if let Some(uname) = crate::modules::kernel::get_uname_info() {
+        let sys_lower = uname.sysname.to_lowercase();
+        if sys_lower.contains("freebsd") {
+            return OsInfo {
+                display_name: format!("FreeBSD {}", uname.kernel_release),
+                distro_id: "freebsd".to_string(),
+                distro_like: vec!["bsd".to_string()],
+            };
+        } else if sys_lower.contains("openbsd") {
+            return OsInfo {
+                display_name: format!("OpenBSD {}", uname.kernel_release),
+                distro_id: "openbsd".to_string(),
+                distro_like: vec!["bsd".to_string()],
+            };
+        } else if sys_lower.contains("netbsd") {
+            return OsInfo {
+                display_name: format!("NetBSD {}", uname.kernel_release),
+                distro_id: "netbsd".to_string(),
+                distro_like: vec!["bsd".to_string()],
+            };
+        }
+    }
+
+    // 6. Fallback to generic kernel sysname
     OsInfo {
         display_name: "Linux".to_string(),
         distro_id: "linux".to_string(),
