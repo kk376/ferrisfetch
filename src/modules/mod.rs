@@ -50,6 +50,7 @@ pub enum ModuleId {
     Theme,
     Icons,
     Font,
+    Cursor,
     Plugin,
     Colors,
 }
@@ -81,6 +82,7 @@ impl ModuleId {
             ModuleId::Theme,
             ModuleId::Icons,
             ModuleId::Font,
+            ModuleId::Cursor,
             ModuleId::Plugin,
             ModuleId::Colors,
         ]
@@ -112,6 +114,7 @@ impl ModuleId {
             ModuleId::Theme => "theme",
             ModuleId::Icons => "icons",
             ModuleId::Font => "font",
+            ModuleId::Cursor => "cursor",
             ModuleId::Plugin => "plugin",
             ModuleId::Colors => "colors",
         }
@@ -154,6 +157,7 @@ impl FromStr for ModuleId {
             "theme" | "gtk" | "gtktheme" => Ok(ModuleId::Theme),
             "icons" | "icontheme" => Ok(ModuleId::Icons),
             "font" | "fonts" | "gtkfont" => Ok(ModuleId::Font),
+            "cursor" | "cursortheme" | "mouse" => Ok(ModuleId::Cursor),
             "plugin" | "plugins" | "custom" => Ok(ModuleId::Plugin),
             "colors" | "palette" => Ok(ModuleId::Colors),
             _ => Err(()),
@@ -211,6 +215,7 @@ impl ModuleRegistry {
             Box::new(theme::ThemeCollector),
             Box::new(theme::IconsCollector),
             Box::new(theme::FontCollector),
+            Box::new(theme::CursorCollector),
             Box::new(plugin::PluginCollector),
             Box::new(colors::ColorsCollector),
         ];
@@ -292,6 +297,7 @@ mod tests {
             ModuleId::from_str("terminalfont"),
             Some(ModuleId::TerminalFont)
         );
+        assert_eq!(ModuleId::from_str("cursor"), Some(ModuleId::Cursor));
         assert_eq!(ModuleId::from_str("plugin"), Some(ModuleId::Plugin));
         assert_eq!(ModuleId::from_str("palette"), Some(ModuleId::Colors));
         assert_eq!(ModuleId::from_str("invalid_mod"), None);
@@ -299,6 +305,6 @@ mod tests {
 
     #[test]
     fn test_module_id_all_count() {
-        assert_eq!(ModuleId::all().len(), 26);
+        assert_eq!(ModuleId::all().len(), 27);
     }
 }

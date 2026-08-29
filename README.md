@@ -33,6 +33,7 @@ cccccccc;.:odl:.;cccccccccccccc:,.       CPU: AMD Ryzen 5 7535HS (6c 12t) @ 4.39
                                          Local IP: 192.168.29.219
                                          Theme: Adwaita (dark) [GTK/GNOME]
                                          Icons: Adwaita [GTK/GNOME]
+                                         Cursor: Adwaita (24px) [GTK/GNOME]
 ```
 
 ---
@@ -259,6 +260,7 @@ ferrisfetch --logo ferris
 | **Theme** | GTK 3/4 `settings.ini`, KDE `kdeglobals`, XFCE `xsettings.xml`, `$GTK_THEME` | Omitted if not configured |
 | **Icons** | GTK 3/4 `settings.ini`, KDE `kdeglobals`, XFCE `xsettings.xml` | Omitted if not configured |
 | **Font** | System desktop interface font from GTK, KDE, and GSettings | Omitted if not configured |
+| **Cursor** | Desktop cursor theme and size in pixels from GTK, KDE, GSettings, and Xcursor | Omitted if not configured |
 | **Plugin** | Parallel custom script & command executor from `config.toml` or `plugins/` | Omitted if none configured |
 
 ---

@@ -12,6 +12,7 @@ pub struct ThemeInfo {
     pub icon_theme: Option<String>,
     pub font: Option<String>,
     pub cursor: Option<String>,
+    pub cursor_size: Option<u32>,
     pub dark_mode: bool,
     pub source: Option<ThemeSource>,
 }
@@ -72,6 +73,11 @@ pub fn parse_gtk_settings_ini(content: &str) -> ThemeInfo {
                 "gtk-icon-theme-name" => info.icon_theme = Some(val),
                 "gtk-font-name" => info.font = Some(val),
                 "gtk-cursor-theme-name" => info.cursor = Some(val),
+                "gtk-cursor-theme-size" => {
+                    if let Ok(size) = val.parse::<u32>() {
+                        info.cursor_size = Some(size);
+                    }
+                }
                 "gtk-application-prefer-dark-theme" => {
                     info.dark_mode = val == "1" || val.eq_ignore_ascii_case("true");
                 }
@@ -206,6 +212,11 @@ fn query_gsettings_theme() -> ThemeInfo {
                         "icon-theme" => info.icon_theme = Some(v.to_string()),
                         "font-name" => info.font = Some(v.to_string()),
                         "cursor-theme" => info.cursor = Some(v.to_string()),
+                        "cursor-size" => {
+                            if let Ok(s) = v.parse::<u32>() {
+                                info.cursor_size = Some(s);
+                            }
+                        }
                         "color-scheme" if v.to_ascii_lowercase().contains("dark") => {
                             info.dark_mode = true;
                         }
@@ -219,6 +230,12 @@ fn query_gsettings_theme() -> ThemeInfo {
                 }
                 if info.icon_theme.is_none() {
                     info.icon_theme = Some("Adwaita".to_string());
+                }
+                if info.cursor.is_none() {
+                    info.cursor = Some("Adwaita".to_string());
+                    if info.cursor_size.is_none() {
+                        info.cursor_size = Some(24);
+                    }
                 }
                 return info;
             }
@@ -254,6 +271,34 @@ fn query_gsettings_theme() -> ThemeInfo {
                 .to_string();
             if !val.is_empty() {
                 info.icon_theme = Some(val);
+            }
+        }
+    }
+
+    if let Ok(output) = Command::new("gsettings")
+        .args(["get", "org.gnome.desktop.interface", "cursor-theme"])
+        .output()
+    {
+        if output.status.success() {
+            let val = String::from_utf8_lossy(&output.stdout)
+                .trim()
+                .trim_matches('\'')
+                .trim_matches('"')
+                .to_string();
+            if !val.is_empty() {
+                info.cursor = Some(val);
+            }
+        }
+    }
+
+    if let Ok(output) = Command::new("gsettings")
+        .args(["get", "org.gnome.desktop.interface", "cursor-size"])
+        .output()
+    {
+        if output.status.success() {
+            let val = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if let Ok(s) = val.parse::<u32>() {
+                info.cursor_size = Some(s);
             }
         }
     }
@@ -330,12 +375,12 @@ fn detect_theme_info_uncached() -> Option<ThemeInfo> {
         .or_else(|| std::env::var_os("HOME").map(|h| std::path::Path::new(&h).join(".cache")))
         .map(|p| p.join("ferrisfetch"));
 
-    let cache_file = cache_dir.as_ref().map(|d| d.join("theme_v1.cache"));
+    let cache_file = cache_dir.as_ref().map(|d| d.join("theme_v2.cache"));
 
     if let Some(ref path) = cache_file {
         if let Ok(content) = std::fs::read_to_string(path) {
             let lines: Vec<&str> = content.lines().collect();
-            if lines.len() >= 5 {
+            if lines.len() >= 6 {
                 let theme = if lines[0].is_empty() {
                     None
                 } else {
@@ -356,8 +401,12 @@ fn detect_theme_info_uncached() -> Option<ThemeInfo> {
                 } else {
                     Some(lines[3].to_string())
                 };
-                let dark_mode = lines[4] == "1" || lines[4].eq_ignore_ascii_case("true");
-                let source = match lines.get(5).copied().unwrap_or("") {
+                let cursor_size = lines.get(4).and_then(|s| s.parse::<u32>().ok());
+                let dark_mode = lines
+                    .get(5)
+                    .map(|&d| d == "1" || d.eq_ignore_ascii_case("true"))
+                    .unwrap_or(false);
+                let source = match lines.get(6).copied().unwrap_or("") {
                     "Gtk" => Some(ThemeSource::Gtk),
                     "Kde" => Some(ThemeSource::Kde),
                     "Xfce" => Some(ThemeSource::Xfce),
@@ -371,6 +420,7 @@ fn detect_theme_info_uncached() -> Option<ThemeInfo> {
                     icon_theme,
                     font,
                     cursor,
+                    cursor_size,
                     dark_mode,
                     source,
                 });
@@ -473,11 +523,15 @@ fn detect_theme_info_uncached() -> Option<ThemeInfo> {
                 None => "",
             };
             let serialized = format!(
-                "{}\n{}\n{}\n{}\n{}\n{}\n",
+                "{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
                 info.theme.as_deref().unwrap_or(""),
                 info.icon_theme.as_deref().unwrap_or(""),
                 info.font.as_deref().unwrap_or(""),
                 info.cursor.as_deref().unwrap_or(""),
+                info.cursor_size
+                    .map(|s| s.to_string())
+                    .as_deref()
+                    .unwrap_or(""),
                 if info.dark_mode { "1" } else { "0" },
                 src_str
             );
@@ -584,6 +638,39 @@ impl Collector for FontCollector {
         Some(ModuleOutput {
             id: ModuleId::Font,
             label: "Font".to_string(),
+            value,
+            custom_rendered: None,
+        })
+    }
+}
+
+/// Formats the desktop cursor theme and size string.
+pub fn format_cursor_value(info: &ThemeInfo) -> Option<String> {
+    let cursor = info.cursor.as_ref()?;
+    let with_size = match info.cursor_size {
+        Some(size) => format!("{} ({}px)", cursor, size),
+        None => cursor.clone(),
+    };
+    Some(match info.source {
+        Some(source) => format!("{} {}", with_size, source.label_suffix()),
+        None => with_size,
+    })
+}
+
+pub struct CursorCollector;
+
+impl Collector for CursorCollector {
+    fn id(&self) -> ModuleId {
+        ModuleId::Cursor
+    }
+
+    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
+        let info = detect_theme_info()?;
+        let value = format_cursor_value(&info)?;
+
+        Some(ModuleOutput {
+            id: ModuleId::Cursor,
+            label: "Cursor".to_string(),
             value,
             custom_rendered: None,
         })
@@ -705,6 +792,47 @@ ColorScheme=BreezeDark
         assert_eq!(
             format_theme_value(&light).as_deref(),
             Some("Light [Windows]")
+        );
+    }
+
+    #[test]
+    fn test_format_cursor_value_with_and_without_size() {
+        let info_with_size = ThemeInfo {
+            cursor: Some("Adwaita".to_string()),
+            cursor_size: Some(24),
+            source: Some(ThemeSource::Gtk),
+            ..Default::default()
+        };
+        assert_eq!(
+            format_cursor_value(&info_with_size).as_deref(),
+            Some("Adwaita (24px) [GTK]")
+        );
+
+        let info_no_size = ThemeInfo {
+            cursor: Some("Breeze_Snow".to_string()),
+            cursor_size: None,
+            source: Some(ThemeSource::Kde),
+            ..Default::default()
+        };
+        assert_eq!(
+            format_cursor_value(&info_no_size).as_deref(),
+            Some("Breeze_Snow [Qt/KDE]")
+        );
+    }
+
+    #[test]
+    fn test_parse_gtk_settings_ini_cursor_size() {
+        let content = r#"
+[Settings]
+gtk-cursor-theme-name=Bibata-Modern-Classic
+gtk-cursor-theme-size=28
+"#;
+        let info = parse_gtk_settings_ini(content);
+        assert_eq!(info.cursor.as_deref(), Some("Bibata-Modern-Classic"));
+        assert_eq!(info.cursor_size, Some(28));
+        assert_eq!(
+            format_cursor_value(&info).as_deref(),
+            Some("Bibata-Modern-Classic (28px) [GTK]")
         );
     }
 }
