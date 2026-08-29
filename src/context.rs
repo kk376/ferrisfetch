@@ -1,4 +1,5 @@
 use crate::cli::Cli;
+use crate::config::Config;
 use crate::modules::os::{detect_os, OsInfo};
 use crate::modules::ModuleId;
 use std::io::IsTerminal;
@@ -27,25 +28,42 @@ pub struct FetchContext {
     pub active_modules: Vec<ModuleId>,
     pub logo_override: Option<String>,
     pub no_logo: bool,
+    pub config: Config,
 }
 
 impl FetchContext {
     pub fn new(cli: &Cli) -> Self {
+        let config = Config::load_default();
+        Self::with_config(cli, config)
+    }
+
+    pub fn with_config(cli: &Cli, config: Config) -> Self {
         let term_width = get_terminal_width();
-        let caps = detect_terminal_caps(cli.no_color);
+        let no_color = cli.no_color || config.no_color.unwrap_or(false);
+        let caps = detect_terminal_caps(no_color);
         let enable_color = caps.color_level != ColorLevel::None;
         let os_info = detect_os();
-        let active_modules = resolve_active_modules(cli);
+        let active_modules = resolve_active_modules(cli, &config);
+
+        let disk_target_path = if cli.disk_path != "/" {
+            cli.disk_path.clone()
+        } else {
+            config.disk_path.clone().unwrap_or_else(|| "/".to_string())
+        };
+
+        let logo_override = cli.logo.clone().or_else(|| config.logo.clone());
+        let no_logo = cli.no_logo || config.no_logo.unwrap_or(false);
 
         Self {
             term_width,
             enable_color,
             caps,
             os_info,
-            disk_target_path: cli.disk_path.clone(),
+            disk_target_path,
             active_modules,
-            logo_override: cli.logo.clone(),
-            no_logo: cli.no_logo,
+            logo_override,
+            no_logo,
+            config,
         }
     }
 }
@@ -232,26 +250,28 @@ pub fn should_enable_color(no_color_flag: bool) -> bool {
     detect_color_level(no_color_flag) != ColorLevel::None
 }
 
-/// Resolves the active list of modules based on CLI flags.
-pub fn resolve_active_modules(cli: &Cli) -> Vec<ModuleId> {
+/// Resolves the active list of modules based on CLI flags and config file settings.
+pub fn resolve_active_modules(cli: &Cli, config: &Config) -> Vec<ModuleId> {
     let base_modules: Vec<ModuleId> = if let Some(ref mods) = cli.modules {
+        mods.iter().filter_map(|m| ModuleId::from_str(m)).collect()
+    } else if let Some(ref mods) = config.modules {
         mods.iter().filter_map(|m| ModuleId::from_str(m)).collect()
     } else {
         ModuleId::all().to_vec()
     };
 
-    let filtered: Vec<ModuleId> = if let Some(ref disabled) = cli.disable {
-        let disabled_set: Vec<ModuleId> = disabled
-            .iter()
-            .filter_map(|d| ModuleId::from_str(d))
-            .collect();
-        base_modules
-            .into_iter()
-            .filter(|m| !disabled_set.contains(m))
-            .collect()
-    } else {
-        base_modules
-    };
+    let mut disabled_set: Vec<ModuleId> = Vec::new();
+    if let Some(ref disabled) = cli.disable {
+        disabled_set.extend(disabled.iter().filter_map(|d| ModuleId::from_str(d)));
+    }
+    if let Some(ref disabled) = config.disable {
+        disabled_set.extend(disabled.iter().filter_map(|d| ModuleId::from_str(d)));
+    }
+
+    let filtered: Vec<ModuleId> = base_modules
+        .into_iter()
+        .filter(|m| !disabled_set.contains(m))
+        .collect();
 
     // Deduplicate while strictly preserving first-seen appearance order
     let mut seen = std::collections::HashSet::new();
@@ -274,8 +294,9 @@ mod tests {
             disk_path: "/".to_string(),
             ..Default::default()
         };
+        let config = Config::default();
 
-        let active = resolve_active_modules(&cli);
+        let active = resolve_active_modules(&cli, &config);
         assert_eq!(active.len(), ModuleId::all().len());
     }
 
@@ -291,9 +312,23 @@ mod tests {
             disk_path: "/".to_string(),
             ..Default::default()
         };
+        let config = Config::default();
 
-        let active = resolve_active_modules(&cli);
+        let active = resolve_active_modules(&cli, &config);
         assert_eq!(active, vec![ModuleId::Os, ModuleId::Memory]);
+    }
+
+    #[test]
+    fn test_resolve_active_modules_config_fallback() {
+        let cli = Cli::default();
+        let config = Config {
+            modules: Some(vec!["kernel".to_string(), "uptime".to_string()]),
+            disable: Some(vec!["uptime".to_string()]),
+            ..Default::default()
+        };
+
+        let active = resolve_active_modules(&cli, &config);
+        assert_eq!(active, vec![ModuleId::Kernel]);
     }
 
     #[test]
@@ -309,8 +344,9 @@ mod tests {
             disk_path: "/".to_string(),
             ..Default::default()
         };
+        let config = Config::default();
 
-        let active = resolve_active_modules(&cli);
+        let active = resolve_active_modules(&cli, &config);
         assert_eq!(active, vec![ModuleId::Os, ModuleId::Cpu]);
     }
 
@@ -322,8 +358,9 @@ mod tests {
             disk_path: "/".to_string(),
             ..Default::default()
         };
+        let config = Config::default();
 
-        let active = resolve_active_modules(&cli);
+        let active = resolve_active_modules(&cli, &config);
         assert!(active.is_empty());
     }
 
