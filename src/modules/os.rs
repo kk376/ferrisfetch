@@ -177,7 +177,8 @@ pub fn detect_os() -> OsInfo {
     // 2. macOS / Darwin Detection
     if Path::new("/System/Library/CoreServices/SystemVersion.plist").exists() {
         let mut ver = None;
-        if let Ok(content) = fs::read_to_string("/System/Library/CoreServices/SystemVersion.plist") {
+        if let Ok(content) = fs::read_to_string("/System/Library/CoreServices/SystemVersion.plist")
+        {
             if let Some(pos) = content.find("<key>ProductVersion</key>") {
                 let rest = &content[pos..];
                 if let Some(start) = rest.find("<string>") {

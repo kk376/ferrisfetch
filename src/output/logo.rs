@@ -806,7 +806,11 @@ pub fn match_logo(
         if name_lower == "win7" {
             return ALL_LOGOS.iter().find(|l| l.name == "windows7");
         }
-        if name_lower == "mac" || name_lower == "darwin" || name_lower == "apple" || name_lower == "osx" {
+        if name_lower == "mac"
+            || name_lower == "darwin"
+            || name_lower == "apple"
+            || name_lower == "osx"
+        {
             return ALL_LOGOS.iter().find(|l| l.name == "macos");
         }
         if name_lower == "bsd" {
@@ -827,7 +831,11 @@ pub fn match_logo(
     if id_clean.contains("android") || id_clean.contains("termux") {
         return ALL_LOGOS.iter().find(|l| l.name == "android");
     }
-    if id_clean.contains("macos") || id_clean.contains("darwin") || id_clean.contains("osx") || id_clean.contains("apple") {
+    if id_clean.contains("macos")
+        || id_clean.contains("darwin")
+        || id_clean.contains("osx")
+        || id_clean.contains("apple")
+    {
         return ALL_LOGOS.iter().find(|l| l.name == "macos");
     }
     if id_clean.contains("freebsd") {
