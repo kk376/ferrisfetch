@@ -18,7 +18,7 @@ pub fn parse_edid_binary(data: &[u8], connector_name: &str) -> Option<DisplayInf
         return None;
     }
     // Verify standard EDID header magic (00 FF FF FF FF FF FF 00)
-    if &data[0..8] != &[0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00] {
+    if data[0..8] != [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00] {
         return None;
     }
 
@@ -58,7 +58,8 @@ pub fn parse_edid_binary(data: &[u8], connector_name: &str) -> Option<DisplayInf
     let v_total = v_active + v_blank;
 
     let (res, hz) = if pixel_clock_10khz > 0 && h_total > 0 && v_total > 0 {
-        let refresh = ((pixel_clock_10khz as f64 * 10000.0) / (h_total as f64 * v_total as f64)).round() as u32;
+        let refresh = ((pixel_clock_10khz as f64 * 10000.0) / (h_total as f64 * v_total as f64))
+            .round() as u32;
         (format!("{}x{}", h_active, v_active), Some(refresh))
     } else {
         ("1920x1080".to_string(), None)
@@ -66,9 +67,16 @@ pub fn parse_edid_binary(data: &[u8], connector_name: &str) -> Option<DisplayInf
 
     // 5. Display type [Built-in] vs [External]
     let conn_lower = connector_name.to_lowercase();
-    let display_type = if conn_lower.contains("edp") || conn_lower.contains("lvds") || conn_lower.contains("dsi") {
+    let display_type = if conn_lower.contains("edp")
+        || conn_lower.contains("lvds")
+        || conn_lower.contains("dsi")
+    {
         Some("[Built-in]".to_string())
-    } else if conn_lower.contains("hdmi") || conn_lower.contains("dp") || conn_lower.contains("vga") || conn_lower.contains("dvi") {
+    } else if conn_lower.contains("hdmi")
+        || conn_lower.contains("dp")
+        || conn_lower.contains("vga")
+        || conn_lower.contains("dvi")
+    {
         Some("[External]".to_string())
     } else {
         None
@@ -153,7 +161,11 @@ pub fn detect_display() -> Option<DisplayInfo> {
             let path = entry.path();
             if let Ok(status) = fs::read_to_string(path.join("status")) {
                 if status.trim() == "connected" {
-                    let conn_name = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+                    let conn_name = path
+                        .file_name()
+                        .unwrap_or_default()
+                        .to_string_lossy()
+                        .to_string();
                     if let Ok(edid_bytes) = fs::read(path.join("edid")) {
                         if let Some(mut info) = parse_edid_binary(&edid_bytes, &conn_name) {
                             if let Ok(modes) = fs::read_to_string(path.join("modes")) {
@@ -220,7 +232,7 @@ impl Collector for DisplayCollector {
 
     fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
         let info = detect_display()?;
-        
+
         let label = match info.name {
             Some(ref n) => format!("Display ({})", n),
             None => "Display".to_string(),

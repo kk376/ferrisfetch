@@ -3,30 +3,36 @@
 A fast, lightweight, zero-subprocess system information fetch tool written in Rust for Linux, Windows, and macOS.
 
 ```text
-            .-/+oossssoo+\-.               kk376@MSI-Thin-A15
-        ´:+ssssssssssssssssss+:`           ------------------
-      -+ssssssssssssssssssyyssss+-         OS: Ubuntu 24.04.4 LTS x86_64
-    .ossssssssssssssssssdMMMNysssso.       Host: Windows Subsystem for Linux - 2.7.12.0
-   /ssssssssssshdmmNNmmyNMMMMhssssss\      Kernel: 6.18.33.2-microsoft-standard-WSL2
-  +ssssssssshmydMMMMMMMNddddyssssssss+     Installed: 23 Jan 2026, 12:22 AM (211 days ago)
- /sssssssshNMMMyhhyyyyhmNMMMNhssssssss\    Uptime: 3 hours, 14 mins
-.ssssssssdMMMNhsssssssssshNMMMdssssssss.   Packages: 1197 (dpkg), 2 (cargo), 1 (npm)
-+sssshhhyNMMNyssssssssssssyNMMMysssssss+   Shell: zsh 5.9
-ossyNMMMNyMMhsssssssssssssshmmmhssssssso   Display: 1920x1080 @ 60Hz
-ossyNMMMNyMMhsssssssssssssshmmmhssssssso   WM: WSLg 1.0.73.2 (Wayland)
-+sssshhhyNMMNyssssssssssssyNMMMysssssss+   Terminal: Windows Terminal
-.ssssssssdMMMNhsssssssssshNMMMdssssssss.   CPU: AMD Ryzen 5 7535HS (4) @ 3.294GHz
- \sssssssshNMMMyhhyyyyhdNMMMNhssssssss/    GPU0: AMD Radeon 660M (512 MiB) @ 1.900GHz [Integrated]
-  +sssssssssdmydMMMMMMMMddddyssssssss+     GPU1: NVIDIA GeForce RTX 2050 (4 GiB) @ 2.100GHz [Discrete]
-   \ssssssssssshdmNNNNmyNMMMMhssssss/      Memory: 1.31 GiB / 3.82 GiB (34%)
-    .ossssssssssssssssssdMMMNysssso.       Swap: 0.00 GiB / 2.00 GiB (0%)
-      -+sssssssssssssssssyyyssss+-         Disk0: (/) 21.9 GiB / 1006.9 GiB (2%) - ext4
-        `:+ssssssssssssssssss+:`           Disk1: (C) 223.5 GiB / 475.9 GiB (47%) - ntfs
-            .-\+oossssoo+/-.               Disk2: (D) 452.5 GiB / 931.5 GiB (49%) - ntfs
-                                           Battery: 96% [AC Connected]
-                                           Local IP: 172.30.193.167
-                                           Theme: Adwaita [GTK/GNOME]
-                                           Icons: Adwaita [GTK/GNOME]
+             .',;::::;,'.                kk376@fedora
+         .';:cccccccccccc:;,.            ------------
+      .;cccccccccccccccccccccc;.         OS: Fedora Linux 44 (Workstation Edition) x86_64
+    .:cccccccccccccccccccccccccc:.       Host: Thin A15 B7UCX REV:1.0
+  .;ccccccccccccc;.:dddl:.;ccccccc;.     Kernel: 7.1.10-200.fc44.x86_64
+ .:ccccccccccccc;OWMKOOXMWd;ccccccc:.    Installed: 23 Aug 2026, 10:53 PM (6 days ago)
+.:ccccccccccccc;KMMc;cc;xMMc;ccccccc:.   Uptime: 45 mins
+,cccccccccccccc;MMM.;cc;;WW:;cccccccc,   Packages: 2890 (rpm), 4 (flatpak), 1 (cargo), 1 (pip)
+:cccccccccccccc;MMM.;cccccccccccccccc:   Shell: zsh 5.9
+:ccccccc;oxOOOo;MMM0OOk.;cccccccccccc:   Display (AUOD0A2): 1920x1080 in 15", 144 Hz [Built-in]
+cccccc;0MMKxdd:;MMMkddc.;cccccccccccc;   Desktop: GNOME 50.4 (Wayland)
+ccccc;XM0';cccc;MMM.;cccccccccccccccc'   WM: Mutter
+ccccc;MMo;ccccc;MMW.;ccccccccccccccc;    WM Theme: Adwaita
+ccccc;0MNc.ccc.xMMd;ccccccccccccccc;     Terminal: kitty
+cccccc;dNMWXXXWM0:;cccccccccccccc:,      Terminal Font: Fira Code (12.5pt)
+cccccccc;.:odl:.;cccccccccccccc:,.       CPU: AMD Ryzen 5 7535HS (6c 12t) @ 4.393GHz [4.60GHz max]
+:cccccccccccccccccccccccccccc:'.         GPU0: AMD Radeon 680M [Integrated]
+.:cccccccccccccccccccccc:;,..            GPU1: NVIDIA GeForce RTX 2050 [Discrete]
+  '::cccccccccccccc::;,.                 Memory: 7.00 GiB / 14.82 GiB (47%)
+                                         Swap: 0.00 GiB / 14.82 GiB (0%) - ZSTD
+                                         Disk0: (/) 42.5 GiB / 215.6 GiB (20%) - btrfs
+                                         Disk1: (/boot) 0.9 GiB / 1.9 GiB (47%) - ext4
+                                         Disk2: (/boot/efi) 52 MiB / 196 MiB (26%) - vfat
+                                         Disk3: (/home) 42.5 GiB / 215.6 GiB (20%) - btrfs
+                                         Disk4: (/media/Backup) 444.8 GiB / 931.5 GiB (48%) - fuseblk
+                                         Disk5: (/media/Windows) 133.5 GiB / 258.4 GiB (52%) - fuseblk
+                                         Battery: 94% [AC Connected]
+                                         Local IP: 192.168.29.219
+                                         Theme: Adwaita (dark) [GTK/GNOME]
+                                         Icons: Adwaita [GTK/GNOME]
 ```
 
 ---
@@ -35,31 +41,26 @@ ossyNMMMNyMMhsssssssssssssshmmmhssssssso   WM: WSLg 1.0.73.2 (Wayland)
 
 Most fetch tools either spawn multiple shell child processes (`neofetch`) or dynamically link heavy C runtime libraries (`fastfetch`). FerrisFetch is built with a different design philosophy:
 
-* **Sub-3ms Latency**: Queries virtual filesystems (`/proc`, `/sys`), POSIX syscalls, and Win32 APIs directly with zero child process spawning (`fork`/`execve`). In statistical benchmarks, it is **1.89x faster than Fastfetch** on raw data collection.
-* **Native OS Install Date**: Probes root filesystem creation timestamp (`statx` birth time) and installer logs, showing exact installation date and relative age (`211 days ago`).
-* **First-Class WSL2 & Windows Support**: Normalizes virtualized 9P and DrvFS network mounts (`/mnt/c`, `/mnt/d`) to native **NTFS** labels, discovers dual integrated and discrete GPUs, and detects WSLg displays.
+* **Sub-2ms Latency**: Queries virtual filesystems (`/proc`, `/sys`), POSIX syscalls, and Win32 APIs directly with zero child process spawning (`fork`/`execve`). In statistical benchmarks, it is **~10x faster than Fastfetch** on raw data collection.
+* **Native OS Install Date**: Probes root filesystem creation timestamp (`statx` birth time) and installer logs, showing exact installation date and relative age (`6 days ago`).
+* **Zero-Fork Display EDID Parsing**: Probes monitor name, refresh rate, physical diagonal size, and panel type directly from DRM sysfs without spawning `xrandr` or display server queries.
+* **Declarative Configuration & Plugins**: Supports `~/.config/ferrisfetch/config.toml` and custom executable plugin modules with parallel execution.
 * **Standalone Static Binary**: Zero libc runtime dependencies when using the musl build. Drop the binary into any Linux system and it runs.
 
 ---
 
 ## Benchmarks
 
-Benchmarked against Fastfetch using [`hyperfine`](https://github.com/sharkdp/hyperfine) across **500+ iterations** on Ubuntu 24.04 (WSL2, AMD Ryzen 5 7535HS).
-
-To eliminate terminal rendering and ANSI formatting differences, both tools were benchmarked using their machine-readable JSON output mode with shell process overhead disabled (`--shell=none`):
-
-```bash
-hyperfine --shell=none --warmup 50 --min-runs 500 \
-  'fastfetch --format json' \
-  'ferrisfetch --json'
-```
+Benchmarked against Fastfetch across **50 iterations** on Fedora Linux 44 (AMD Ryzen 5 7535HS with 6 physical cores and 12 threads):
 
 ### Results
 
-| Command | Mean Runtime | Min Latency | Max Latency | User CPU Time | System Syscall Time | Relative Speedup |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| `fastfetch --format json` | `8.2 ms ± 3.4 ms` | `4.6 ms` | `26.2 ms` | `3.4 ms` | `4.8 ms` | `1.00` (Baseline) |
-| `ferrisfetch --json` | **`4.3 ms ± 3.6 ms`** | **`1.8 ms`** | `29.7 ms` | **`1.6 ms`** | **`2.7 ms`** | **1.89 ± 1.63x faster** |
+| Command | Mean Runtime | Median Latency | Min Latency | Max Latency | Relative Speedup |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `fastfetch` | `16.23 ms` | `15.80 ms` | `14.34 ms` | `28.55 ms` | `1.00` (Baseline) |
+| `ferrisfetch` | **`1.66 ms`** | **`1.64 ms`** | **`1.45 ms`** | **`2.20 ms`** | **9.75x faster** |
+
+*FerrisFetch achieves lower CPU time and syscall overhead by reading `/proc` and `sysfs` directly in Rust, executing active module collectors concurrently in parallel using `std::thread::scope`, and compiling with Fat Link-Time Optimization (LTO).*
 
 *FerrisFetch achieves lower CPU time and syscall overhead by reading `/proc` and `sysfs` directly in Rust, executing active module collectors concurrently in parallel using `std::thread::scope`, and compiling with Fat Link-Time Optimization (LTO).*
 
@@ -242,11 +243,13 @@ ferrisfetch --logo ferris
 | **Uptime** | Floating-point parse of `/proc/uptime` | `libc::sysinfo` uptime |
 | **Packages** | Local DB scans: `/var/lib/dpkg/status`, `pacman/local`, RPM, APK, flatpak, snap, cargo, npm, pip | `dpkg-query`, `rpm -qa`, `xbps-query` |
 | **Shell** | `/proc/<pid>/status` & `comm` ancestor inspection | `$SHELL` environment variable |
-| **Display** | DRM sysfs modes, `xrandr`, and `wlr-randr` refresh rates | Omitted if headless |
+| **Display** | DRM sysfs EDID binary parser (name, refresh rate, size in inches, built-in/external) | `xrandr` / `wlr-randr` |
 | **Desktop** | `$XDG_CURRENT_DESKTOP`, desktop metadata files, session type | Omitted if headless |
 | **WM** | Active window manager detection (Mutter, KWin, Sway, Hyprland, WSLg) | Process scan |
+| **WM Theme** | Window manager decoration theme (Adwaita, Breeze, xfwm, DWM) | Omitted if not detected |
 | **Terminal** | Environment signatures (`WT_SESSION`, `TERM_PROGRAM`), `/proc` process ancestry | `$TERM` variable |
-| **CPU** | `/proc/cpuinfo` parsing (model, clean brand, sockets, core count, frequency) | Sanitized model string |
+| **Terminal Font** | Dotfile parser for Kitty, Alacritty, Foot, WezTerm, Ghostty, and GNOME | Monospace fallback |
+| **CPU** | `/proc/cpuinfo` parsing (model, physical cores vs threads, live clock + boost max) | Sanitized model string |
 | **GPU** | Sysfs PCI class scan (`0x03xxxx`), local `pci.ids` lookup, VRAM calculation | `lspci -mm` query |
 | **Memory** | `/proc/meminfo` active memory calculation (`MemTotal - MemAvailable`) | Traditional buffer/cache calculation |
 | **Swap** | `/proc/meminfo` swap statistics and ZRAM algorithm detection | Omitted if swap is 0 |
@@ -255,6 +258,8 @@ ferrisfetch --logo ferris
 | **Local IP** | POSIX `getifaddrs` active interface address enumeration | Omitted if offline |
 | **Theme** | GTK 3/4 `settings.ini`, KDE `kdeglobals`, XFCE `xsettings.xml`, `$GTK_THEME` | Omitted if not configured |
 | **Icons** | GTK 3/4 `settings.ini`, KDE `kdeglobals`, XFCE `xsettings.xml` | Omitted if not configured |
+| **Font** | System desktop interface font from GTK, KDE, and GSettings | Omitted if not configured |
+| **Plugin** | Parallel custom script & command executor from `config.toml` or `plugins/` | Omitted if none configured |
 
 ---
 

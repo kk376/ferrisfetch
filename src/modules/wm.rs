@@ -195,7 +195,9 @@ pub fn detect_wm_theme() -> Option<String> {
         if let Ok(content) = fs::read_to_string(kwinrc_path) {
             for line in content.lines() {
                 if let Some((k, v)) = line.split_once('=') {
-                    if k.trim().eq_ignore_ascii_case("theme") || k.trim().eq_ignore_ascii_case("PluginName") {
+                    if k.trim().eq_ignore_ascii_case("theme")
+                        || k.trim().eq_ignore_ascii_case("PluginName")
+                    {
                         let clean = v.trim();
                         if !clean.is_empty() {
                             return Some(clean.to_string());

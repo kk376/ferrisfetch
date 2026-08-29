@@ -223,7 +223,13 @@ fn test_json_output_flag() {
 #[test]
 fn test_timings_flag() {
     let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
-    cmd.args(["--no-color", "--no-logo", "--timings", "-m", "os,kernel,cpu"]);
+    cmd.args([
+        "--no-color",
+        "--no-logo",
+        "--timings",
+        "-m",
+        "os,kernel,cpu",
+    ]);
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
     assert!(stdout.contains("Module Execution Timings"));

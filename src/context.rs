@@ -142,7 +142,8 @@ pub fn detect_color_level(no_color_flag: bool) -> ColorLevel {
         }
     }
 
-    let is_forced = std::env::var_os("CLICOLOR_FORCE").is_some() || std::env::var_os("FORCE_COLOR").is_some();
+    let is_forced =
+        std::env::var_os("CLICOLOR_FORCE").is_some() || std::env::var_os("FORCE_COLOR").is_some();
     if !is_forced && !std::io::stdout().is_terminal() {
         return ColorLevel::None;
     }
@@ -213,7 +214,8 @@ pub fn detect_nerd_font_support() -> bool {
     // Modern modern-terminal emulators with built-in or bundled Nerd Font glyph fallbacks
     if let Ok(tp) = std::env::var("TERM_PROGRAM") {
         let tp_lower = tp.to_lowercase();
-        if tp_lower.contains("ghostty") || tp_lower.contains("wezterm") || tp_lower.contains("warp") {
+        if tp_lower.contains("ghostty") || tp_lower.contains("wezterm") || tp_lower.contains("warp")
+        {
             return true;
         }
     }

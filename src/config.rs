@@ -61,14 +61,22 @@ pub fn parse_config_toml(content: &str) -> Config {
         }
 
         if trimmed.starts_with("[[plugins]]") || trimmed.starts_with("[[plugin]]") {
-            if let (Some(n), Some(c)) = (current_plugin_name.take(), current_plugin_command.take()) {
-                plugins.push(PluginConfig { name: n, command: c });
+            if let (Some(n), Some(c)) = (current_plugin_name.take(), current_plugin_command.take())
+            {
+                plugins.push(PluginConfig {
+                    name: n,
+                    command: c,
+                });
             }
             in_plugin_section = true;
             continue;
         } else if trimmed.starts_with('[') {
-            if let (Some(n), Some(c)) = (current_plugin_name.take(), current_plugin_command.take()) {
-                plugins.push(PluginConfig { name: n, command: c });
+            if let (Some(n), Some(c)) = (current_plugin_name.take(), current_plugin_command.take())
+            {
+                plugins.push(PluginConfig {
+                    name: n,
+                    command: c,
+                });
             }
             in_plugin_section = false;
             continue;
@@ -119,7 +127,10 @@ pub fn parse_config_toml(content: &str) -> Config {
     }
 
     if let (Some(n), Some(c)) = (current_plugin_name.take(), current_plugin_command.take()) {
-        plugins.push(PluginConfig { name: n, command: c });
+        plugins.push(PluginConfig {
+            name: n,
+            command: c,
+        });
     }
 
     if !plugins.is_empty() {
@@ -137,7 +148,13 @@ pub fn parse_toml_string_array(val: &str) -> Option<Vec<String>> {
     let inner = trimmed.trim_start_matches('[').trim_end_matches(']');
     let items: Vec<String> = inner
         .split(',')
-        .map(|s| s.trim().trim_matches('"').trim_matches('\'').trim().to_string())
+        .map(|s| {
+            s.trim()
+                .trim_matches('"')
+                .trim_matches('\'')
+                .trim()
+                .to_string()
+        })
         .filter(|s| !s.is_empty())
         .collect();
     Some(items)

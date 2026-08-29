@@ -141,12 +141,10 @@ pub fn parse_cpu_info(content: &str) -> Option<CpuInfo> {
                         current_core_id = Some(id);
                     }
                 }
-                "cpu cores" => {
-                    if cpu_cores_per_pkg.is_none() {
-                        if let Ok(c) = val.parse::<usize>() {
-                            if c > 0 {
-                                cpu_cores_per_pkg = Some(c);
-                            }
+                "cpu cores" if cpu_cores_per_pkg.is_none() => {
+                    if let Ok(c) = val.parse::<usize>() {
+                        if c > 0 {
+                            cpu_cores_per_pkg = Some(c);
                         }
                     }
                 }
@@ -227,7 +225,8 @@ pub fn get_cpu_freq_pair_ghz() -> (Option<f64>, Option<f64>) {
     let mut cur = None;
     let mut max = None;
 
-    if let Ok(content) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq") {
+    if let Ok(content) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq")
+    {
         if let Ok(khz) = content.trim().parse::<f64>() {
             if khz > 0.0 {
                 cur = Some(khz / 1_000_000.0);
@@ -254,7 +253,9 @@ pub fn get_cpu_freq_pair_ghz() -> (Option<f64>, Option<f64>) {
 
 #[cfg(not(windows))]
 pub fn get_cpu_freq_ghz() -> Option<f64> {
-    get_cpu_freq_pair_ghz().0.or_else(|| get_cpu_freq_pair_ghz().1)
+    get_cpu_freq_pair_ghz()
+        .0
+        .or_else(|| get_cpu_freq_pair_ghz().1)
 }
 
 #[cfg(not(windows))]

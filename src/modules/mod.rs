@@ -141,7 +141,9 @@ impl FromStr for ModuleId {
             "wm" | "windowmanager" => Ok(ModuleId::Wm),
             "wmtheme" | "wm_theme" => Ok(ModuleId::WmTheme),
             "terminal" | "term" => Ok(ModuleId::Terminal),
-            "terminalfont" | "terminal_font" | "termfont" | "term_font" => Ok(ModuleId::TerminalFont),
+            "terminalfont" | "terminal_font" | "termfont" | "term_font" => {
+                Ok(ModuleId::TerminalFont)
+            }
             "cpu" => Ok(ModuleId::Cpu),
             "gpu" => Ok(ModuleId::Gpu),
             "memory" | "mem" => Ok(ModuleId::Memory),
@@ -247,8 +249,9 @@ impl ModuleRegistry {
                 handles
                     .into_iter()
                     .map(|h| {
-                        h.join()
-                            .unwrap_or_else(|_| (Vec::new(), ModuleId::Title, std::time::Duration::ZERO))
+                        h.join().unwrap_or_else(|_| {
+                            (Vec::new(), ModuleId::Title, std::time::Duration::ZERO)
+                        })
                     })
                     .collect()
             });
@@ -285,7 +288,10 @@ mod tests {
         assert_eq!(ModuleId::from_str("icons"), Some(ModuleId::Icons));
         assert_eq!(ModuleId::from_str("font"), Some(ModuleId::Font));
         assert_eq!(ModuleId::from_str("wmtheme"), Some(ModuleId::WmTheme));
-        assert_eq!(ModuleId::from_str("terminalfont"), Some(ModuleId::TerminalFont));
+        assert_eq!(
+            ModuleId::from_str("terminalfont"),
+            Some(ModuleId::TerminalFont)
+        );
         assert_eq!(ModuleId::from_str("plugin"), Some(ModuleId::Plugin));
         assert_eq!(ModuleId::from_str("palette"), Some(ModuleId::Colors));
         assert_eq!(ModuleId::from_str("invalid_mod"), None);
