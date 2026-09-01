@@ -16,18 +16,23 @@ override_dh_auto_test:
 
 override_dh_auto_install:
 	# Install binary
-	install -d debian/ferrisfetch/usr/bin
-	install -m 0755 target/release/ferrisfetch debian/ferrisfetch/usr/bin/ferrisfetch
+	install -d debian/kkfetch/usr/bin
+	install -m 0755 target/release/kkfetch debian/kkfetch/usr/bin/kkfetch
 	# Install shell completions
-	install -d debian/ferrisfetch/usr/share/bash-completion/completions
-	install -m 0644 completions/ferrisfetch.bash debian/ferrisfetch/usr/share/bash-completion/completions/ferrisfetch
-	install -d debian/ferrisfetch/usr/share/zsh/vendor-completions
-	install -m 0644 completions/_ferrisfetch debian/ferrisfetch/usr/share/zsh/vendor-completions/_ferrisfetch
-	install -d debian/ferrisfetch/usr/share/fish/vendor_completions.d
-	install -m 0644 completions/ferrisfetch.fish debian/ferrisfetch/usr/share/fish/vendor_completions.d/ferrisfetch.fish
+	install -d debian/kkfetch/usr/share/bash-completion/completions
+	install -m 0644 completions/kkfetch.bash debian/kkfetch/usr/share/bash-completion/completions/kkfetch
+	install -d debian/kkfetch/usr/share/zsh/vendor-completions
+	install -m 0644 completions/_kkfetch debian/kkfetch/usr/share/zsh/vendor-completions/_kkfetch
+	install -d debian/kkfetch/usr/share/fish/vendor_completions.d
+	install -m 0644 completions/kkfetch.fish debian/kkfetch/usr/share/fish/vendor_completions.d/kkfetch.fish
+	# Install manpage
+	install -d debian/kkfetch/usr/share/man/man1
+	if [ -f docs/kkfetch.1 ]; then \
+		gzip -9cn docs/kkfetch.1 > debian/kkfetch/usr/share/man/man1/kkfetch.1.gz; \
+	fi
 	# Install documentation
-	install -d debian/ferrisfetch/usr/share/doc/ferrisfetch
-	install -m 0644 README.md debian/ferrisfetch/usr/share/doc/ferrisfetch/README.md
+	install -d debian/kkfetch/usr/share/doc/kkfetch
+	install -m 0644 README.md debian/kkfetch/usr/share/doc/kkfetch/README.md
 
 override_dh_auto_clean:
 	rm -rf .cargo

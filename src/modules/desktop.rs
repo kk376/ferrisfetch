@@ -97,7 +97,7 @@ pub fn detect_de_version(de_name: &str) -> Option<String> {
     let cache_dir = std::env::var_os("XDG_CACHE_HOME")
         .map(std::path::PathBuf::from)
         .or_else(|| std::env::var_os("HOME").map(|h| std::path::Path::new(&h).join(".cache")))
-        .map(|p| p.join("ferrisfetch"));
+        .map(|p| p.join("kkfetch"));
     let cache_file = cache_dir
         .as_ref()
         .map(|d| d.join(format!("de_{}.cache", lower.replace(' ', "_"))));

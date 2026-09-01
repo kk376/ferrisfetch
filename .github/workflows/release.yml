@@ -39,11 +39,11 @@ jobs:
 
       - name: Build release binaries
         run: |
-          cargo build --release --target x86_64-unknown-linux-gnu
-          cargo build --release --target x86_64-unknown-linux-musl
+          cargo build --release --bin kkfetch --target x86_64-unknown-linux-gnu
+          cargo build --release --bin kkfetch --target x86_64-unknown-linux-musl
           CC_aarch64_unknown_linux_musl=aarch64-linux-gnu-gcc CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc \
-            cargo build --release --target aarch64-unknown-linux-musl
-          cargo build --release --target x86_64-pc-windows-gnu
+            cargo build --release --bin kkfetch --target aarch64-unknown-linux-musl
+          cargo build --release --bin kkfetch --target x86_64-pc-windows-gnu
 
       - name: Package release artifacts
         run: |
@@ -52,76 +52,96 @@ jobs:
           mkdir -p dist
 
           # 1. Standalone Universal Static Binaries
-          cp target/x86_64-unknown-linux-musl/release/ferrisfetch dist/ferrisfetch-linux-musl-x86_64
-          chmod 755 dist/ferrisfetch-linux-musl-x86_64
+          cp target/x86_64-unknown-linux-musl/release/kkfetch dist/kkfetch-linux-musl-x86_64
+          chmod 755 dist/kkfetch-linux-musl-x86_64
 
-          cp target/aarch64-unknown-linux-musl/release/ferrisfetch dist/ferrisfetch-termux-arm64
-          chmod 755 dist/ferrisfetch-termux-arm64
+          cp target/aarch64-unknown-linux-musl/release/kkfetch dist/kkfetch-termux-arm64
+          chmod 755 dist/kkfetch-termux-arm64
 
-          # 2. Windows x86_64 Release Zip
+          # 2. Linux x86_64 Tarball (.tar.gz)
+          TAR_DIR="kkfetch-${VERSION}-x86_64-unknown-linux-gnu"
+          mkdir -p "${TAR_DIR}/completions"
+          cp target/x86_64-unknown-linux-gnu/release/kkfetch "${TAR_DIR}/kkfetch"
+          cp README.md LICENSE "${TAR_DIR}/"
+          [ -f docs/kkfetch.1 ] && cp docs/kkfetch.1 "${TAR_DIR}/"
+          [ -f completions/kkfetch.bash ] && cp completions/kkfetch.bash "${TAR_DIR}/completions/"
+          [ -f completions/_kkfetch ] && cp completions/_kkfetch "${TAR_DIR}/completions/"
+          [ -f completions/kkfetch.fish ] && cp completions/kkfetch.fish "${TAR_DIR}/completions/"
+          tar -czf "dist/kkfetch-${VERSION}-x86_64-unknown-linux-gnu.tar.gz" "${TAR_DIR}"
+          rm -rf "${TAR_DIR}"
+
+          # 3. Windows x86_64 Release Zip
           mkdir -p pkg-windows
-          cp target/x86_64-pc-windows-gnu/release/ferrisfetch.exe pkg-windows/
+          cp target/x86_64-pc-windows-gnu/release/kkfetch.exe pkg-windows/
           cp README.md LICENSE pkg-windows/
-          (cd pkg-windows && zip -r "../dist/ferrisfetch-windows-x86_64.zip" ferrisfetch.exe README.md LICENSE)
+          (cd pkg-windows && zip -r "../dist/kkfetch-windows-x86_64.zip" kkfetch.exe README.md LICENSE)
           rm -rf pkg-windows
 
-          # 3. Termux .deb
+          # 4. Termux .deb
           mkdir -p pkg-termux/data/data/com.termux/files/usr/bin pkg-termux/DEBIAN
-          cp target/aarch64-unknown-linux-musl/release/ferrisfetch pkg-termux/data/data/com.termux/files/usr/bin/
+          cp target/aarch64-unknown-linux-musl/release/kkfetch pkg-termux/data/data/com.termux/files/usr/bin/
           cat <<EOF > pkg-termux/DEBIAN/control
-          Package: ferrisfetch
+          Package: kkfetch
           Version: ${VERSION}-1
           Architecture: aarch64
-          Maintainer: FerrisFetch Packaging Team <packaging@ferrisfetch.rs>
+          Maintainer: Kushagra Kumar (kk376) <packaging@kkfetch.rs>
           Installed-Size: 1100
           Section: utils
           Priority: optional
-          Homepage: https://github.com/kk376/ferrisfetch
+          Homepage: https://github.com/kk376/kkfetch
           Description: Fast, lightweight Linux and Android system information fetch tool written in Rust
           EOF
-          dpkg-deb --build pkg-termux "dist/ferrisfetch_${VERSION}-1_termux_aarch64.deb"
+          dpkg-deb --build pkg-termux "dist/kkfetch_${VERSION}-1_termux_aarch64.deb"
           rm -rf pkg-termux
 
-          # 3. Debian Package (.deb)
+          # 5. Debian Package (.deb)
           cargo deb --target x86_64-unknown-linux-gnu --no-build
           cp target/x86_64-unknown-linux-gnu/debian/*.deb dist/
 
-          # 4. RPM Package (.rpm)
+          # 6. RPM Package (.rpm)
           cargo generate-rpm --target x86_64-unknown-linux-gnu
           cp target/generate-rpm/*.rpm dist/ || cp target/x86_64-unknown-linux-gnu/generate-rpm/*.rpm dist/
 
-          # 5. Arch Linux Package (.pkg.tar.zst)
+          # 7. Arch Linux Package (.pkg.tar.zst)
           PKGDIR="pkg-arch-build"
           mkdir -p "${PKGDIR}/usr/bin"
-          mkdir -p "${PKGDIR}/usr/share/doc/ferrisfetch"
-          mkdir -p "${PKGDIR}/usr/share/licenses/ferrisfetch"
+          mkdir -p "${PKGDIR}/usr/share/doc/kkfetch"
+          mkdir -p "${PKGDIR}/usr/share/licenses/kkfetch"
+          mkdir -p "${PKGDIR}/usr/share/man/man1"
+          mkdir -p "${PKGDIR}/usr/share/bash-completion/completions"
+          mkdir -p "${PKGDIR}/usr/share/zsh/site-functions"
+          mkdir -p "${PKGDIR}/usr/share/fish/vendor_completions.d"
 
-          cp target/x86_64-unknown-linux-gnu/release/ferrisfetch "${PKGDIR}/usr/bin/ferrisfetch"
-          cp README.md "${PKGDIR}/usr/share/doc/ferrisfetch/README.md"
-          cp LICENSE "${PKGDIR}/usr/share/licenses/ferrisfetch/LICENSE"
-          chmod 755 "${PKGDIR}/usr/bin/ferrisfetch"
+          cp target/x86_64-unknown-linux-gnu/release/kkfetch "${PKGDIR}/usr/bin/kkfetch"
+          cp README.md "${PKGDIR}/usr/share/doc/kkfetch/README.md"
+          cp LICENSE "${PKGDIR}/usr/share/licenses/kkfetch/LICENSE"
+          [ -f docs/kkfetch.1 ] && cp docs/kkfetch.1 "${PKGDIR}/usr/share/man/man1/kkfetch.1"
+          [ -f completions/kkfetch.bash ] && cp completions/kkfetch.bash "${PKGDIR}/usr/share/bash-completion/completions/kkfetch"
+          [ -f completions/_kkfetch ] && cp completions/_kkfetch "${PKGDIR}/usr/share/zsh/site-functions/_kkfetch"
+          [ -f completions/kkfetch.fish ] && cp completions/kkfetch.fish "${PKGDIR}/usr/share/fish/vendor_completions.d/kkfetch.fish"
+          chmod 755 "${PKGDIR}/usr/bin/kkfetch"
 
           SIZE=$(du -sb "${PKGDIR}" | awk '{print $1}')
           BUILDDATE=$(date +%s)
 
           cat <<EOF > "${PKGDIR}/.PKGINFO"
-          pkgname = ferrisfetch
-          pkgbase = ferrisfetch
+          pkgname = kkfetch
+          pkgbase = kkfetch
           pkgver = ${VERSION}-1
           pkgdesc = A fast, lightweight Linux system information fetch tool written in Rust
-          url = https://github.com/kk376/ferrisfetch
+          url = https://github.com/kk376/kkfetch
           builddate = ${BUILDDATE}
-          packager = GitHub Actions <actions@github.com>
+          packager = Kushagra Kumar (kk376) <packaging@kkfetch.rs>
           size = ${SIZE}
           arch = x86_64
           license = MIT
           depend = glibc
           EOF
 
-          (cd "${PKGDIR}" && tar --zstd -cf "../dist/ferrisfetch-${VERSION}-1-x86_64.pkg.tar.zst" .PKGINFO usr)
+          (cd "${PKGDIR}" && tar --zstd -cf "../dist/kkfetch-${VERSION}-1-x86_64.pkg.tar.zst" .PKGINFO usr)
           rm -rf "${PKGDIR}"
 
-          # 6. Generate SHA256 checksums
+          # 8. Generate SHA256 checksums
           (cd dist && sha256sum * > SHA256SUMS.txt)
 
       - name: Publish GitHub Release

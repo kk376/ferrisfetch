@@ -18,23 +18,23 @@
     in
     {
       packages = forAllSystems (system: {
-        ferrisfetch = nixpkgsFor.${system}.callPackage ./package.nix {
+        kkfetch = nixpkgsFor.${system}.callPackage ./package.nix {
           src = nixpkgs.lib.cleanSource ../..;
         };
-        default = self.packages.${system}.ferrisfetch;
+        default = self.packages.${system}.kkfetch;
       });
 
       apps = forAllSystems (system: {
-        ferrisfetch = {
+        kkfetch = {
           type = "app";
-          program = "${self.packages.${system}.ferrisfetch}/bin/ferrisfetch";
+          program = "${self.packages.${system}.kkfetch}/bin/kkfetch";
         };
-        default = self.apps.${system}.ferrisfetch;
+        default = self.apps.${system}.kkfetch;
       });
 
       devShells = forAllSystems (system: {
         default = nixpkgsFor.${system}.mkShell {
-          inputsFrom = [ self.packages.${system}.ferrisfetch ];
+          inputsFrom = [ self.packages.${system}.kkfetch ];
           packages = with nixpkgsFor.${system}; [
             cargo
             rustc
@@ -46,7 +46,7 @@
       });
 
       overlays.default = final: prev: {
-        ferrisfetch = final.callPackage ./package.nix {
+        kkfetch = final.callPackage ./package.nix {
           src = final.lib.cleanSource ../..;
         };
       };

@@ -1,15 +1,15 @@
-# Contributor: FerrisFetch Packaging Team <packaging@ferrisfetch.rs>
-# Maintainer: FerrisFetch Packaging Team <packaging@ferrisfetch.rs>
-pkgname=ferrisfetch
+# Contributor: Kushagra Kumar (kk376) <kk376@users.noreply.github.com>
+# Maintainer: Kushagra Kumar (kk376) <kk376@users.noreply.github.com>
+pkgname=kkfetch
 pkgver=0.11.7
 pkgrel=0
 pkgdesc="Fast, lightweight Linux and Android system information fetch CLI written in Rust"
-url="https://github.com/kk376/ferrisfetch"
+url="https://github.com/kk376/kkfetch"
 arch="all"
 license="MIT"
 makedepends="cargo cargo-auditable"
 subpackages="$pkgname-doc $pkgname-bash-completion $pkgname-zsh-completion $pkgname-fish-completion:fishcomp:noarch"
-source="$pkgname-$pkgver.tar.gz::https://github.com/kk376/ferrisfetch/archive/refs/tags/v$pkgver.tar.gz"
+source="$pkgname-$pkgver.tar.gz::https://github.com/kk376/kkfetch/archive/refs/tags/v$pkgver.tar.gz"
 options="net"
 
 prepare() {
@@ -35,6 +35,10 @@ package() {
 	install -Dm644 "completions/$pkgname.fish" \
 		"$pkgdir/usr/share/fish/vendor_completions.d/$pkgname.fish"
 
+	if [ -f "docs/$pkgname.1" ]; then
+		install -Dm644 "docs/$pkgname.1" "$pkgdir/usr/share/man/man1/$pkgname.1"
+	fi
+
 	install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 	install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
 }
@@ -48,5 +52,5 @@ fishcomp() {
 }
 
 sha512sums="
-1184134e96107122e1191275eaf7bce8cadf10625ec9dce38f48a3f2f00eec46db356e01792d32d52ce4097abfe9f0a066db7afb5024e666308a004019d7e19a  ferrisfetch-0.8.6.tar.gz
+1184134e96107122e1191275eaf7bce8cadf10625ec9dce38f48a3f2f00eec46db356e01792d32d52ce4097abfe9f0a066db7afb5024e666308a004019d7e19a  kkfetch-0.11.7.tar.gz
 "

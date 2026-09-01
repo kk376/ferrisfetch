@@ -1,6 +1,6 @@
-# Nix Packaging for FerrisFetch
+# Nix Packaging for KKFetch
 
-This directory contains Nix packaging manifests for FerrisFetch following standard Nixpkgs conventions.
+This directory contains Nix packaging manifests for KKFetch following standard Nixpkgs conventions.
 
 ## Manifests
 
@@ -24,7 +24,7 @@ nix run --impure ./packaging/nix -- --help
 
 ```bash
 nix-build packaging/nix
-./result/bin/ferrisfetch
+./result/bin/kkfetch
 ```
 
 ### Development Shell
@@ -35,7 +35,7 @@ nix develop --impure ./packaging/nix
 
 ### Nixpkgs Inclusion
 
-To submit FerrisFetch to upstream Nixpkgs (`nixpkgs/pkgs/by-name/fe/ferrisfetch/package.nix`):
+To submit KKFetch to upstream Nixpkgs (`nixpkgs/pkgs/by-name/kk/kkfetch/package.nix`):
 
 1. Set `hash` in `src = fetchFromGitHub { ... }` to the release source tarball SRI hash.
 2. Replace `cargoLock.lockFile` with `cargoHash = "sha256-...";` (generated using `nix-prefetch-github` or running the build once to obtain the fixed-output derivation hash).

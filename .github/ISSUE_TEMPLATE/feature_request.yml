@@ -1,5 +1,5 @@
 name: Feature Request
-description: Propose an idea, new module, or distribution logo for FerrisFetch
+description: Propose an idea, new module, or distribution logo for KKFetch
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
@@ -31,7 +31,7 @@ body:
     id: proposed_solution
     attributes:
       label: Proposed Solution
-      description: How should this feature work in FerrisFetch? Mention relevant Linux `/proc` or `/sys` files if known.
+      description: How should this feature work in KKFetch? Mention relevant Linux `/proc` or `/sys` files if known.
       placeholder: Describe how the module or feature should detect and format the information.
     validations:
       required: true

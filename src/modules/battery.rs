@@ -47,25 +47,25 @@ fn get_cache_path() -> std::path::PathBuf {
     if let Ok(runtime_dir) = std::env::var("XDG_RUNTIME_DIR") {
         let dir = std::path::PathBuf::from(runtime_dir);
         if dir.is_dir() {
-            return dir.join("ferrisfetch_battery.cache");
+            return dir.join("kkfetch_battery.cache");
         }
     }
-    // 2. Prefer $XDG_CACHE_HOME or ~/.cache/ferrisfetch/
+    // 2. Prefer $XDG_CACHE_HOME or ~/.cache/kkfetch/
     if let Ok(cache_home) = std::env::var("XDG_CACHE_HOME") {
-        let dir = std::path::PathBuf::from(cache_home).join("ferrisfetch");
+        let dir = std::path::PathBuf::from(cache_home).join("kkfetch");
         let _ = fs::create_dir_all(&dir);
         return dir.join("battery.cache");
     }
     if let Ok(home) = std::env::var("HOME") {
         let dir = std::path::PathBuf::from(home)
             .join(".cache")
-            .join("ferrisfetch");
+            .join("kkfetch");
         let _ = fs::create_dir_all(&dir);
         return dir.join("battery.cache");
     }
     // 3. Fallback to private user-isolated temporary directory (mode 0700)
     let uid = unsafe { libc::getuid() };
-    let temp_dir = std::env::temp_dir().join(format!("ferrisfetch-{}", uid));
+    let temp_dir = std::env::temp_dir().join(format!("kkfetch-{}", uid));
     let _ = fs::create_dir_all(&temp_dir);
     #[cfg(unix)]
     {

@@ -3,10 +3,10 @@
 <pkgmetadata>
 	<maintainer type="person">
 		<email>kk376@users.noreply.github.com</email>
-		<name>Kushagra Kumar</name>
+		<name>Kushagra Kumar (kk376)</name>
 	</maintainer>
 	<upstream>
-		<bugs-to>https://github.com/kk376/ferrisfetch/issues</bugs-to>
-		<remote-id type="github">kk376/ferrisfetch</remote-id>
+		<bugs-to>https://github.com/kk376/kkfetch/issues</bugs-to>
+		<remote-id type="github">kk376/kkfetch</remote-id>
 	</upstream>
 </pkgmetadata>

@@ -9,7 +9,7 @@ use std::process::Command;
 
 pub struct PluginCollector;
 
-/// Checks whether ferrisfetch is running in an elevated/privileged context (e.g. sudo, su, setuid).
+/// Checks whether kkfetch is running in an elevated/privileged context (e.g. sudo, su, setuid).
 /// In elevated contexts, user-configured arbitrary plugins are intentionally disabled to prevent
 /// privilege escalation via untrusted user configuration (F1).
 #[cfg(unix)]
@@ -29,7 +29,7 @@ fn is_elevated_context() -> bool {
     false
 }
 
-/// Checks whether a plugin file in ~/.config/ferrisfetch/plugins/ is safe and valid to execute (F2).
+/// Checks whether a plugin file in ~/.config/kkfetch/plugins/ is safe and valid to execute (F2).
 /// Requires:
 /// 1. Regular file (not symlink or directory)
 /// 2. Not a hidden file or editor backup (.swp, ~)
@@ -103,7 +103,7 @@ impl Collector for PluginCollector {
             }
         }
 
-        // 2. Executable scripts in ~/.config/ferrisfetch/plugins/ (F2)
+        // 2. Executable scripts in ~/.config/kkfetch/plugins/ (F2)
         if let Some(plugins_dir) = crate::config::get_default_config_path()
             .and_then(|p| p.parent().map(|d| d.join("plugins")))
         {

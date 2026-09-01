@@ -19,7 +19,7 @@ pub struct PluginConfig {
 }
 
 impl Config {
-    /// Loads configuration from default paths ($XDG_CONFIG_HOME/ferrisfetch/config.toml or ~/.config/ferrisfetch/config.toml).
+    /// Loads configuration from default paths ($XDG_CONFIG_HOME/kkfetch/config.toml or ~/.config/kkfetch/config.toml).
     pub fn load_default() -> Self {
         if let Some(path) = get_default_config_path() {
             if path.exists() {
@@ -35,18 +35,18 @@ impl Config {
 pub fn get_default_config_path() -> Option<PathBuf> {
     if let Ok(xdg) = std::env::var("XDG_CONFIG_HOME") {
         if !xdg.is_empty() {
-            return Some(PathBuf::from(xdg).join("ferrisfetch/config.toml"));
+            return Some(PathBuf::from(xdg).join("kkfetch/config.toml"));
         }
     }
     if let Ok(home) = std::env::var("HOME") {
         if !home.is_empty() {
-            return Some(PathBuf::from(home).join(".config/ferrisfetch/config.toml"));
+            return Some(PathBuf::from(home).join(".config/kkfetch/config.toml"));
         }
     }
     None
 }
 
-/// Fast zero-dependency parser for ferrisfetch TOML config file.
+/// Fast zero-dependency parser for kkfetch TOML config file.
 pub fn parse_config_toml(content: &str) -> Config {
     let mut config = Config::default();
     let mut plugins = Vec::new();
@@ -167,7 +167,7 @@ mod tests {
     #[test]
     fn test_parse_config_toml_standard() {
         let toml = r#"
-# Ferrisfetch config
+# KKFetch config
 modules = ["os", "kernel", "cpu", "memory"]
 disable = ["gpu"]
 logo = "fedora"

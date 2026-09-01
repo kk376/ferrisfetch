@@ -1,9 +1,9 @@
 use clap::Parser;
-use ferrisfetch::cli::Cli;
-use ferrisfetch::context::FetchContext;
-use ferrisfetch::modules::{ModuleId, ModuleRegistry};
-use ferrisfetch::output::formatter::{render_json, render_layout};
-use ferrisfetch::output::logo::match_logo;
+use kkfetch::cli::Cli;
+use kkfetch::context::FetchContext;
+use kkfetch::modules::{ModuleId, ModuleRegistry};
+use kkfetch::output::formatter::{render_json, render_layout};
+use kkfetch::output::logo::match_logo;
 
 fn main() {
     let cli = Cli::parse();

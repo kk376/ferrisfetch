@@ -1,173 +1,173 @@
-ferrisfetch (0.11.7-1) unstable; urgency=medium
+kkfetch (0.11.7-1) unstable; urgency=medium
 
   * Security release 0.11.7 - Hardened plugin execution, canonical subprocess paths, user-isolated cache, and output sanitization.
 
- -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 10:35:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 29 Aug 2026 10:35:00 +0530
 
-ferrisfetch (0.11.6-1) unstable; urgency=medium
+kkfetch (0.11.6-1) unstable; urgency=medium
 
   * Release 0.11.6 - Zero-wait stale-while-revalidate battery architecture.
 
- -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 08:27:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 29 Aug 2026 08:27:00 +0530
 
-ferrisfetch (0.11.5-1) unstable; urgency=medium
+kkfetch (0.11.5-1) unstable; urgency=medium
 
   * Release 0.11.5 - Instantaneous terminal version probing and tmpfs runtime caching.
 
- -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 08:15:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 29 Aug 2026 08:15:00 +0530
 
-ferrisfetch (0.11.4-1) unstable; urgency=medium
+kkfetch (0.11.4-1) unstable; urgency=medium
 
   * Release 0.11.4 - Exhaustive multi-vendor integrated & SoC GPU taxonomy catalog.
 
- -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 07:54:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 29 Aug 2026 07:54:00 +0530
 
-ferrisfetch (0.11.3-1) unstable; urgency=medium
+kkfetch (0.11.3-1) unstable; urgency=medium
 
   * Release 0.11.3 - Fix integrated GPU classification for AMD Radeon 610M and mobile APUs.
 
- -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 07:45:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 29 Aug 2026 07:45:00 +0530
 
-ferrisfetch (0.11.2-1) unstable; urgency=medium
+kkfetch (0.11.2-1) unstable; urgency=medium
 
   * Release 0.11.2 - Instantaneous battery probing & tmpfs runtime cache.
 
- -- Kushagra <kushagra376@gmail.com>  Sat, 29 Aug 2026 07:27:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 29 Aug 2026 07:27:00 +0530
 
-ferrisfetch (0.11.1-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.11.1-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.11.1: Dedicated GPU VRAM memory probing and PCI resource parsing.
   * Windows display adapter VRAM resolution.
   * Updated benchmark suites and documentation.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 29 Aug 2026 06:40:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 29 Aug 2026 06:40:00 +0530
 
-ferrisfetch (0.11.0-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.11.0-1~ppa1~noble) noble; urgency=medium
 
-  * Release version 0.11.0: Zero-dependency config parser (~/.config/ferrisfetch/config.toml).
+  * Release version 0.11.0: Zero-dependency config parser (~/.config/kkfetch/config.toml).
   * Custom script plugins, CPU topology, dual clock, sysfs EDID, font, wmtheme, cursor, and terminal versioning.
   * Added dedicated ASCII logos and multi-OS detection for Android, macOS, OpenBSD, NetBSD.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 29 Aug 2026 06:18:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 29 Aug 2026 06:18:00 +0530
 
-ferrisfetch (0.10.2-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.10.2-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.10.2: Permanent dual-boot RTC local mode detection via /etc/adjtime.
   * Localized calendar-day relative time calculation (displaying yesterday).
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Mon, 24 Aug 2026 16:00:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Mon, 24 Aug 2026 16:00:00 +0530
 
-ferrisfetch (0.10.1-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.10.1-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.10.1: Clean GPU marketing model resolution.
   * Dual-boot RTC installer clock skew normalization for OS installation date.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Mon, 24 Aug 2026 01:05:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Mon, 24 Aug 2026 01:05:00 +0530
 
-ferrisfetch (0.10.0-1~ppa3~noble) noble; urgency=medium
+kkfetch (0.10.0-1~ppa3~noble) noble; urgency=medium
 
   * Patch rust-version and edition in vendor crates for Cargo 1.75.0 compatibility.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 20:18:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 20:18:00 +0530
 
-ferrisfetch (0.10.0-1~ppa2~noble) noble; urgency=medium
+kkfetch (0.10.0-1~ppa2~noble) noble; urgency=medium
 
   * Fix vendored cargo edition compatibility for Launchpad MSRV 1.75.0.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 19:55:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 19:55:00 +0530
 
-ferrisfetch (0.10.0-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.10.0-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.10.0: Milestone release with native Win32 zero-subprocess shell and terminal resolution.
   * Dedicated Windows package manager pipeline with Scoop support.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 19:15:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 19:15:00 +0530
 
-ferrisfetch (0.9.9-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.9.9-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.9.9: Preserve package checksum hashes in vendored crates.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 16:25:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 16:25:00 +0530
 
-ferrisfetch (0.9.8-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.9.8-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.9.8: Fixed vendored cargo checksums and offline paths.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 16:10:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 16:10:00 +0530
 
-ferrisfetch (0.9.7-1~ppa2~noble) noble; urgency=medium
+kkfetch (0.9.7-1~ppa2~noble) noble; urgency=medium
 
   * Fix vendored sources path in cargo config for Launchpad offline builds.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 16:00:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 16:00:00 +0530
 
-ferrisfetch (0.9.7-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.9.7-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.9.7: RPM mtime package caching and DRM-first display resolution optimizations.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 15:40:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 15:40:00 +0530
 
-ferrisfetch (0.9.6-1~ppa2~noble) noble; urgency=medium
+kkfetch (0.9.6-1~ppa2~noble) noble; urgency=medium
 
   * Patch vendored crates for Cargo 1.75.0 edition 2021 compatibility on Ubuntu Noble.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 00:25:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 00:25:00 +0530
 
-ferrisfetch (0.9.6-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.9.6-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.9.6: WSL host version discovery and vendored cargo checksum fix.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 00:15:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 00:15:00 +0530
 
-ferrisfetch (0.9.5-1~ppa2~noble) noble; urgency=medium
+kkfetch (0.9.5-1~ppa2~noble) noble; urgency=medium
 
   * Fix vendored cargo checksums for offline Launchpad builds.
   * Add WSL version discovery to Host module (WSL2 <version>).
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sun, 23 Aug 2026 00:00:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 23 Aug 2026 00:00:00 +0530
 
-ferrisfetch (0.9.5-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.9.5-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.9.5: WSLg version discovery and GPU type classification.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 23:02:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 23:02:00 +0530
 
-ferrisfetch (0.9.0-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.9.0-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.9.0: Distro-colored ASCII logos with high-contrast white outer layer.
   * Enhanced ASCII Distro Art: High-contrast white outer framing with brand-colored inner emblems across all 26+ distributions.
   * WSL2 Storage Resolution: Normalized 9p/drvfs virtualization filesystem mappings to native NTFS for Windows drive mounts.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 16:00:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 16:00:00 +0000
 
-ferrisfetch (0.8.6-4~ppa1~noble) noble; urgency=medium
+kkfetch (0.8.6-4~ppa1~noble) noble; urgency=medium
 
   * Clear files mapping in vendored .cargo-checksum.json to prevent build failures on debian-stripped dotfiles.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 15:00:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 15:00:00 +0000
 
-ferrisfetch (0.8.6-3~ppa1~noble) noble; urgency=medium
+kkfetch (0.8.6-3~ppa1~noble) noble; urgency=medium
 
   * Patch vendored clap_lex crate to edition 2021 for Cargo 1.75 compatibility on Ubuntu 24.04 Noble.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 14:48:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 14:48:00 +0000
 
-ferrisfetch (0.8.6-2~ppa1~noble) noble; urgency=medium
+kkfetch (0.8.6-2~ppa1~noble) noble; urgency=medium
 
   * Fix vendored sources path in offline .cargo/config.toml (debian/vendor).
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 14:32:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 14:32:00 +0000
 
-ferrisfetch (0.8.6-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.8.6-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.8.6: Sub-3ms parallel collection, fat LTO, and zero-overhead caching.
   * Enable fat LTO, single codegen units, and abort panic in release profile.
   * Implement concurrent collector execution using std::thread::scope.
   * Eliminate subprocess latency with mtime-aware persistent caches for GPU, Theme, Shell, and DPKG.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 14:15:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 14:15:00 +0000
 
-ferrisfetch (0.8.5-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.8.5-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.8.5: Neofetch dual-tone ASCII art suite and dual-tone ANSI parser.
   * Integrate classic Neofetch ASCII art logos across 26 Linux distributions and Windows.
@@ -175,47 +175,47 @@ ferrisfetch (0.8.5-1~ppa1~noble) noble; urgency=medium
   * Add filesystem type discovery on Disks (ext4, btrfs, ntfs, 9p, vfat, zfs).
   * Add active ZRAM compression algorithm discovery on Swap (LZ4, ZSTD, LZO).
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 13:25:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 13:25:00 +0000
 
-ferrisfetch (0.8.0-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.8.0-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.8.0: Filesystem types, ZRAM compression detection, and redesigned ASCII logos.
   * Add filesystem type discovery on Disks (ext4, btrfs, ntfs, 9p, vfat, zfs).
   * Add active ZRAM compression algorithm discovery on Swap (LZ4, ZSTD, LZO).
   * Redesign high-fidelity ASCII art logos across all Linux distributions and Windows.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 12:50:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 12:50:00 +0000
 
-ferrisfetch (0.7.0-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.7.0-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.7.0: Localized system installation timestamp.
   * Add native local timezone and DST resolution for Linux and Windows.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 08:35:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 08:35:00 +0000
 
-ferrisfetch (0.6.0-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.6.0-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.6.0: Native Windows platform support and cross-platform hardware detection.
   * Add Win32 system probes: OS, Kernel, CPU, GPU, Memory, Disk, Battery, Uptime, Theme, and Desktop.
   * Add package managers (WinGet, Chocolatey, Cargo, NPM, Pip).
   * Add high-resolution ANSI ASCII art logos for Windows 11, Windows 10, and Classic Windows.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 06:15:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 06:15:00 +0000
 
-ferrisfetch (0.5.0.7-1~ppa1~noble) noble; urgency=medium
+kkfetch (0.5.0.7-1~ppa1~noble) noble; urgency=medium
 
   * Pin all dev-dependencies (tempfile 3.10.1, assert_cmd 2.0.14, predicates 3.1.0) to eliminate getrandom 0.4.x.
   * Ensure full compatibility with rustc 1.75.0 on Ubuntu 24.04 noble during dh_auto_test.
 
- -- Kushagra Kumar <kkushagra86@gmail.com>  Sat, 22 Aug 2026 03:48:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sat, 22 Aug 2026 03:48:00 +0000
 
-ferrisfetch (0.4.2-1) unstable; urgency=medium
+kkfetch (0.4.2-1) unstable; urgency=medium
 
   * Release version 0.4.2.
 
- -- FerrisFetch Packaging Team <packaging@ferrisfetch.rs>  Wed, 19 Aug 2026 10:40:00 +0530
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Wed, 19 Aug 2026 10:40:00 +0530
 
-ferrisfetch (0.2.0-1) unstable; urgency=medium
+kkfetch (0.2.0-1) unstable; urgency=medium
 
   * Add structured JSON output flag (--json).
   * Fix GPU detection: parse system pci.ids and prevent ACPI motherboard label override.
@@ -223,9 +223,9 @@ ferrisfetch (0.2.0-1) unstable; urgency=medium
   * Add Homebrew and Gentoo Emerge package managers.
   * Add ASCII art logos for NixOS, Kali, FreeBSD, Slackware, Artix, and Zorin OS.
 
- -- FerrisFetch Packaging Team <packaging@ferrisfetch.rs>  Wed, 19 Aug 2026 07:00:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Wed, 19 Aug 2026 07:00:00 +0000
 
-ferrisfetch (0.1.0-1) unstable; urgency=medium
+kkfetch (0.1.0-1) unstable; urgency=medium
 
   * Initial release (0.1.0).
   * Fast, lightweight Linux system information fetch tool written in Rust.
@@ -233,4 +233,4 @@ ferrisfetch (0.1.0-1) unstable; urgency=medium
   * ANSI 256-color distro ASCII art and customizable module ordering.
   * Shell completions for Bash, Zsh, and Fish.
 
- -- FerrisFetch Packaging Team <packaging@ferrisfetch.rs>  Sun, 16 Aug 2026 12:00:00 +0000
+ -- Kushagra Kumar (kk376) <kk376@users.noreply.github.com>  Sun, 16 Aug 2026 12:00:00 +0000

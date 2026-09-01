@@ -4,9 +4,9 @@ use std::path::Path;
 #[test]
 fn test_completion_files_exist_and_cover_all_flags() {
     let base_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("completions");
-    let bash_file = base_dir.join("ferrisfetch.bash");
-    let zsh_file = base_dir.join("_ferrisfetch");
-    let fish_file = base_dir.join("ferrisfetch.fish");
+    let bash_file = base_dir.join("kkfetch.bash");
+    let zsh_file = base_dir.join("_kkfetch");
+    let fish_file = base_dir.join("kkfetch.fish");
 
     assert!(bash_file.is_file(), "Bash completion file missing");
     assert!(zsh_file.is_file(), "Zsh completion file missing");
@@ -15,6 +15,19 @@ fn test_completion_files_exist_and_cover_all_flags() {
     let bash_content = fs::read_to_string(&bash_file).unwrap();
     let zsh_content = fs::read_to_string(&zsh_file).unwrap();
     let fish_content = fs::read_to_string(&fish_file).unwrap();
+
+    assert!(
+        bash_content.contains("kkfetch"),
+        "Bash completions missing kkfetch command name"
+    );
+    assert!(
+        zsh_content.contains("kkfetch"),
+        "Zsh completions missing kkfetch command name"
+    );
+    assert!(
+        fish_content.contains("kkfetch"),
+        "Fish completions missing kkfetch command name"
+    );
 
     let required_flags = [
         "--modules",

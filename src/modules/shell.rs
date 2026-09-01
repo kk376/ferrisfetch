@@ -116,7 +116,7 @@ fn get_shell_cli_version(shell_name: &str) -> Option<String> {
     let cache_dir = std::env::var_os("XDG_CACHE_HOME")
         .map(std::path::PathBuf::from)
         .or_else(|| std::env::var_os("HOME").map(|h| std::path::Path::new(&h).join(".cache")))
-        .map(|p| p.join("ferrisfetch"));
+        .map(|p| p.join("kkfetch"));
 
     let cache_file = cache_dir
         .as_ref()
@@ -374,7 +374,7 @@ pub fn detect_shell() -> Option<String> {
 pub fn detect_shell() -> Option<String> {
     let mut current_pid = unsafe { libc::getpid() as u32 };
 
-    // Traverse process parent chain (up to 5 ancestors) to identify the interactive shell that invoked ferrisfetch
+    // Traverse process parent chain (up to 5 ancestors) to identify the interactive shell that invoked kkfetch
     for _ in 0..5 {
         if let Some(ppid) = get_ppid(current_pid) {
             if ppid <= 1 {

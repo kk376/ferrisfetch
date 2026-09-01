@@ -1,14 +1,14 @@
-# Maintainer: Arch Linux Packaging Specialist <kk376@archlinux.local>
-pkgname=ferrisfetch
+# Maintainer: Kushagra Kumar (kk376) <kk376@archlinux.local>
+pkgname=kkfetch
 pkgver=0.8.5
 pkgrel=1
 pkgdesc="A fast, lightweight Linux system information fetch tool written in Rust"
 arch=('x86_64' 'aarch64')
-url="https://github.com/kk376/ferrisfetch"
+url="https://github.com/kk376/kkfetch"
 license=('MIT')
 depends=('glibc')
 makedepends=('cargo' 'rust')
-source=("$pkgname-$pkgver.tar.gz::https://github.com/kk376/ferrisfetch/archive/refs/tags/v$pkgver.tar.gz")
+source=("$pkgname-$pkgver.tar.gz::https://github.com/kk376/kkfetch/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('SKIP')
 
 build() {

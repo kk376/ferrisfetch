@@ -1,20 +1,21 @@
-# Template file for 'ferrisfetch'
-pkgname=ferrisfetch
+# Template file for 'kkfetch'
+pkgname=kkfetch
 version=0.11.7
 revision=1
 build_style=cargo
 short_desc="Fast, lightweight Linux and Android system information fetch CLI written in Rust"
-maintainer="Kushagra Kumar <kkushagra86@gmail.com>"
+maintainer="Kushagra Kumar (kk376) <kk376@users.noreply.github.com>"
 license="MIT"
-homepage="https://github.com/kk376/ferrisfetch"
-changelog="https://raw.githubusercontent.com/kk376/ferrisfetch/main/CHANGELOG.md"
-distfiles="https://github.com/kk376/ferrisfetch/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/kk376/kkfetch"
+changelog="https://raw.githubusercontent.com/kk376/kkfetch/main/CHANGELOG.md"
+distfiles="https://github.com/kk376/kkfetch/archive/refs/tags/v${version}.tar.gz"
 checksum=6e2fbf052988cb945c436087f42dcf9ebd8885d3cd19638b58221e7d41eca9df
 
 post_install() {
 	vlicense LICENSE
 	vdoc README.md
-	vcompletion completions/ferrisfetch.bash bash ferrisfetch
-	vcompletion completions/_ferrisfetch zsh
-	vcompletion completions/ferrisfetch.fish fish
+	vman docs/kkfetch.1
+	vcompletion completions/kkfetch.bash bash kkfetch
+	vcompletion completions/_kkfetch zsh
+	vcompletion completions/kkfetch.fish fish
 }

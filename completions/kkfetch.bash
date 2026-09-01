@@ -1,6 +1,6 @@
-# Bash completion script for ferrisfetch
+# Bash completion script for kkfetch
 
-_ferrisfetch() {
+_kkfetch() {
     local cur prev words cword
     if declare -F _init_completion >/dev/null 2>&1; then
         _init_completion -n : 2>/dev/null
@@ -50,7 +50,7 @@ _ferrisfetch() {
 }
 
 if [[ "${BASH_VERSINFO[0]}" -eq 4 && "${BASH_VERSINFO[1]}" -ge 4 || "${BASH_VERSINFO[0]}" -gt 4 ]]; then
-    complete -F _ferrisfetch -o nosort -o bashdefault -o default ferrisfetch
+    complete -F _kkfetch -o nosort -o bashdefault -o default kkfetch
 else
-    complete -F _ferrisfetch -o bashdefault -o default ferrisfetch
+    complete -F _kkfetch -o bashdefault -o default kkfetch
 fi

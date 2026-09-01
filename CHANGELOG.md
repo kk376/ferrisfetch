@@ -8,10 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.11.7] - 2026-08-29
 
 ### Security
-- **Plugin Privilege Escalation Guardrail (F1)**: Automatically disable arbitrary shell plugin execution when `ferrisfetch` is invoked in elevated contexts (`sudo`, `su`, `setuid` where `euid == 0` or `euid != uid`) to prevent privilege escalation via untrusted user configs. *(Discovered & reported by Laysnb)*
-- **Strict Executable Bit & Ownership Validation for Plugins (F2)**: Enforce regular file ownership and executable permission bit (`+x`) checks on `~/.config/ferrisfetch/plugins/` scripts, ignoring non-executable files, hidden files, and editor swap/backup files. *(Discovered & reported by Laysnb)*
+- **Plugin Privilege Escalation Guardrail (F1)**: Automatically disable arbitrary shell plugin execution when `kkfetch` is invoked in elevated contexts (`sudo`, `su`, `setuid` where `euid == 0` or `euid != uid`) to prevent privilege escalation via untrusted user configs. *(Discovered & reported by Laysnb)*
+- **Strict Executable Bit & Ownership Validation for Plugins (F2)**: Enforce regular file ownership and executable permission bit (`+x`) checks on `~/.config/kkfetch/plugins/` scripts, ignoring non-executable files, hidden files, and editor swap/backup files. *(Discovered & reported by Laysnb)*
 - **Canonical System Path Resolution for Subprocesses (F3)**: Replaced bare-name `$PATH` resolution for all helper commands (`lspci`, `dpkg-query`, `rpm`, `gsettings`, `dconf`, `xrandr`, `wlr-randr`, `getprop`) with canonical trusted system directories (`/usr/bin`, `/bin`, `/usr/sbin`, `/sbin`, `/usr/local/bin`), eliminating untrusted PATH search hijacking. *(Discovered & reported by Laysnb)*
-- **User-Isolated Private Cache Path Resolution (F4)**: Hardened tmpfs caching in `battery` and `terminal` modules to prefer `$XDG_RUNTIME_DIR` (mode 0700) and `$XDG_CACHE_HOME` (`~/.cache/ferrisfetch/`), creating private user-owned directories (`/tmp/ferrisfetch-<uid>/`) with `0o700` permissions on temp fallback. *(Discovered & reported by Laysnb)*
+- **User-Isolated Private Cache Path Resolution (F4)**: Hardened tmpfs caching in `battery` and `terminal` modules to prefer `$XDG_RUNTIME_DIR` (mode 0700) and `$XDG_CACHE_HOME` (`~/.cache/kkfetch/`), creating private user-owned directories (`/tmp/kkfetch-<uid>/`) with `0o700` permissions on temp fallback. *(Discovered & reported by Laysnb)*
 - **Terminal Control Sequence Sanitization & JSON Key Escaping (F5)**: Added `sanitize_terminal_string` to strip dangerous OSC terminal manipulation codes and raw non-printable C0 control characters from external display values, and implemented complete escaping for JSON output keys. *(Discovered & reported by Laysnb)*
 
 ## [0.11.6] - 2026-08-29
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.11.2] - 2026-08-29
 
 ### Optimized
-- **Instantaneous Battery Probing & Tmpfs Runtime Cache**: Implemented single-pass sysfs scan with non-blocking 15-second TTL tmpfs runtime caching in `$XDG_RUNTIME_DIR/ferrisfetch_battery.cache` to completely eliminate hardware ACPI EC bus latency spikes on laptops, guaranteeing deterministic sub-3ms parallel execution.
+- **Instantaneous Battery Probing & Tmpfs Runtime Cache**: Implemented single-pass sysfs scan with non-blocking 15-second TTL tmpfs runtime caching in `$XDG_RUNTIME_DIR/kkfetch_battery.cache` to completely eliminate hardware ACPI EC bus latency spikes on laptops, guaranteeing deterministic sub-3ms parallel execution.
 
 ## [0.11.1] - 2026-08-29
 
@@ -49,8 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.11.0] - 2026-08-29
 
 ### Added
-- **Zero-Dependency TOML Configuration System**: Added hierarchical configuration parser loading `~/.config/ferrisfetch/config.toml` (and `/etc/ferrisfetch/config.toml`) supporting module ordering, custom labels, logo presets, colors, separator formatting, and per-module settings.
-- **Custom Info Module Loader & Script Plugin System**: Parallel execution of external scripts in `~/.config/ferrisfetch/plugins/` and custom command modules declared in `config.toml`.
+- **Zero-Dependency TOML Configuration System**: Added hierarchical configuration parser loading `~/.config/kkfetch/config.toml` (and `/etc/kkfetch/config.toml`) supporting module ordering, custom labels, logo presets, colors, separator formatting, and per-module settings.
+- **Custom Info Module Loader & Script Plugin System**: Parallel execution of external scripts in `~/.config/kkfetch/plugins/` and custom command modules declared in `config.toml`.
 - **CPU Topology & Dual Live Clock Frequency**: Physical cores vs logical threads reporting (`6c 12t`) alongside live instantaneous core clock and rated maximum turbo boost frequency (`@ 4.351GHz [4.60GHz max]`).
 - **Extended Zero-Fork Sysfs EDID DRM Parser**: Decodes 128-byte EDID binary payloads from `/sys/class/drm/card*-*/edid` to extract PNP monitor manufacturer code, diagonal physical inch size, native resolution, refresh rate, and connector type.
 - **System Font, WM Theme, and Terminal Font Collectors**: Native parsers for GTK 2/3/4 `settings.ini`, GNOME GSettings/dconf, KDE `kdeglobals`, and Kitty, Alacritty, and Foot dotfiles.

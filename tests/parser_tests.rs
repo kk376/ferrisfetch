@@ -1,12 +1,12 @@
-use ferrisfetch::modules::cpu::{clean_cpu_model, parse_cpu_info};
-use ferrisfetch::modules::gpu::parse_lspci_mm_output;
-use ferrisfetch::modules::memory::{format_memory, parse_meminfo};
-use ferrisfetch::modules::os::parse_os_release;
-use ferrisfetch::modules::packages::parse_dpkg_status;
-use ferrisfetch::modules::uptime::{format_uptime, parse_uptime};
-use ferrisfetch::modules::{ModuleId, ModuleOutput};
-use ferrisfetch::output::formatter::{render_layout, visible_width};
-use ferrisfetch::output::logo::match_logo;
+use kkfetch::modules::cpu::{clean_cpu_model, parse_cpu_info};
+use kkfetch::modules::gpu::parse_lspci_mm_output;
+use kkfetch::modules::memory::{format_memory, parse_meminfo};
+use kkfetch::modules::os::parse_os_release;
+use kkfetch::modules::packages::parse_dpkg_status;
+use kkfetch::modules::uptime::{format_uptime, parse_uptime};
+use kkfetch::modules::{ModuleId, ModuleOutput};
+use kkfetch::output::formatter::{render_layout, visible_width};
+use kkfetch::output::logo::match_logo;
 
 // --- Distribution Family Tests ---
 

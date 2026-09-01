@@ -8,7 +8,7 @@ CRATES=""
 inherit cargo
 
 DESCRIPTION="Fast, lightweight Linux system information fetch tool written in Rust"
-HOMEPAGE="https://github.com/kk376/ferrisfetch"
+HOMEPAGE="https://github.com/kk376/kkfetch"
 SRC_URI="https://github.com/kk376/${PN}/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz
 	$(cargo_crate_uris)"
 
@@ -20,9 +20,10 @@ src_install() {
 	cargo_src_install
 
 	dodoc README.md
-	newbashcomp completions/ferrisfetch.bash ferrisfetch
+	doman docs/kkfetch.1
+	newbashcomp completions/kkfetch.bash kkfetch
 	insinto /usr/share/zsh/site-functions
-	newins completions/_ferrisfetch _ferrisfetch
+	newins completions/_kkfetch _kkfetch
 	insinto /usr/share/fish/vendor_completions.d
-	newins completions/ferrisfetch.fish ferrisfetch.fish
+	newins completions/kkfetch.fish kkfetch.fish
 }

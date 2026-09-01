@@ -2,7 +2,7 @@ use clap::Parser;
 
 #[derive(Parser, Debug, Clone, Default)]
 #[command(
-    name = "ferrisfetch",
+    name = "kkfetch",
     about = "A fast, lightweight Linux system information fetch tool written in Rust",
     version
 )]
@@ -19,7 +19,7 @@ pub struct Cli {
     #[arg(long = "no-color")]
     pub no_color: bool,
 
-    /// Override the ASCII logo (e.g. "arch", "debian", "ubuntu", "ferris", "fedora", "tux")
+    /// Override the ASCII logo (e.g. "arch", "debian", "ubuntu", "kkfetch", "fedora", "tux")
     #[arg(short = 'l', long = "logo")]
     pub logo: Option<String>,
 

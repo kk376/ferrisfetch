@@ -2,30 +2,30 @@
 
 ## Supported Versions
 
-Security fixes are provided for the current release version of FerrisFetch.
+Security fixes are provided for the current release version of KKFetch.
 
 | Version | Supported          |
 | :---    | :---               |
-| 0.8.x   | :white_check_mark: |
-| < 0.8.0 | :x:                |
+| 0.11.x  | :white_check_mark: |
+| < 0.11.0 | :x:                |
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability or potential issue in FerrisFetch, please disclose it responsibly. Do not report security vulnerabilities via public GitHub issues.
+If you discover a security vulnerability or potential issue in KKFetch, please disclose it responsibly. Do not report security vulnerabilities via public GitHub issues.
 
 ### How to report
 
 1. Use GitHub's private vulnerability reporting feature:
-   - Navigate to the **Security** tab of the FerrisFetch repository.
+   - Navigate to the **Security** tab of the KKFetch repository (`https://github.com/kk376/kkfetch`).
    - Select **Advisories** and click **Report a vulnerability**.
-2. Alternatively, email the maintainer at `security@ferrisfetch.local` or contact the repository owner directly.
+2. Alternatively, contact the maintainer Kushagra Kumar (kk376) directly via GitHub or email.
 
 ### What to include
 
 Please provide:
 - A description of the issue and potential security impact.
 - Steps or a minimal test case to reproduce the behavior.
-- The version of FerrisFetch and the Linux environment (distribution, kernel, architecture) used.
+- The version of KKFetch and the operating system environment (distribution, kernel, architecture) used.
 
 ### Response timeline
 

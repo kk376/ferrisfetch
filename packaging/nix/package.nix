@@ -6,12 +6,12 @@
 }:
 
 rustPlatform.buildRustPackage rec {
-  pname = "ferrisfetch";
+  pname = "kkfetch";
   version = "0.11.7";
 
   src = if src != null then src else fetchFromGitHub {
     owner = "kk376";
-    repo = "ferrisfetch";
+    repo = "kkfetch";
     rev = "v${version}";
     hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   };
@@ -23,18 +23,18 @@ rustPlatform.buildRustPackage rec {
   nativeBuildInputs = [ installShellFiles ];
 
   postInstall = ''
-    installShellCompletion --cmd ferrisfetch \
-      --bash completions/ferrisfetch.bash \
-      --fish completions/ferrisfetch.fish \
-      --zsh completions/_ferrisfetch
+    installShellCompletion --cmd kkfetch \
+      --bash completions/kkfetch.bash \
+      --fish completions/kkfetch.fish \
+      --zsh completions/_kkfetch
   '';
 
   meta = with lib; {
     description = "Fast, lightweight Linux system information fetch tool written in Rust";
-    homepage = "https://github.com/kk376/ferrisfetch";
+    homepage = "https://github.com/kk376/kkfetch";
     license = licenses.mit;
-    maintainers = [ ];
-    mainProgram = "ferrisfetch";
+    maintainers = [ "Kushagra Kumar (kk376)" ];
+    mainProgram = "kkfetch";
     platforms = platforms.linux;
   };
 }

@@ -1,4 +1,4 @@
-# FerrisFetch
+# KKFetch
 
 A fast, lightweight, zero-subprocess system information fetch tool written in Rust for Linux, Windows, and macOS.
 
@@ -38,15 +38,15 @@ cccccccc;.:odl:.;cccccccccccccc:,.       CPU: AMD Ryzen 5 7535HS (6c 12t) @ 4.39
 
 ---
 
-## Why FerrisFetch?
+## Why KKFetch?
 
-Most fetch tools either spawn multiple shell child processes (`neofetch`) or dynamically link heavy C runtime libraries (`fastfetch`). FerrisFetch is built with a different design philosophy:
+Most fetch tools either spawn multiple shell child processes (`neofetch`) or dynamically link heavy C runtime libraries (`fastfetch`). KKFetch is built with a different design philosophy:
 
 * **Sub-3ms Latency**: Queries virtual filesystems (`/proc`, `/sys`), POSIX syscalls, and Win32 APIs directly with zero child process spawning (`fork`/`execve`). In statistical benchmarks, it is **6x faster than Fastfetch** on raw data collection across all 27 active modules.
 * **Native OS Install Date**: Probes root filesystem creation timestamp (`statx` birth time) and installer logs, showing exact installation date and relative age (`6 days ago`).
 * **GPU Memory & Classification**: Probes dedicated VRAM and classifies graphics hardware into `[Integrated]` and `[Discrete]` tiers with sequential indexing.
 * **Zero-Fork Display EDID Parsing**: Probes monitor name, refresh rate, physical diagonal size, and panel type directly from DRM sysfs without spawning `xrandr` or display server queries.
-* **Declarative Configuration & Plugins**: Supports `~/.config/ferrisfetch/config.toml` and custom executable plugin modules with parallel execution.
+* **Declarative Configuration & Plugins**: Supports `~/.config/kkfetch/config.toml` and custom executable plugin modules with parallel execution.
 * **Standalone Static Binary**: Zero libc runtime dependencies when using the musl build. Drop the binary into any Linux system and it runs.
 
 ---
@@ -60,36 +60,36 @@ Benchmarked against Fastfetch across **100 iterations** (20 warmup runs) on Fedo
 | Command | Mean Runtime | Median Latency | Min Latency | Max Latency | Relative Speedup |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | `fastfetch` | `17.93 ms` | `15.66 ms` | `14.67 ms` | `118.12 ms` | `1.00` (Baseline) |
-| `ferrisfetch` (All 27 Modules) | **`3.00 ms`** | **`2.72 ms`** | **`2.36 ms`** | **`12.91 ms`** | **5.97x faster** |
-| `ferrisfetch` (Pure sysfs/drm) | **`2.53 ms`** | **`2.48 ms`** | **`2.26 ms`** | **`4.11 ms`** | **7.08x faster** |
+| `kkfetch` (All 27 Modules) | **`3.00 ms`** | **`2.72 ms`** | **`2.36 ms`** | **`12.91 ms`** | **5.97x faster** |
+| `kkfetch` (Pure sysfs/drm) | **`2.53 ms`** | **`2.48 ms`** | **`2.26 ms`** | **`4.11 ms`** | **7.08x faster** |
 
-*FerrisFetch achieves lower CPU time and syscall overhead by reading `/proc` and `sysfs` directly in Rust, executing active module collectors concurrently in parallel using `std::thread::scope`, and compiling with Fat Link-Time Optimization (LTO).*
+*KKFetch achieves lower CPU time and syscall overhead by reading `/proc` and `sysfs` directly in Rust, executing active module collectors concurrently in parallel using `std::thread::scope`, and compiling with Fat Link-Time Optimization (LTO).*
 
 ### Benchmark Commands
 
 **1. Built-in Module Latency Profiler:**
-Runs FerrisFetch with the internal microsecond latency profiler, displaying precise wall-clock execution time for every active information collector (CPU, GPU, Memory, EDID Display, Packages, etc.):
+Runs KKFetch with the internal microsecond latency profiler, displaying precise wall-clock execution time for every active information collector (CPU, GPU, Memory, EDID Display, Packages, etc.):
 ```bash
-ferrisfetch --timings
+kkfetch --timings
 ```
 
 **2. Comparative Statistical Benchmark (via `hyperfine`):**
-Executes 100 statistical test runs (preceded by 20 warmup cycles) to calculate the mean runtime, median latency, standard deviation, and relative speedup between FerrisFetch and Fastfetch:
+Executes 100 statistical test runs (preceded by 20 warmup cycles) to calculate the mean runtime, median latency, standard deviation, and relative speedup between KKFetch and Fastfetch:
 ```bash
-hyperfine --warmup 20 --runs 100 'ferrisfetch' 'fastfetch'
+hyperfine --warmup 20 --runs 100 'kkfetch' 'fastfetch'
 ```
 
 **3. Pure Sysfs / Accelerated Mode Benchmark:**
-Measures the core sub-3ms performance of FerrisFetch with external bus latency disabled, highlighting zero-fork `/proc`, `sysfs`, and DRM kernel prober throughput against Fastfetch:
+Measures the core sub-3ms performance of KKFetch with external bus latency disabled, highlighting zero-fork `/proc`, `sysfs`, and DRM kernel prober throughput against Fastfetch:
 ```bash
-hyperfine --warmup 20 --runs 100 'ferrisfetch -d battery' 'fastfetch'
+hyperfine --warmup 20 --runs 100 'kkfetch -d battery' 'fastfetch'
 ```
 
 ---
 
 ## Supported Operating Systems & Logos
 
-FerrisFetch includes high-contrast ASCII art logos with distro brand signature colors for **26 operating systems and distributions**:
+KKFetch includes high-contrast ASCII art logos with distro brand signature colors for **26 operating systems and distributions**:
 
 | Family / Ecosystem | Supported Distributions & Targets |
 | :--- | :--- |
@@ -110,14 +110,14 @@ FerrisFetch includes high-contrast ASCII art logos with distro brand signature c
 
 **Via Personal Package Archive (PPA):**
 ```bash
-sudo add-apt-repository -y ppa:kushagra376/ferrisfetch
-sudo apt update && sudo apt install -y ferrisfetch
+sudo add-apt-repository -y ppa:kushagra376/kkfetch
+sudo apt update && sudo apt install -y kkfetch
 ```
 
 **Via Pre-built `.deb`:**
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch_0.11.7-1_amd64.deb
-sudo dpkg -i ferrisfetch_0.11.7-1_amd64.deb
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.11.7/kkfetch_0.11.7-1_amd64.deb
+sudo dpkg -i kkfetch_0.11.7-1_amd64.deb
 ```
 
 ---
@@ -126,8 +126,8 @@ sudo dpkg -i ferrisfetch_0.11.7-1_amd64.deb
 
 **Via Fedora Copr:**
 ```bash
-sudo dnf copr enable -y kk376/ferrisfetch
-sudo dnf install -y ferrisfetch
+sudo dnf copr enable -y kk376/kkfetch
+sudo dnf install -y kkfetch
 ```
 
 ---
@@ -136,8 +136,8 @@ sudo dnf install -y ferrisfetch
 
 **Via Pre-built Pacman Package:**
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch-0.11.7-1-x86_64.pkg.tar.zst
-sudo pacman -U ferrisfetch-0.11.7-1-x86_64.pkg.tar.zst
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.11.7/kkfetch-0.11.7-1-x86_64.pkg.tar.zst
+sudo pacman -U kkfetch-0.11.7-1-x86_64.pkg.tar.zst
 ```
 
 ---
@@ -147,7 +147,7 @@ sudo pacman -U ferrisfetch-0.11.7-1-x86_64.pkg.tar.zst
 **Via Homebrew:**
 ```bash
 brew tap kk376/tap
-brew install ferrisfetch
+brew install kkfetch
 ```
 
 ---
@@ -155,8 +155,8 @@ brew install ferrisfetch
 ### Android (Termux)
 
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch_0.11.7-1_termux_aarch64.deb
-dpkg -i ferrisfetch_0.11.7-1_termux_aarch64.deb
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.11.7/kkfetch_0.11.7-1_termux_aarch64.deb
+dpkg -i kkfetch_0.11.7-1_termux_aarch64.deb
 ```
 
 ---
@@ -167,13 +167,13 @@ No dependencies, pure standalone executable:
 
 ```powershell
 # 1. Download
-curl.exe -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch-windows-x86_64.zip
+curl.exe -LO https://github.com/kk376/kkfetch/releases/download/v0.11.7/kkfetch-windows-x86_64.zip
 
 # 2. Extract
-tar.exe -xf ferrisfetch-windows-x86_64.zip
+tar.exe -xf kkfetch-windows-x86_64.zip
 
 # 3. Run
-.\ferrisfetch.exe
+.\kkfetch.exe
 ```
 
 ---
@@ -183,9 +183,9 @@ tar.exe -xf ferrisfetch-windows-x86_64.zip
 Statically linked with musl (zero external dependencies):
 
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch-linux-musl-x86_64
-chmod +x ferrisfetch-linux-musl-x86_64
-sudo mv ferrisfetch-linux-musl-x86_64 /usr/local/bin/ferrisfetch
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.11.7/kkfetch-linux-musl-x86_64
+chmod +x kkfetch-linux-musl-x86_64
+sudo mv kkfetch-linux-musl-x86_64 /usr/local/bin/kkfetch
 ```
 
 ---
@@ -193,8 +193,8 @@ sudo mv ferrisfetch-linux-musl-x86_64 /usr/local/bin/ferrisfetch
 ### Pre-built Tarball Archive
 
 ```bash
-curl -LO https://github.com/kk376/ferrisfetch/releases/download/v0.11.7/ferrisfetch-0.11.7-x86_64-unknown-linux-gnu.tar.gz
-tar -xzf ferrisfetch-0.11.7-x86_64-unknown-linux-gnu.tar.gz
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.11.7/kkfetch-0.11.7-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf kkfetch-0.11.7-x86_64-unknown-linux-gnu.tar.gz
 sudo ./install.sh
 ```
 
@@ -205,10 +205,10 @@ sudo ./install.sh
 Requires Rust 1.75.0+ and `gcc`.
 
 ```bash
-git clone https://github.com/kk376/ferrisfetch.git
-cd ferrisfetch
+git clone https://github.com/kk376/kkfetch.git
+cd kkfetch
 cargo build --release
-sudo cp target/release/ferrisfetch /usr/local/bin/
+sudo cp target/release/kkfetch /usr/local/bin/
 ```
 
 ---
@@ -233,27 +233,27 @@ sudo cp target/release/ferrisfetch /usr/local/bin/
 
 **Custom module ordering:**
 ```bash
-ferrisfetch -m os,cpu,memory,disk
+kkfetch -m os,cpu,memory,disk
 ```
 
 **Profile execution timings per module:**
 ```bash
-ferrisfetch --timings
+kkfetch --timings
 ```
 
 **JSON output for scripts and status bars:**
 ```bash
-ferrisfetch --json
+kkfetch --json
 ```
 
 **Disable specific modules:**
 ```bash
-ferrisfetch -d gpu,packages
+kkfetch -d gpu,packages
 ```
 
 **Override logo with the Ferris mascot:**
 ```bash
-ferrisfetch --logo ferris
+kkfetch --logo ferris
 ```
 
 ---
@@ -293,26 +293,26 @@ ferrisfetch --logo ferris
 
 ## Shell Completions
 
-FerrisFetch includes completions for Bash, Zsh, and Fish:
+KKFetch includes completions for Bash, Zsh, and Fish:
 
 ### Bash
 ```bash
-source completions/ferrisfetch.bash
-# System-wide: sudo cp completions/ferrisfetch.bash /usr/share/bash-completion/completions/ferrisfetch
+source completions/kkfetch.bash
+# System-wide: sudo cp completions/kkfetch.bash /usr/share/bash-completion/completions/kkfetch
 ```
 
 ### Zsh
 ```zsh
 # Add to ~/.zshrc before compinit:
-fpath=(/path/to/ferrisfetch/completions $fpath)
+fpath=(/path/to/kkfetch/completions $fpath)
 autoload -Uz compinit && compinit
-# System-wide: sudo cp completions/_ferrisfetch /usr/share/zsh/site-functions/_ferrisfetch
+# System-wide: sudo cp completions/_kkfetch /usr/share/zsh/site-functions/_kkfetch
 ```
 
 ### Fish
 ```fish
-cp completions/ferrisfetch.fish ~/.config/fish/completions/
-# System-wide: sudo cp completions/ferrisfetch.fish /usr/share/fish/vendor_completions.d/
+cp completions/kkfetch.fish ~/.config/fish/completions/
+# System-wide: sudo cp completions/kkfetch.fish /usr/share/fish/vendor_completions.d/
 ```
 
 ---
@@ -323,12 +323,12 @@ Package definitions and build specifications are organized in [`packaging/`](pac
 
 * **Arch Linux (AUR)**: [`packaging/arch/`](packaging/arch/) (`PKGBUILD`, `.SRCINFO`)
 * **Debian / Ubuntu**: [`packaging/debian/`](packaging/debian/) (`control`, `rules`, `changelog`)
-* **Fedora / RHEL (Copr)**: [`packaging/rpm/`](packaging/rpm/) (`ferrisfetch.spec`)
+* **Fedora / RHEL (Copr)**: [`packaging/rpm/`](packaging/rpm/) (`kkfetch.spec`)
 * **Alpine Linux**: [`packaging/alpine/`](packaging/alpine/) (`APKBUILD`)
-* **Gentoo Linux**: [`packaging/gentoo/`](packaging/gentoo/) (`ferrisfetch-0.10.0.ebuild`)
+* **Gentoo Linux**: [`packaging/gentoo/`](packaging/gentoo/) (`kkfetch-0.10.0.ebuild`)
 * **Void Linux**: [`packaging/void/`](packaging/void/) (`template`)
 * **Nix / NixOS**: [`packaging/nix/`](packaging/nix/) (`package.nix`)
-* **Homebrew Tap**: [`packaging/homebrew/`](packaging/homebrew/) (`ferrisfetch.rb`)
+* **Homebrew Tap**: [`packaging/homebrew/`](packaging/homebrew/) (`kkfetch.rb`)
 * **Android (Termux)**: [`packaging/termux/`](packaging/termux/) (`build.sh`)
 * **Windows (WinGet)**: [`packaging/winget/`](packaging/winget/) (YAML manifests)
 
@@ -373,5 +373,5 @@ Special thanks to community contributors for architectural recommendations and s
 
 ## Credits & License
 
-* **FerrisFetch** is open-source software licensed under the **[MIT License](LICENSE)**.
-* **ASCII Art Outlines**: Distribution ASCII art boundary outlines are based on the classic art from **[Neofetch](https://github.com/dylanaraps/neofetch)** by Dylan Araps (also licensed under the **MIT License**, Copyright © 2016-2022 Dylan Araps), customized and enhanced in FerrisFetch with high-contrast white structural framing and distribution brand signature colors.
+* **KKFetch** is authored by **Kushagra Kumar (kk376)** and open-source software licensed under the **[MIT License](LICENSE)**.
+* **ASCII Art Outlines**: Distribution ASCII art boundary outlines are based on the classic art from **[Neofetch](https://github.com/dylanaraps/neofetch)** by Dylan Araps (also licensed under the **MIT License**, Copyright © 2016-2022 Dylan Araps), customized and enhanced in KKFetch with high-contrast white structural framing and distribution brand signature colors.

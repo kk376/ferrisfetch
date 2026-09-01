@@ -1,7 +1,7 @@
-# Fish shell completion script for ferrisfetch
+# Fish shell completion script for kkfetch
 
-# Disable file completions by default for ferrisfetch
-complete -c ferrisfetch -f
+# Disable file completions by default for kkfetch
+complete -c kkfetch -f
 
 # Modules definitions
 set -l modules \
@@ -74,13 +74,13 @@ set -l logos \
     'none\tDisable ASCII logo output'
 
 # Options and flags
-complete -c ferrisfetch -s m -l modules -d 'Enable specific modules in order (comma-separated)' -r -a "$modules"
-complete -c ferrisfetch -s d -l disable -d 'Disable specific modules (comma-separated)' -r -a "$modules"
-complete -c ferrisfetch -s l -l logo -d 'Override the ASCII logo' -r -a "$logos"
-complete -c ferrisfetch -l disk-path -d 'Target mount point or directory path for disk usage statistics' -r -F
-complete -c ferrisfetch -l no-color -d 'Disable colored ANSI output'
-complete -c ferrisfetch -l no-logo -d 'Do not display any ASCII logo'
-complete -c ferrisfetch -l list-modules -d 'List all available information modules and exit'
-complete -c ferrisfetch -l json -d 'Output system information in structured JSON format'
-complete -c ferrisfetch -s h -l help -d 'Print help'
-complete -c ferrisfetch -s V -l version -d 'Print version'
+complete -c kkfetch -s m -l modules -d 'Enable specific modules in order (comma-separated)' -r -a "$modules"
+complete -c kkfetch -s d -l disable -d 'Disable specific modules (comma-separated)' -r -a "$modules"
+complete -c kkfetch -s l -l logo -d 'Override the ASCII logo' -r -a "$logos"
+complete -c kkfetch -l disk-path -d 'Target mount point or directory path for disk usage statistics' -r -F
+complete -c kkfetch -l no-color -d 'Disable colored ANSI output'
+complete -c kkfetch -l no-logo -d 'Do not display any ASCII logo'
+complete -c kkfetch -l list-modules -d 'List all available information modules and exit'
+complete -c kkfetch -l json -d 'Output system information in structured JSON format'
+complete -c kkfetch -s h -l help -d 'Print help'
+complete -c kkfetch -s V -l version -d 'Print version'

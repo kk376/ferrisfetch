@@ -1,8 +1,8 @@
-# FerrisFetch Portability and Test Coverage Review
+# KKFetch Portability and Test Coverage Review
 
 ## 1. Scope and Objective
 
-This review documents the portability mechanisms, failure mode handling, and test fixtures added to FerrisFetch. FerrisFetch targets sub-5 millisecond execution on standard Linux distributions without mandatory external runtime dependencies. The tool must operate reliably across Debian, Red Hat, Arch, and independent distribution families, as well as virtualized environments and headless servers.
+This review documents the portability mechanisms, failure mode handling, and test fixtures added to KKFetch. KKFetch targets sub-5 millisecond execution on standard Linux distributions without mandatory external runtime dependencies. The tool must operate reliably across Debian, Red Hat, Arch, and independent distribution families, as well as virtualized environments and headless servers.
 
 All file I/O operations and subprocess calls are non-blocking, safe against missing files or commands, and strictly local with zero network calls.
 
@@ -10,7 +10,7 @@ All file I/O operations and subprocess calls are non-blocking, safe against miss
 
 ## 2. Distribution Coverage and Mechanisms
 
-FerrisFetch resolves operating system metadata using standard systemd specifications with fallbacks for legacy and minimal distributions.
+KKFetch resolves operating system metadata using standard systemd specifications with fallbacks for legacy and minimal distributions.
 
 ```
 +-------------------------------------------------------------------------+
@@ -51,7 +51,7 @@ FerrisFetch resolves operating system metadata using standard systemd specificat
 
 ## 3. Package Manager Detection
 
-FerrisFetch uses direct file parsing for package managers that maintain plain-text metadata. Subprocesses are spawned only when necessary, and only after verifying database existence on disk.
+KKFetch uses direct file parsing for package managers that maintain plain-text metadata. Subprocesses are spawned only when necessary, and only after verifying database existence on disk.
 
 ```
 +-------------------------------------------------------------------------------+

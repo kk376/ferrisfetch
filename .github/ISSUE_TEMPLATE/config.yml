@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: GitHub Discussions
-    url: https://github.com/kk376/ferrisfetch/discussions
+    url: https://github.com/kk376/kkfetch/discussions
     about: Ask general questions, share configurations, or discuss ideas.
   - name: Security Vulnerability Report
-    url: https://github.com/kk376/ferrisfetch/security/advisories/new
+    url: https://github.com/kk376/kkfetch/security/advisories/new
     about: Report potential security vulnerabilities privately.

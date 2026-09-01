@@ -4,9 +4,9 @@ cargo build \
     --release \
     --locked
 
-install -Dm755 target/release/ferrisfetch "$1/usr/bin/ferrisfetch"
-install -Dm644 completions/ferrisfetch.bash "$1/usr/share/bash-completion/completions/ferrisfetch"
-install -Dm644 completions/_ferrisfetch "$1/usr/share/zsh/site-functions/_ferrisfetch"
-install -Dm644 completions/ferrisfetch.fish "$1/usr/share/fish/vendor_completions.d/ferrisfetch.fish"
-install -Dm644 README.md "$1/usr/share/doc/ferrisfetch/README.md"
-install -Dm644 LICENSE "$1/usr/share/licenses/ferrisfetch/LICENSE"
+install -Dm755 target/release/kkfetch "$1/usr/bin/kkfetch"
+install -Dm644 completions/kkfetch.bash "$1/usr/share/bash-completion/completions/kkfetch"
+install -Dm644 completions/_kkfetch "$1/usr/share/zsh/site-functions/_kkfetch"
+install -Dm644 completions/kkfetch.fish "$1/usr/share/fish/vendor_completions.d/kkfetch.fish"
+install -Dm644 README.md "$1/usr/share/doc/kkfetch/README.md"
+install -Dm644 LICENSE "$1/usr/share/licenses/kkfetch/LICENSE"

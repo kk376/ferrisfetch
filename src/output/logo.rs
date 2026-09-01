@@ -2,7 +2,7 @@
 //!
 //! Distribution ASCII art boundary outlines are based on classic designs from
 //! Neofetch (MIT License, Copyright (c) 2016-2022 Dylan Araps), enhanced in
-//! FerrisFetch with high-contrast white structural framing (`{w}`) and
+//! KKFetch with high-contrast white structural framing (`{w}`) and
 //! distribution brand signature color emblems (`{c}`).
 
 use crate::output::color::RESET;
@@ -785,6 +785,9 @@ pub fn match_logo(
             }
         }
         // Aliases
+        if name_lower == "kkfetch" || name_lower == "rust" {
+            return ALL_LOGOS.iter().find(|l| l.name == "ferris");
+        }
         if name_lower == "mint" {
             return ALL_LOGOS.iter().find(|l| l.name == "linuxmint");
         }
@@ -985,6 +988,14 @@ pub mod tests {
     fn test_match_logo_unknown_fallback_to_ferris() {
         let logo = match_logo(None, "unknown_distro", &[]).unwrap();
         assert_eq!(logo.name, "generic");
+    }
+
+    #[test]
+    fn test_match_logo_kkfetch_and_ferris_aliases() {
+        let logo_kk = match_logo(Some("kkfetch"), "generic", &[]).unwrap();
+        assert_eq!(logo_kk.name, "ferris");
+        let logo_rust = match_logo(Some("rust"), "generic", &[]).unwrap();
+        assert_eq!(logo_rust.name, "ferris");
     }
 
     #[test]

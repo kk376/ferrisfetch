@@ -1,8 +1,8 @@
-# FerrisFetch Independent Code & Quality Review
+# KKFetch Independent Code & Quality Review
 
 ## 1. Executive Summary
 
-This document presents an independent code and quality audit of the FerrisFetch repository (`/home/kk376/code/ferrisfetch`). The audit evaluated the codebase against six core criteria:
+This document presents an independent code and quality audit of the KKFetch repository (`/home/kk376/code/kkfetch`). The audit evaluated the codebase against six core criteria:
 
 1. **Correctness and robustness**: Checked for panics, unwrap on untrusted data, division-by-zero, integer overflow, out-of-bounds indexing, and edge-case handling across empty or corrupted inputs.
 2. **Portability**: Evaluated compatibility across Debian, Red Hat, Arch, Alpine, Void, openSUSE distributions, WSL2, and headless/container environments.
@@ -35,7 +35,7 @@ No critical crash bugs, memory unsafety, or security vulnerabilities were identi
 - **File**: `src/modules/terminal.rs`
 - **Location**: Function `detect_terminal()` (lines 178–183)
 - **Problem Description**:
-  During process ancestry traversal, `comm.contains(proc_name)` matches any process whose name contains `proc_name` as a substring. For two-letter terminal names like `("st", "st")`, any ancestor process containing `st` (e.g. `systemd`, `starship`, `strace`, `startx`, `install`, `gst-plugin`) evaluates to `true`. This causes FerrisFetch to falsely report the terminal emulator as `st`.
+  During process ancestry traversal, `comm.contains(proc_name)` matches any process whose name contains `proc_name` as a substring. For two-letter terminal names like `("st", "st")`, any ancestor process containing `st` (e.g. `systemd`, `starship`, `strace`, `startx`, `install`, `gst-plugin`) evaluates to `true`. This causes KKFetch to falsely report the terminal emulator as `st`.
 - **Recommended Fix**:
   Use exact equality or strict word boundary matching rather than substring containment:
   ```rust
@@ -60,7 +60,7 @@ No critical crash bugs, memory unsafety, or security vulnerabilities were identi
   On standard Linux systems without ACPI `label` files in `/sys/bus/pci/devices/`, `detect_gpus_from_sysfs_dir` resolves the PCI vendor ID (`0x8086` -> `Intel`, `0x10de` -> `NVIDIA`) and strips the numeric device ID if it begins with `0x`. This returns bare vendor strings (`vec!["Intel"]`, `vec!["NVIDIA"]`).
   `get_gpu_info()` then checks:
   `let has_raw_device_ids = sysfs_gpus.iter().any(|g| g.contains("0x") || g.contains("PCI Display"));`
-  Because bare vendor strings like `"Intel"` or `"NVIDIA"` contain neither `"0x"` nor `"PCI Display"`, `has_raw_device_ids` evaluates to `false`. FerrisFetch skips calling `lspci -mm` and outputs only `GPU: Intel, NVIDIA` instead of rich model strings like `GPU: Intel UHD Graphics 630, NVIDIA GeForce GTX 1650 Ti`.
+  Because bare vendor strings like `"Intel"` or `"NVIDIA"` contain neither `"0x"` nor `"PCI Display"`, `has_raw_device_ids` evaluates to `false`. KKFetch skips calling `lspci -mm` and outputs only `GPU: Intel, NVIDIA` instead of rich model strings like `GPU: Intel UHD Graphics 630, NVIDIA GeForce GTX 1650 Ti`.
 - **Recommended Fix**:
   Treat single-word vendor names as generic names requiring `lspci` enrichment:
   ```rust
@@ -295,8 +295,8 @@ No critical crash bugs, memory unsafety, or security vulnerabilities were identi
 | Security Aspect | Assessment | Notes & Hardening Controls |
 |---|---|---|
 | **Subprocess Execution (F3)** | Secure | All external commands (`lspci`, `dpkg-query`, `rpm`, `gsettings`, `dconf`, `xrandr`, `wlr-randr`) are resolved via trusted canonical system paths (`/usr/bin`, `/bin`, `/usr/sbin`, `/sbin`, `/usr/local/bin`) via `system_command()`, eliminating `$PATH` hijacking vectors. |
-| **Plugin Isolation (F1, F2)** | Secure | User-configured plugins in `config.toml` and `~/.config/ferrisfetch/plugins/` are automatically **disabled in elevated contexts** (`sudo`, `su`, `setuid` where `euid == 0` or `euid != uid`) to prevent privilege escalation. Plugin directory scans strictly require regular files with the executable bit (`+x`) owned by the user. |
-| **Caching & State (F4)** | Secure | Runtime caching uses `$XDG_RUNTIME_DIR` (tmpfs, mode 0700) or `$XDG_CACHE_HOME` (`~/.cache/ferrisfetch/`). Temporary directory fallbacks create private user-isolated directories (`/tmp/ferrisfetch-<uid>/`) with strict `0o700` permissions. |
+| **Plugin Isolation (F1, F2)** | Secure | User-configured plugins in `config.toml` and `~/.config/kkfetch/plugins/` are automatically **disabled in elevated contexts** (`sudo`, `su`, `setuid` where `euid == 0` or `euid != uid`) to prevent privilege escalation. Plugin directory scans strictly require regular files with the executable bit (`+x`) owned by the user. |
+| **Caching & State (F4)** | Secure | Runtime caching uses `$XDG_RUNTIME_DIR` (tmpfs, mode 0700) or `$XDG_CACHE_HOME` (`~/.cache/kkfetch/`). Temporary directory fallbacks create private user-isolated directories (`/tmp/kkfetch-<uid>/`) with strict `0o700` permissions. |
 | **Output Sanitization (F5)** | Secure | Untrusted external strings (disk labels, DHCP hostnames, plugin outputs) are sanitized with `sanitize_terminal_string()` to strip dangerous OSC terminal manipulation codes and raw C0 control characters. JSON output keys and values are escaped. |
 | **Path Traversal in CLI** | Secure | `--disk-path` is passed directly to `libc::statvfs` via `CString`. Path failure or null bytes return `None` safely without panic. |
 | **POSIX `unsafe` Usage** | Secure | All `unsafe` FFI blocks (`uname`, `sysinfo`, `statvfs`, `ioctl`, `geteuid`, `getpwuid`, Win32 API) initialize memory with `MaybeUninit` or zeroed structs and validate return codes and null pointers before dereferencing. |
@@ -312,4 +312,4 @@ No critical crash bugs, memory unsafety, or security vulnerabilities were identi
 
 ## 5. Acknowledgments & Security Credits
 
-Special thanks to **Laysnb** for conducting the thorough independent security audit of FerrisFetch v0.11.6, identifying the plugin directory auto-execution vector (F2), privilege escalation boundaries (F1), `$PATH` resolution hardening (F3), `/tmp` cache permissions (F4), and terminal control sequence escaping (F5). All findings were remediated and verified in v0.11.7.
+Special thanks to **Laysnb** for conducting the thorough independent security audit of KKFetch v0.11.6, identifying the plugin directory auto-execution vector (F2), privilege escalation boundaries (F1), `$PATH` resolution hardening (F3), `/tmp` cache permissions (F4), and terminal control sequence escaping (F5). All findings were remediated and verified in v0.11.7.

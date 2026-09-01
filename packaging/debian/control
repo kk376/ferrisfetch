@@ -1,25 +1,25 @@
-Source: ferrisfetch
+Source: kkfetch
 Section: utils
 Priority: optional
-Maintainer: Kushagra Kumar <kkushagra86@gmail.com>
+Maintainer: Kushagra Kumar (kk376) <kk376@users.noreply.github.com>
 Build-Depends:
  debhelper-compat (= 13),
  cargo,
  rustc,
  libc6-dev
 Standards-Version: 4.6.2
-Homepage: https://github.com/kk376/ferrisfetch
-Vcs-Git: https://github.com/kk376/ferrisfetch.git
-Vcs-Browser: https://github.com/kk376/ferrisfetch
+Homepage: https://github.com/kk376/kkfetch
+Vcs-Git: https://github.com/kk376/kkfetch.git
+Vcs-Browser: https://github.com/kk376/kkfetch
 Rules-Requires-Root: no
 
-Package: ferrisfetch
+Package: kkfetch
 Architecture: any
 Depends:
  ${shlibs:Depends},
  ${misc:Depends}
 Description: fast, lightweight Linux system information fetch tool written in Rust
- FerrisFetch is a zero-runtime-dependency CLI system information fetch tool
+ KKFetch is a zero-runtime-dependency CLI system information fetch tool
  written in Rust, tailored for Linux systems. It gathers system specifications
  and displays them cleanly alongside distribution ASCII art logos with
  sub-millisecond execution performance and minimal resource overhead.

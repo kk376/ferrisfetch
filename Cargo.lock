@@ -190,18 +190,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223"
 
 [[package]]
-name = "ferrisfetch"
-version = "0.11.7"
-dependencies = [
- "assert_cmd",
- "clap",
- "clap_complete",
- "libc",
- "predicates",
- "tempfile",
-]
-
-[[package]]
 name = "float-cmp"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -221,6 +209,18 @@ name = "is_terminal_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
+
+[[package]]
+name = "kkfetch"
+version = "0.11.7"
+dependencies = [
+ "assert_cmd",
+ "clap",
+ "clap_complete",
+ "libc",
+ "predicates",
+ "tempfile",
+]
 
 [[package]]
 name = "libc"

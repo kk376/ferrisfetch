@@ -1,7 +1,7 @@
 # Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.6.0.schema.json
 
-PackageIdentifier: KushagraKumar.FerrisFetch
+PackageIdentifier: kk376.kkfetch
 PackageVersion: 0.10.0
 DefaultLocale: en-US
 ManifestType: version

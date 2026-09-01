@@ -1,6 +1,10 @@
-# Contributing to FerrisFetch
+# Contributing to KKFetch
 
-Thank you for contributing to FerrisFetch. This guide covers local development, testing, adding new system modules, and contributing distribution logos.
+Thank you for contributing to KKFetch. This guide covers local development, testing, adding new system modules, and contributing distribution logos.
+
+## Maintainers
+
+KKFetch is maintained by **Kushagra Kumar (kk376)**.
 
 ## Prerequisites
 
@@ -13,12 +17,12 @@ Thank you for contributing to FerrisFetch. This guide covers local development, 
 ### Build from source
 
 ```bash
-git clone https://github.com/kk376/ferrisfetch.git
-cd ferrisfetch
+git clone https://github.com/kk376/kkfetch.git
+cd kkfetch
 cargo build
 ```
 
-Run FerrisFetch locally:
+Run KKFetch locally:
 
 ```bash
 cargo run -- --logo ferris
@@ -96,7 +100,7 @@ Include unit tests in `src/modules/<module_name>.rs` to test edge cases, missing
 
 ## Adding a Distribution Logo
 
-FerrisFetch contains compact ASCII art logos for Linux distributions.
+KKFetch contains compact ASCII art logos for Linux distributions.
 
 ### Logo Guidelines
 

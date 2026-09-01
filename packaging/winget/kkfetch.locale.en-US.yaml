@@ -1,16 +1,16 @@
 # Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
 
-PackageIdentifier: Kushagra.FerrisFetch
+PackageIdentifier: kk376.kkfetch
 PackageVersion: 0.10.0
 PackageLocale: en-US
-Publisher: Kushagra
+Publisher: Kushagra Kumar (kk376)
 PublisherUrl: https://github.com/kk376
-PublisherSupportUrl: https://github.com/kk376/ferrisfetch/issues
-PackageName: FerrisFetch
-PackageUrl: https://github.com/kk376/ferrisfetch
+PublisherSupportUrl: https://github.com/kk376/kkfetch/issues
+PackageName: kkfetch
+PackageUrl: https://github.com/kk376/kkfetch
 License: MIT
-LicenseUrl: https://github.com/kk376/ferrisfetch/blob/main/LICENSE
+LicenseUrl: https://github.com/kk376/kkfetch/blob/main/LICENSE
 ShortDescription: Fast, lightweight system information fetch tool written in Rust for Linux and Windows
 Tags:
   - cli

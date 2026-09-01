@@ -1,8 +1,8 @@
-#compdef ferrisfetch
+#compdef kkfetch
 
 autoload -U is-at-least
 
-_ferrisfetch() {
+_kkfetch() {
     typeset -A opt_args
     typeset -a _arguments_options
     local ret=1
@@ -68,7 +68,7 @@ _ferrisfetch() {
         'opensuse:openSUSE chameleon / geeko logo'
         'suse:openSUSE logo (alias)'
         'alpine:Alpine Linux mountain logo'
-        'gentoo:Gentoo Linux 'g' logo'
+        'gentoo:Gentoo Linux '\''g'\'' logo'
         'void:Void Linux logo'
         'pop:Pop!_OS logo'
         'popos:Pop!_OS logo (alias)'
@@ -106,8 +106,8 @@ _ferrisfetch() {
     return $ret
 }
 
-if [ "$funcstack[1]" = "_ferrisfetch" ]; then
-    _ferrisfetch "$@"
+if [ "$funcstack[1]" = "_kkfetch" ]; then
+    _kkfetch "$@"
 else
-    compdef _ferrisfetch ferrisfetch
+    compdef _kkfetch kkfetch
 fi

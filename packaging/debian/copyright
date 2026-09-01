@@ -1,9 +1,9 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: ferrisfetch
-Source: https://github.com/kk376/ferrisfetch
+Upstream-Name: kkfetch
+Source: https://github.com/kk376/kkfetch
 
 Files: *
-Copyright: 2026 FerrisFetch Authors
+Copyright: 2026 Kushagra Kumar (kk376)
 License: MIT
 
 License: MIT

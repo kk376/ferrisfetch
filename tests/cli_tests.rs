@@ -3,7 +3,7 @@ use predicates::prelude::*;
 
 #[test]
 fn test_cli_help() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.arg("--help");
     cmd.assert()
         .success()
@@ -16,7 +16,7 @@ fn test_cli_help() {
 
 #[test]
 fn test_list_modules_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.arg("--list-modules");
     cmd.assert()
         .success()
@@ -31,7 +31,7 @@ fn test_list_modules_flag() {
 
 #[test]
 fn test_no_color_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.arg("--no-color");
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
@@ -40,7 +40,7 @@ fn test_no_color_flag() {
 
 #[test]
 fn test_custom_modules_filtering() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args(["--no-color", "--no-logo", "-m", "os,kernel"]);
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
@@ -52,7 +52,7 @@ fn test_custom_modules_filtering() {
 
 #[test]
 fn test_disable_module_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args([
         "--no-color",
         "--no-logo",
@@ -70,7 +70,7 @@ fn test_disable_module_flag() {
 
 #[test]
 fn test_logo_override_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args(["--no-color", "--logo", "arch", "-m", "os"]);
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
@@ -80,17 +80,17 @@ fn test_logo_override_flag() {
 
 #[test]
 fn test_no_logo_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args(["--no-color", "--no-logo", "-m", "os"]);
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
-    let expected_os = ferrisfetch::modules::os::detect_os().display_name;
+    let expected_os = kkfetch::modules::os::detect_os().display_name;
     assert!(stdout.contains(&format!("OS: {}", expected_os)));
 }
 
 #[test]
 fn test_disk_path_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args(["--no-color", "--no-logo", "-m", "disk", "--disk-path", "/"]);
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
@@ -100,7 +100,7 @@ fn test_disk_path_flag() {
 
 #[test]
 fn test_disk_path_invalid_does_not_panic() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args([
         "--no-color",
         "--no-logo",
@@ -117,7 +117,7 @@ fn test_disk_path_invalid_does_not_panic() {
 
 #[test]
 fn test_duplicate_and_invalid_module_args() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args([
         "--no-color",
         "--no-logo",
@@ -136,7 +136,7 @@ fn test_duplicate_and_invalid_module_args() {
 
 #[test]
 fn test_combine_modules_and_disable_flags() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args([
         "--no-color",
         "--no-logo",
@@ -157,7 +157,7 @@ fn test_combine_modules_and_disable_flags() {
 
 #[test]
 fn test_installed_module_filtering() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args(["--no-color", "--no-logo", "-m", "installed"]);
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
@@ -182,7 +182,7 @@ fn test_various_logo_overrides() {
     ];
 
     for (name, snippet) in logos {
-        let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+        let mut cmd = Command::cargo_bin("kkfetch").unwrap();
         cmd.args(["--no-color", "--logo", name, "-m", "os"]);
         let assert = cmd.assert().success();
         let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
@@ -197,19 +197,19 @@ fn test_various_logo_overrides() {
 
 #[test]
 fn test_cli_version() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.arg("--version");
     cmd.assert()
         .success()
         .stdout(predicate::str::contains(format!(
-            "ferrisfetch {}",
+            "kkfetch {}",
             env!("CARGO_PKG_VERSION")
         )));
 }
 
 #[test]
 fn test_json_output_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.arg("--json");
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
@@ -222,7 +222,7 @@ fn test_json_output_flag() {
 
 #[test]
 fn test_timings_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args([
         "--no-color",
         "--no-logo",
@@ -241,7 +241,7 @@ fn test_timings_flag() {
 
 #[test]
 fn test_timings_with_json_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.args(["--json", "--timings", "-m", "os,kernel"]);
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();

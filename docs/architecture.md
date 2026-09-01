@@ -1,6 +1,6 @@
-# FerrisFetch Architecture & Linux Detection Research
+# KKFetch Architecture & Linux Detection Research
 
-FerrisFetch is a fast, lightweight system information fetch tool written in Rust for Linux systems. It prioritizes sub-5 millisecond execution times, zero external runtime dependencies on standard distributions (Debian, Red Hat, Arch families), safe and panic-free fallback behavior, and clean terminal rendering.
+KKFetch is a fast, lightweight system information fetch tool written in Rust for Linux systems. It prioritizes sub-5 millisecond execution times, zero external runtime dependencies on standard distributions (Debian, Red Hat, Arch families), safe and panic-free fallback behavior, and clean terminal rendering.
 
 ---
 
@@ -210,7 +210,7 @@ pub fn format_uptime(total_seconds: u64) -> String {
 - **Physical Sockets**: Count unique values of `physical id` across processors (defaulting to 1).
 
 #### String Sanitization
-CPU model strings from manufacturers contain redundant branding tokens. FerrisFetch strips:
+CPU model strings from manufacturers contain redundant branding tokens. KKFetch strips:
 - `(R)`, `(TM)`, `(tm)`
 - `CPU @ ...` clock speed suffixes
 - `Processor`, `Dual-Core`, `Quad-Core`, `Six-Core`, `Eight-Core`
@@ -329,7 +329,7 @@ Format: `32.4 GiB / 250.0 GiB (13%)`
 1. **Process Inspection via `/proc`**:
    - Find parent process ID ($PPID$) from `/proc/self/status` or `/proc/self/stat`.
    - Read `/proc/<PPID>/comm` or target of `/proc/<PPID>/exe`.
-   - If the parent process is `cargo` or `ferrisfetch`, ascend to the grandparent process.
+   - If the parent process is `cargo` or `kkfetch`, ascend to the grandparent process.
 2. **Environment Fallback**:
    - Read `$SHELL` and extract the file stem (e.g. `/bin/bash` $\rightarrow$ `bash`).
 
@@ -566,7 +566,7 @@ pub fn visible_width(s: &str) -> usize {
 
 ### 3.3 ASCII Logo Specifications & Color Palettes
 
-FerrisFetch contains dedicated, compact ASCII art representations for major Linux distributions and the Ferris mascot.
+KKFetch contains dedicated, compact ASCII art representations for major Linux distributions and the Ferris mascot.
 
 #### 1. Ferris (Rust Crab Mascot) - Default / Generic
 Primary Color: Coral Red (`\x1b[38;5;208m`), Accent: White (`\x1b[37m`)
@@ -704,7 +704,7 @@ Primary Color: Yellow (`\x1b[38;5;220m`), Accent: White (`\x1b[37m`)
 
 ```toml
 [package]
-name = "ferrisfetch"
+name = "kkfetch"
 version = "0.8.6"
 edition = "2021"
 rust-version = "1.75.0"
@@ -724,7 +724,7 @@ tempfile = "3.10"
 
 ### Evaluation: Custom Parsers vs `regex` Crate
 - `regex` pulls in multiple crates (`regex-syntax`, `regex-automata`, `aho-corasick`) and adds compilation time and binary weight.
-- Every text structure parsed in FerrisFetch (`os-release`, `cpuinfo`, `meminfo`, `uptime`, `dpkg/status`) consists of simple delimited key-value pairs or token lists.
+- Every text structure parsed in KKFetch (`os-release`, `cpuinfo`, `meminfo`, `uptime`, `dpkg/status`) consists of simple delimited key-value pairs or token lists.
 - Using `split_once(':')`, `split_once('=')`, and standard slice iterators avoids all dependencies, compiles instantly, and processes files in microseconds.
 
 ### Minimum Supported Rust Version (MSRV)
@@ -766,7 +766,7 @@ Using `assert_cmd`:
 ```rust
 #[test]
 fn test_no_color_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.arg("--no-color");
     let assert = cmd.assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
@@ -775,7 +775,7 @@ fn test_no_color_flag() {
 
 #[test]
 fn test_list_modules_flag() {
-    let mut cmd = Command::cargo_bin("ferrisfetch").unwrap();
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
     cmd.arg("--list-modules");
     cmd.assert()
         .success()
