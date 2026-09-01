@@ -14,6 +14,7 @@ pub struct PluginCollector;
 /// privilege escalation via untrusted user configuration (F1).
 #[cfg(unix)]
 fn is_elevated_context() -> bool {
+    // SAFETY: getuid and geteuid are safe POSIX calls that take no arguments and return integer IDs.
     unsafe {
         let uid = libc::getuid();
         let euid = libc::geteuid();
@@ -64,6 +65,7 @@ fn is_safe_plugin_file(path: &Path) -> bool {
         }
 
         // Must be owned by current user or root
+        // SAFETY: getuid is a safe POSIX call returning the user ID without memory side-effects.
         let current_uid = unsafe { libc::getuid() };
         let file_uid = meta.uid();
         if file_uid != current_uid && file_uid != 0 {

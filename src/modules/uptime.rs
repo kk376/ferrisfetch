@@ -50,6 +50,7 @@ pub fn get_uptime() -> Option<u64> {
     }
 
     // Fallback for chroot/container environments where /proc is unmounted or restricted
+    // SAFETY: libc::sysinfo safely writes hardware statistics into the provided uninitialized sysinfo struct pointer.
     unsafe {
         let mut info = MaybeUninit::<libc::sysinfo>::uninit();
         if libc::sysinfo(info.as_mut_ptr()) == 0 {
@@ -66,6 +67,7 @@ pub fn get_uptime() -> Option<u64> {
 /// Reads system uptime on Windows via GetTickCount64.
 #[cfg(windows)]
 pub fn get_uptime() -> Option<u64> {
+    // SAFETY: GetTickCount64 is a safe Windows API call that returns a u64 millisecond counter.
     unsafe {
         let ms = crate::modules::win_util::ffi::GetTickCount64();
         if ms > 0 {

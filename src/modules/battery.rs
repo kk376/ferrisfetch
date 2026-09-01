@@ -64,6 +64,7 @@ fn get_cache_path() -> std::path::PathBuf {
         return dir.join("battery.cache");
     }
     // 3. Fallback to private user-isolated temporary directory (mode 0700)
+    // SAFETY: libc::getuid is safe as it requires no arguments and returns the current user ID.
     let uid = unsafe { libc::getuid() };
     let temp_dir = std::env::temp_dir().join(format!("kkfetch-{}", uid));
     let _ = fs::create_dir_all(&temp_dir);
@@ -193,6 +194,7 @@ pub fn detect_battery() -> Option<BatteryInfo> {
 #[cfg(windows)]
 pub fn detect_battery() -> Option<BatteryInfo> {
     use crate::modules::win_util::ffi;
+    // SAFETY: GetSystemPowerStatus is safe to call with a mutable reference to a zero-initialized SYSTEM_POWER_STATUS struct.
     unsafe {
         let mut status = std::mem::zeroed::<ffi::SYSTEM_POWER_STATUS>();
         if ffi::GetSystemPowerStatus(&mut status) != 0 {

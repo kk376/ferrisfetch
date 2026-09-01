@@ -1,3 +1,4 @@
+#![warn(clippy::undocumented_unsafe_blocks)]
 use clap::Parser;
 use kkfetch::cli::Cli;
 use kkfetch::context::FetchContext;

@@ -32,3 +32,10 @@ Please provide:
 - **Initial confirmation**: Within 48 hours of receipt.
 - **Assessment and status updates**: Regular updates while investigating and drafting a fix.
 - **Coordinated disclosure**: A patch and security release will be published alongside an advisory acknowledging the reporter (unless you prefer anonymity).
+
+## Plugin System Threat Model
+
+- Plugins execute shell commands via `/bin/sh -c`
+- Mitigations: elevated context blocked, file ownership validation, symlink rejection
+- Risk: malicious config.toml can execute arbitrary commands as current user
+- Recommendation: review plugin configs, use `--no-plugins` in automated contexts

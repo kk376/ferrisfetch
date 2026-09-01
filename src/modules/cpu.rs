@@ -167,6 +167,7 @@ pub fn parse_cpu_info(content: &str) -> Option<CpuInfo> {
         processor_count
     } else {
         #[cfg(unix)]
+        // SAFETY: libc::sysconf is safe as it queries system constants and returns an integer without mutating memory.
         unsafe {
             let n = libc::sysconf(libc::_SC_NPROCESSORS_ONLN);
             if n > 0 {

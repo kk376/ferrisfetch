@@ -71,6 +71,7 @@ impl FetchContext {
 /// Detects terminal column width via direct kernel ioctl TIOCGWINSZ, Win32 console info, or $COLUMNS fallback.
 pub fn get_terminal_width() -> u16 {
     #[cfg(unix)]
+    // SAFETY: libc::ioctl with TIOCGWINSZ safely writes to a zeroed winsize struct and requires a valid file descriptor (STDOUT_FILENO).
     unsafe {
         let mut ws: libc::winsize = std::mem::zeroed();
         if libc::ioctl(libc::STDOUT_FILENO, libc::TIOCGWINSZ, &mut ws) == 0 && ws.ws_col > 0 {
@@ -79,6 +80,7 @@ pub fn get_terminal_width() -> u16 {
     }
 
     #[cfg(windows)]
+    // SAFETY: GetConsoleScreenBufferInfo safely populates a zeroed ConsoleScreenBufferInfo struct using a valid console output handle.
     unsafe {
         #[repr(C)]
         struct Coord {

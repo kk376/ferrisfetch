@@ -70,6 +70,7 @@ pub struct InstallInfo {
 fn get_statx_birth_time(path: &str) -> Option<u64> {
     let c_path = CString::new(path).ok()?;
     let mut statx_buf = MaybeUninit::<Statx>::zeroed();
+    // SAFETY: SYS_statx is safely called with a valid C-string path, standard flags, and a pointer to an uninitialized Statx struct that the kernel fills.
     let res = unsafe {
         libc::syscall(
             libc::SYS_statx,
@@ -81,6 +82,7 @@ fn get_statx_birth_time(path: &str) -> Option<u64> {
         )
     };
     if res == 0 {
+        // SAFETY: Assuming initialization is safe here because libc::syscall with SYS_statx populated the buffer successfully (res == 0).
         let buf = unsafe { statx_buf.assume_init() };
         // Check if the underlying filesystem returned valid btime (creation time)
         if buf.stx_mask & STATX_BTIME != 0 && buf.stx_btime.tv_sec > 0 {
@@ -208,6 +210,7 @@ pub fn epoch_to_datetime(epoch_secs: u64) -> (i32, u8, u8, u8, u8, u8) {
 /// Implements localized wall-clock date formatting suggested by @Laynsb (https://github.com/Laynsb).
 #[cfg(not(windows))]
 pub fn get_local_timezone_offset_secs(epoch: u64) -> i64 {
+    // SAFETY: localtime_r safely converts the epoch time to a local tm struct, writing into a zeroed tm instance.
     unsafe {
         #[allow(deprecated)]
         let time = epoch as libc::time_t;
@@ -224,6 +227,7 @@ pub fn get_local_timezone_offset_secs(epoch: u64) -> i64 {
 #[cfg(windows)]
 pub fn get_local_timezone_offset_secs(_epoch: u64) -> i64 {
     use crate::modules::win_util::ffi;
+    // SAFETY: GetTimeZoneInformation safely reads timezone details into a zeroed TIME_ZONE_INFORMATION struct.
     unsafe {
         let mut tzi = MaybeUninit::<ffi::TIME_ZONE_INFORMATION>::zeroed();
         let res = ffi::GetTimeZoneInformation(tzi.as_mut_ptr());

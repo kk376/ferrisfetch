@@ -8,6 +8,7 @@ use std::net::Ipv4Addr;
 /// Retrieves the primary local IPv4 address using standard POSIX getifaddrs (UNIX) or UDP socket route query (Windows).
 pub fn detect_local_ip() -> Option<String> {
     #[cfg(unix)]
+    // SAFETY: libc::getifaddrs safely allocates a linked list of network interfaces. We safely iterate over it and free it with libc::freeifaddrs.
     unsafe {
         let mut ifaddrs: *mut libc::ifaddrs = std::ptr::null_mut();
         if libc::getifaddrs(&mut ifaddrs) == 0 && !ifaddrs.is_null() {
