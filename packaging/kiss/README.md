@@ -9,8 +9,8 @@ This directory contains the KISS Linux package recipe files for `kkfetch`.
 ## Package Structure
 
 - `build`: Posix shell script executing `cargo build --release --locked` and installing binaries, shell completions, documentation, and license.
-- `version`: Package version and release (`0.11.7 1`).
-- `sources`: Source tarball location (`https://github.com/kk376/kkfetch/archive/refs/tags/v0.11.7.tar.gz`).
+- `version`: Package version and release (`0.12.0 1`).
+- `sources`: Source tarball location (`https://github.com/kk376/kkfetch/archive/refs/tags/v0.12.0.tar.gz`).
 - `checksums`: SHA256 checksum for source tarball validation.
 - `depends`: Build/runtime dependencies (`rust make`).
 

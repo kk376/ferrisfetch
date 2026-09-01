@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-09-01
+
+### Changed
+- **Official Project Rebrand to KKFetch**: Full transition from `ferrisfetch` to `kkfetch`, including binary name migration, default config directory move to `~/.config/kkfetch/`, updated completions, manual pages, and multi-distro packaging templates.
+- **Maintainer Identity**: Updated project authorship and maintainership to Kushagra Kumar (`kk376`).
+
+### Security
+- **Documented Unsafe Invariants**: Added formal `// SAFETY:` explanatory comments across all `unsafe` blocks in 7 modules (`context.rs`, `cpu.rs`, `uptime.rs`, `battery.rs`, `installed.rs`, `localip.rs`, `plugin.rs`), verifying OS kernel invariants and memory safety.
+- **Enforced Safety Lint**: Activated `#![warn(clippy::undocumented_unsafe_blocks)]` in `main.rs` to guarantee compile-time safety documentation across the codebase.
+- **Automated Security Auditing**: Added automated `cargo audit` workflow to GitHub Actions CI pipeline.
+- **Plugin Threat Model**: Formalized threat model and privilege-boundary mitigations in `SECURITY.md`.
+
+### Packaging & CI
+- **Multi-Platform Release Pipeline**: Upgraded GitHub Actions release automation to build standalone static musl binaries (x86_64, aarch64), Windows x86_64 zip, Termux arm64, Debian, RPM, and Arch Linux packages.
+- **Ubuntu Noble PPA**: Configured Launchpad PPA packaging for Ubuntu 24.04 LTS (`noble`).
+
 ## [0.11.7] - 2026-08-29
 
 ### Security

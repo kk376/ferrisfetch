@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:           kkfetch
-Version:        0.11.7
+Version:        0.12.0
 Release:        1%{?dist}
 Summary:        Fast, lightweight system information tool in Rust
 
@@ -58,6 +58,9 @@ install -Dpm 0644 README.md %{buildroot}%{_docdir}/%{name}/README.md
 %{_datadir}/fish/vendor_completions.d/%{name}.fish
 
 %changelog
+* Tue Sep 01 2026 Kushagra Kumar (kk376) <kk376@users.noreply.github.com> - 0.12.0-1
+- Release version 0.12.0: Official rebrand to kkfetch, safety documentation, clippy safety lint, and cargo audit CI
+
 * Mon Aug 31 2026 Kushagra Kumar (kk376) <kk376@users.noreply.github.com> - 0.11.7-1
 - Release version 0.11.7: Rebrand to kkfetch, security hardening, and performance optimizations
 

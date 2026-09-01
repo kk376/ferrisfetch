@@ -1,6 +1,6 @@
 # Template file for 'kkfetch'
 pkgname=kkfetch
-version=0.11.7
+version=0.12.0
 revision=1
 build_style=cargo
 short_desc="Fast, lightweight Linux and Android system information fetch CLI written in Rust"

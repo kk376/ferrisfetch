@@ -1,3 +1,9 @@
+kkfetch (0.12.0-1~ppa1~noble) noble; urgency=medium
+
+  * Release version 0.12.0: Official rebrand to KKFetch, unsafe block safety documentation, clippy safety lint, and automated CI security audit.
+
+ -- Kushagra Kumar <kkushagra86@gmail.com>  Tue, 01 Sep 2026 11:50:00 +0530
+
 kkfetch (0.11.7-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.11.7: Rebrand to KKFetch, hardened plugin execution, canonical subprocess paths, user-isolated cache, and output sanitization.
