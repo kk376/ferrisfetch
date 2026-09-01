@@ -2,7 +2,7 @@ class Kkfetch < Formula
   desc "Fast, lightweight Linux, macOS, and Windows system information fetch tool written in Rust"
   homepage "https://github.com/kk376/kkfetch"
   url "https://github.com/kk376/kkfetch/releases/download/v0.12.0/kkfetch-0.12.0-x86_64-unknown-linux-gnu.tar.gz"
-  sha256 "SKIP"
+  sha256 "0f0df08111849d41ba40d1a441894553db6122be1147d36f271670f57b704803"
   license "MIT"
   version "0.12.0"
 
