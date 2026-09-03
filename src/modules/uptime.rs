@@ -50,6 +50,7 @@ pub fn get_uptime() -> Option<u64> {
     }
 
     // Fallback for chroot/container environments where /proc is unmounted or restricted
+    #[cfg(target_os = "linux")]
     // SAFETY: libc::sysinfo safely writes hardware statistics into the provided uninitialized sysinfo struct pointer.
     unsafe {
         let mut info = MaybeUninit::<libc::sysinfo>::uninit();
@@ -57,6 +58,38 @@ pub fn get_uptime() -> Option<u64> {
             let info = info.assume_init();
             if info.uptime > 0 {
                 return Some(info.uptime as u64);
+            }
+        }
+    }
+
+    #[cfg(any(
+        target_os = "macos",
+        target_os = "freebsd",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    ))]
+    // SAFETY: sysctl with KERN_BOOTTIME reads kernel boot time into a valid timeval buffer, and gettimeofday reads current time.
+    unsafe {
+        let mut mib = [libc::CTL_KERN, libc::KERN_BOOTTIME];
+        let mut boottime = MaybeUninit::<libc::timeval>::uninit();
+        let mut size = std::mem::size_of::<libc::timeval>();
+        if libc::sysctl(
+            mib.as_mut_ptr(),
+            2,
+            boottime.as_mut_ptr() as *mut libc::c_void,
+            &mut size,
+            std::ptr::null_mut(),
+            0,
+        ) == 0
+        {
+            let boottime = boottime.assume_init();
+            let mut now = MaybeUninit::<libc::timeval>::uninit();
+            if libc::gettimeofday(now.as_mut_ptr(), std::ptr::null_mut()) == 0 {
+                let now = now.assume_init();
+                let diff = now.tv_sec - boottime.tv_sec;
+                if diff > 0 {
+                    return Some(diff as u64);
+                }
             }
         }
     }

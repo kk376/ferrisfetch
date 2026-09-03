@@ -6,14 +6,14 @@
 
 use crate::context::FetchContext;
 use crate::modules::{Collector, ModuleId, ModuleOutput};
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
 use std::ffi::CString;
 #[cfg(not(windows))]
 use std::fs;
 use std::mem::MaybeUninit;
 use std::time::UNIX_EPOCH;
 
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
 #[repr(C)]
 #[derive(Default)]
 struct StatxTimestamp {
@@ -22,7 +22,7 @@ struct StatxTimestamp {
     __statx_pad1: i32,
 }
 
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
 #[repr(C)]
 #[derive(Default)]
 struct Statx {
@@ -50,11 +50,11 @@ struct Statx {
     __statx_pad2: [u64; 14],
 }
 
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
 const STATX_BTIME: u32 = 0x00000800;
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
 const STATX_MTIME: u32 = 0x00000020;
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
 const STATX_CTIME: u32 = 0x00000040;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -66,7 +66,7 @@ pub struct InstallInfo {
 /// Direct statx syscall wrapper (Linux >= 4.11).
 /// Direct syscall invocation is required because `std::fs::Metadata::created()` is unsupported
 /// on older kernels/glibc versions and filesystems lacking explicit btime support.
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
 fn get_statx_birth_time(path: &str) -> Option<u64> {
     let c_path = CString::new(path).ok()?;
     let mut statx_buf = MaybeUninit::<Statx>::zeroed();
@@ -94,6 +94,14 @@ fn get_statx_birth_time(path: &str) -> Option<u64> {
         }
     }
     None
+}
+
+#[cfg(not(any(windows, target_os = "linux")))]
+fn get_statx_birth_time(path: &str) -> Option<u64> {
+    let meta = fs::metadata(path).ok()?;
+    let created = meta.created().or_else(|_| meta.modified()).ok()?;
+    let duration = created.duration_since(UNIX_EPOCH).ok()?;
+    Some(duration.as_secs())
 }
 
 #[cfg(not(windows))]
