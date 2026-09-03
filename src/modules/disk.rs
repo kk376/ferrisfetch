@@ -136,7 +136,7 @@ pub fn format_disk_usage(info: &DiskUsage) -> String {
     }
 }
 
-#[cfg(not(windows))]
+#[cfg(any(not(windows), test))]
 const IGNORED_FS_TYPES: &[&str] = &[
     "tmpfs",
     "devtmpfs",
@@ -169,7 +169,7 @@ const IGNORED_FS_TYPES: &[&str] = &[
     "sdcardfs",
 ];
 
-#[cfg(not(windows))]
+#[cfg(any(not(windows), test))]
 const IGNORED_MOUNT_PREFIXES: &[&str] = &[
     "/mnt/wsl",
     "/mnt/wslg",
