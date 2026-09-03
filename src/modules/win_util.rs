@@ -181,14 +181,17 @@ pub mod ffi {
             return None;
         }
 
-        let mut buffer: Vec<u8> = vec![0; data_size as usize];
+        let u16_count = (data_size as usize + 1) / 2;
+        let mut buffer: Vec<u16> = vec![0u16; u16_count];
+        // SAFETY: RegQueryValueExW writes up to data_size bytes into the buffer.
+        // buffer has at least data_size bytes allocated and is guaranteed 2-byte aligned.
         let res = unsafe {
             RegQueryValueExW(
                 hkey,
                 val_w.as_ptr(),
                 std::ptr::null(),
                 &mut val_type,
-                buffer.as_mut_ptr(),
+                buffer.as_mut_ptr() as *mut u8,
                 &mut data_size,
             )
         };
@@ -197,13 +200,15 @@ pub mod ffi {
         }
 
         if val_type == REG_SZ || val_type == REG_EXPAND_SZ {
-            let u16_slice = unsafe {
-                std::slice::from_raw_parts(buffer.as_ptr() as *const u16, (data_size / 2) as usize)
-            };
-            let s = String::from_utf16_lossy(u16_slice);
+            let words = (data_size as usize) / 2;
+            let s = String::from_utf16_lossy(&buffer[..words]);
             Some(s.trim_matches('\0').trim().to_string())
         } else if val_type == REG_DWORD && data_size >= 4 {
-            let val = u32::from_ne_bytes(buffer[0..4].try_into().ok()?);
+            // SAFETY: buffer is initialized and valid for reading at least 4 bytes.
+            let bytes = unsafe {
+                std::slice::from_raw_parts(buffer.as_ptr() as *const u8, data_size as usize)
+            };
+            let val = u32::from_ne_bytes(bytes[0..4].try_into().ok()?);
             Some(val.to_string())
         } else {
             None

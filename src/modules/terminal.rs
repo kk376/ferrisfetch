@@ -338,15 +338,23 @@ fn get_terminal_cache_path(binary: &str) -> std::path::PathBuf {
         let _ = std::fs::create_dir_all(&dir);
         return dir.join(format!("term_{}.cache", binary));
     }
-    // 3. Fallback to private user-isolated temporary directory (mode 0700)
-    let uid = unsafe { libc::getuid() };
-    let temp_dir = std::env::temp_dir().join(format!("kkfetch-{}", uid));
-    let _ = std::fs::create_dir_all(&temp_dir);
+    // 3. Fallback to private user-isolated temporary directory (mode 0700 on Unix)
     #[cfg(unix)]
-    {
+    let temp_dir = {
+        // SAFETY: getuid() is a POSIX syscall that returns the real user ID of the calling process without side effects.
+        let uid = unsafe { libc::getuid() };
+        let dir = std::env::temp_dir().join(format!("kkfetch-{}", uid));
+        let _ = std::fs::create_dir_all(&dir);
         use std::os::unix::fs::PermissionsExt;
-        let _ = std::fs::set_permissions(&temp_dir, std::fs::Permissions::from_mode(0o700));
-    }
+        let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o700));
+        dir
+    };
+    #[cfg(not(unix))]
+    let temp_dir = {
+        let dir = std::env::temp_dir().join("kkfetch");
+        let _ = std::fs::create_dir_all(&dir);
+        dir
+    };
     temp_dir.join(format!("term_{}.cache", binary))
 }
 
