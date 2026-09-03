@@ -59,9 +59,9 @@ Benchmarked against Fastfetch across **100 iterations** (20 warmup runs) on Fedo
 
 | Command | Mean Runtime | Median Latency | Min Latency | Max Latency | Relative Speedup |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| `fastfetch` | `17.93 ms` | `15.66 ms` | `14.67 ms` | `118.12 ms` | `1.00` (Baseline) |
-| `kkfetch` (All 27 Modules) | **`3.00 ms`** | **`2.72 ms`** | **`2.36 ms`** | **`12.91 ms`** | **5.97x faster** |
-| `kkfetch` (Pure sysfs/drm) | **`2.53 ms`** | **`2.48 ms`** | **`2.26 ms`** | **`4.11 ms`** | **7.08x faster** |
+| `fastfetch` | `21.90 ms` | `18.35 ms` | `14.67 ms` | `136.51 ms` | `1.00` (Baseline) |
+| `kkfetch` (All 27 Modules) | **`3.65 ms`** | **`3.65 ms`** | **`2.69 ms`** | **`5.11 ms`** | **6.00x faster** |
+| `kkfetch` (Pure sysfs/drm) | **`3.60 ms`** | **`3.65 ms`** | **`2.64 ms`** | **`4.27 ms`** | **6.08x faster** |
 
 *KKFetch achieves lower CPU time and syscall overhead by reading `/proc` and `sysfs` directly in Rust, executing active module collectors concurrently in parallel using `std::thread::scope`, and compiling with Fat Link-Time Optimization (LTO).*
 
@@ -74,15 +74,15 @@ kkfetch --timings
 ```
 
 **2. Comparative Statistical Benchmark (via `hyperfine`):**
-Executes 100 statistical test runs (preceded by 20 warmup cycles) to calculate the mean runtime, median latency, standard deviation, and relative speedup between KKFetch and Fastfetch:
+Executes 100 statistical test runs (preceded by 20 warmup cycles) using direct execution (`-N`/`--shell=none` to eliminate shell fork jitter on sub-5ms binaries) to calculate the mean runtime, median latency, standard deviation, and relative speedup between KKFetch and Fastfetch:
 ```bash
-hyperfine --warmup 20 --runs 100 'kkfetch' 'fastfetch'
+hyperfine --warmup 20 --runs 100 -N 'kkfetch' 'fastfetch'
 ```
 
 **3. Pure Sysfs / Accelerated Mode Benchmark:**
 Measures the core sub-3ms performance of KKFetch with external bus latency disabled, highlighting zero-fork `/proc`, `sysfs`, and DRM kernel prober throughput against Fastfetch:
 ```bash
-hyperfine --warmup 20 --runs 100 'kkfetch -d battery' 'fastfetch'
+hyperfine --warmup 20 --runs 100 -N 'kkfetch -d battery' 'fastfetch'
 ```
 
 ---
