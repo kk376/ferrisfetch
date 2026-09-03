@@ -7,29 +7,29 @@ A fast, lightweight, zero-subprocess system information fetch tool written in Ru
          .';:cccccccccccc:;,.            ------------
       .;cccccccccccccccccccccc;.         OS: Fedora Linux 44 (Workstation Edition) x86_64
     .:cccccccccccccccccccccccccc:.       Host: Thin A15 B7UCX REV:1.0
-  .;ccccccccccccc;.:dddl:.;ccccccc;.     Kernel: 7.1.10-200.fc44.x86_64
- .:ccccccccccccc;OWMKOOXMWd;ccccccc:.    Installed: 23 Aug 2026, 10:53 PM (6 days ago)
-.:ccccccccccccc;KMMc;cc;xMMc;ccccccc:.   Uptime: 45 mins
-,cccccccccccccc;MMM.;cc;;WW:;cccccccc,   Packages: 2890 (rpm), 4 (flatpak), 1 (cargo), 1 (pip)
+  .;ccccccccccccc;.:dddl:.;ccccccc;.     Kernel: 7.1.12-200.fc44.x86_64
+ .:ccccccccccccc;OWMKOOXMWd;ccccccc:.    Installed: 23 Aug 2026, 10:53 PM (12 days ago)
+.:ccccccccccccc;KMMc;cc;xMMc;ccccccc:.   Uptime: 4 hours, 53 mins
+,cccccccccccccc;MMM.;cc;;WW:;cccccccc,   Packages: 2789 (rpm), 3 (flatpak), 2 (cargo), 2 (pip)
 :cccccccccccccc;MMM.;cccccccccccccccc:   Shell: zsh 5.9
 :ccccccc;oxOOOo;MMM0OOk.;cccccccccccc:   Display (AUOD0A2): 1920x1080 in 15", 144 Hz [Built-in]
 cccccc;0MMKxdd:;MMMkddc.;cccccccccccc;   Desktop: GNOME 50.4 (Wayland)
 ccccc;XM0';cccc;MMM.;cccccccccccccccc'   WM: Mutter
 ccccc;MMo;ccccc;MMW.;ccccccccccccccc;    WM Theme: Adwaita
-ccccc;0MNc.ccc.xMMd;ccccccccccccccc;     Terminal: kitty 0.48.2
-cccccc;dNMWXXXWM0:;cccccccccccccc:,      Terminal Font: Fira Code (12.5pt)
-cccccccc;.:odl:.;cccccccccccccc:,.       CPU: AMD Ryzen 5 7535HS (6c 12t) @ 4.393GHz [4.60GHz max]
+ccccc;0MNc.ccc.xMMd;ccccccccccccccc;     Terminal: kitty 0.47.1
+cccccc;dNMWXXXWM0:;cccccccccccccc:,      Terminal Font: Fira Code (12pt)
+cccccccc;.:odl:.;cccccccccccccc:,.       CPU: AMD Ryzen 5 7535HS (6c 12t) @ 4.415GHz [4.60GHz max]
 :cccccccccccccccccccccccccccc:'.         GPU0: AMD Radeon 680M (512 MiB) [Integrated]
 .:cccccccccccccccccccccc:;,..            GPU1: NVIDIA GeForce RTX 2050 (4 GiB) [Discrete]
-  '::cccccccccccccc::;,.                 Memory: 7.00 GiB / 14.82 GiB (47%)
-                                         Swap: 0.00 GiB / 14.82 GiB (0%) - ZSTD
-                                         Disk0: (/) 42.5 GiB / 215.6 GiB (20%) - btrfs
-                                         Disk1: (/boot) 0.9 GiB / 1.9 GiB (47%) - ext4
+  '::cccccccccccccc::;,.                 Memory: 8.40 GiB / 14.82 GiB (57%)
+                                         Swap: 1.10 GiB / 14.82 GiB (7%) - ZSTD
+                                         Disk0: (/) 121.4 GiB / 215.6 GiB (56%) - btrfs
+                                         Disk1: (/boot) 0.9 GiB / 1.9 GiB (48%) - ext4
                                          Disk2: (/boot/efi) 52 MiB / 196 MiB (26%) - vfat
-                                         Disk3: (/home) 42.5 GiB / 215.6 GiB (20%) - btrfs
+                                         Disk3: (/home) 121.4 GiB / 215.6 GiB (56%) - btrfs
                                          Disk4: (/media/Backup) 444.8 GiB / 931.5 GiB (48%) - fuseblk
                                          Disk5: (/media/Windows) 133.5 GiB / 258.4 GiB (52%) - fuseblk
-                                         Battery: 94% [AC Connected]
+                                         Battery: 93% [AC Connected]
                                          Local IP: 192.168.29.219
                                          Theme: Adwaita (dark) [GTK/GNOME]
                                          Icons: Adwaita [GTK/GNOME]
@@ -53,7 +53,7 @@ Most fetch tools either spawn multiple shell child processes (`neofetch`) or dyn
 
 ## Benchmarks
 
-Benchmarked against Fastfetch across **100 iterations** (20 warmup runs) on Fedora Linux 44 (AMD Ryzen 5 7535HS with 6 physical cores and 12 threads):
+Benchmarked against Fastfetch across **100 iterations** (20 warmup runs) on bare-metal Fedora Linux 44 (Linux 7.1.12-200.fc44.x86_64, AMD Ryzen 5 7535HS with 6 physical cores and 12 threads):
 
 ### Results
 
