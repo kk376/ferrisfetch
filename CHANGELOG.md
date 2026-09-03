@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-09-04
+
+### Added
+- **No-Plugins Execution Flag**: Added `--no-plugins` command-line option to explicitly disable third-party shell plugin execution in automated, headless, or security-sensitive environments.
+- **Darwin (macOS) Kernel Boot Detection**: Integrated native Darwin `sysctl` (`CTL_KERN`, `KERN_BOOTTIME`) fallback in the uptime module when `libc::sysinfo` is unavailable.
+- **Darwin & BSD Filesystem Metadata Fallback**: Added portable APFS/HFS+ file creation and modification timestamp resolution when Linux `statx` direct syscalls are unsupported.
+- **Cross-Platform Matrix Testing**: Added Windows and macOS CI test matrices to ensure cross-platform compatibility across releases.
+
+### Fixed
+- **Win32 Pointer Alignment**: Resolved potential unaligned pointer dereferences in `win_util.rs` via `std::ptr::copy_nonoverlapping` into properly aligned stack structures, eliminating undefined behavior.
+- **Windows Platform Gates**: Gated default terminal cache directory and disk storage constants with appropriate platform cfg attributes, and fixed Windows test suite imports in `battery.rs`.
+- **Collector Panic Module Attribution**: Corrected multi-threaded collector panic reporting to attribute errors to the specific module identifier rather than a generic index.
+- **Darwin Statx Guard**: Scoped Linux-specific `libc::SYS_statx` direct syscall to `#[cfg(target_os = "linux")]` to resolve compilation failures on macOS and BSD.
+
+### Security
+- **Hardened Unsafe Invariants**: Audited and documented formal `// SAFETY:` invariants across all FFI blocks, enforcing compile-time compliance via `#![warn(clippy::undocumented_unsafe_blocks)]`.
+- **CI Security Audit**: Added automated `cargo-audit` verification job into the continuous integration workflow.
+
+### Packaging
+- **Updated Package Manifests**: Synchronized 0.13.0 release configurations across Fedora Copr (RPM spec), Ubuntu Launchpad PPA (Noble changelog), Homebrew tap Formula, Arch Linux PKGBUILD, Gentoo (`kkfetch-0.13.0.ebuild`), KISS Linux, Alpine Linux, Termux, Void Linux, Nix, and WinGet.
+
 ## [0.12.0] - 2026-09-01
 
 ### Changed

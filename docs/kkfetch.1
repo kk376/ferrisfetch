@@ -1,4 +1,4 @@
-.TH KKFETCH 1 "September 2026" "kkfetch 0.12.0" "User Commands"
+.TH KKFETCH 1 "September 2026" "kkfetch 0.13.0" "User Commands"
 .SH NAME
 kkfetch \- A fast, lightweight Linux system information fetch tool written in Rust
 .SH SYNOPSIS
@@ -18,6 +18,9 @@ Disable specific modules (comma-separated, e.g. "gpu,disk").
 .TP
 \fB\-\-no-color\fR
 Disable colored ANSI output.
+.TP
+\fB\-\-no-plugins\fR
+Disable execution of external shell plugins.
 .TP
 \fB\-l\fR, \fB\-\-logo\fR \fI<LOGO>\fR
 Override the ASCII logo (e.g. "arch", "debian", "ubuntu", "ferris", "fedora", "tux").

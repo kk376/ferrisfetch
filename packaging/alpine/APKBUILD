@@ -1,7 +1,7 @@
 # Contributor: Kushagra Kumar (kk376) <kk376@users.noreply.github.com>
 # Maintainer: Kushagra Kumar (kk376) <kk376@users.noreply.github.com>
 pkgname=kkfetch
-pkgver=0.12.0
+pkgver=0.13.0
 pkgrel=0
 pkgdesc="Fast, lightweight Linux and Android system information fetch CLI written in Rust"
 url="https://github.com/kk376/kkfetch"
@@ -52,5 +52,5 @@ fishcomp() {
 }
 
 sha512sums="
-1184134e96107122e1191275eaf7bce8cadf10625ec9dce38f48a3f2f00eec46db356e01792d32d52ce4097abfe9f0a066db7afb5024e666308a004019d7e19a  kkfetch-0.12.0.tar.gz
+SKIP  kkfetch-0.13.0.tar.gz
 "

@@ -1,3 +1,9 @@
+kkfetch (0.13.0-1~ppa1~noble) noble; urgency=medium
+
+  * Release version 0.13.0: Darwin support, Win32 alignment hardening, no-plugins flag, and cross-platform CI matrix.
+
+ -- Kushagra Kumar <kkushagra86@gmail.com>  Fri, 04 Sep 2026 01:45:00 +0530
+
 kkfetch (0.12.0-1~ppa1~noble) noble; urgency=medium
 
   * Release version 0.12.0: Official rebrand to KKFetch, unsafe block safety documentation, clippy safety lint, and automated CI security audit.

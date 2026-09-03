@@ -116,8 +116,8 @@ sudo apt update && sudo apt install -y kkfetch
 
 **Via Pre-built `.deb`:**
 ```bash
-curl -LO https://github.com/kk376/kkfetch/releases/download/v0.12.0/kkfetch_0.12.0-1_amd64.deb
-sudo dpkg -i kkfetch_0.12.0-1_amd64.deb
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.13.0/kkfetch_0.13.0-1_amd64.deb
+sudo dpkg -i kkfetch_0.13.0-1_amd64.deb
 ```
 
 ---
@@ -136,8 +136,8 @@ sudo dnf install -y kkfetch
 
 **Via Pre-built Pacman Package:**
 ```bash
-curl -LO https://github.com/kk376/kkfetch/releases/download/v0.12.0/kkfetch-0.12.0-1-x86_64.pkg.tar.zst
-sudo pacman -U kkfetch-0.12.0-1-x86_64.pkg.tar.zst
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.13.0/kkfetch-0.13.0-1-x86_64.pkg.tar.zst
+sudo pacman -U kkfetch-0.13.0-1-x86_64.pkg.tar.zst
 ```
 
 ---
@@ -155,8 +155,8 @@ brew install kkfetch
 ### Android (Termux)
 
 ```bash
-curl -LO https://github.com/kk376/kkfetch/releases/download/v0.12.0/kkfetch_0.12.0-1_termux_aarch64.deb
-dpkg -i kkfetch_0.12.0-1_termux_aarch64.deb
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.13.0/kkfetch_0.13.0-1_termux_aarch64.deb
+dpkg -i kkfetch_0.13.0-1_termux_aarch64.deb
 ```
 
 ---
@@ -167,7 +167,7 @@ No dependencies, pure standalone executable:
 
 ```powershell
 # 1. Download
-curl.exe -LO https://github.com/kk376/kkfetch/releases/download/v0.12.0/kkfetch-windows-x86_64.zip
+curl.exe -LO https://github.com/kk376/kkfetch/releases/download/v0.13.0/kkfetch-windows-x86_64.zip
 
 # 2. Extract
 tar.exe -xf kkfetch-windows-x86_64.zip
@@ -183,7 +183,7 @@ tar.exe -xf kkfetch-windows-x86_64.zip
 Statically linked with musl (zero external dependencies):
 
 ```bash
-curl -LO https://github.com/kk376/kkfetch/releases/download/v0.12.0/kkfetch-linux-musl-x86_64
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.13.0/kkfetch-linux-musl-x86_64
 chmod +x kkfetch-linux-musl-x86_64
 sudo mv kkfetch-linux-musl-x86_64 /usr/local/bin/kkfetch
 ```
@@ -193,8 +193,8 @@ sudo mv kkfetch-linux-musl-x86_64 /usr/local/bin/kkfetch
 ### Pre-built Tarball Archive
 
 ```bash
-curl -LO https://github.com/kk376/kkfetch/releases/download/v0.12.0/kkfetch-0.12.0-x86_64-unknown-linux-gnu.tar.gz
-tar -xzf kkfetch-0.12.0-x86_64-unknown-linux-gnu.tar.gz
+curl -LO https://github.com/kk376/kkfetch/releases/download/v0.13.0/kkfetch-0.13.0-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf kkfetch-0.13.0-x86_64-unknown-linux-gnu.tar.gz
 sudo ./install.sh
 ```
 
