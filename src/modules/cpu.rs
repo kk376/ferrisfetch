@@ -314,8 +314,8 @@ impl Collector for CpuCollector {
         ModuleId::Cpu
     }
 
-    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
-        let cpu = get_cpu_info()?;
+    fn collect(&self, ctx: &FetchContext) -> Option<ModuleOutput> {
+        let cpu = ctx.cpu_info.as_ref().cloned().or_else(get_cpu_info)?;
         let cleaned = clean_cpu_model(&cpu.model);
 
         // Core / thread layout formatting

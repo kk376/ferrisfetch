@@ -581,8 +581,12 @@ impl Collector for ThemeCollector {
         ModuleId::Theme
     }
 
-    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
-        let info = detect_theme_info()?;
+    fn collect(&self, ctx: &FetchContext) -> Option<ModuleOutput> {
+        let info = ctx
+            .theme_info
+            .as_ref()
+            .cloned()
+            .or_else(detect_theme_info)?;
         let value = format_theme_value(&info)?;
 
         Some(ModuleOutput {
@@ -601,8 +605,12 @@ impl Collector for IconsCollector {
         ModuleId::Icons
     }
 
-    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
-        let info = detect_theme_info()?;
+    fn collect(&self, ctx: &FetchContext) -> Option<ModuleOutput> {
+        let info = ctx
+            .theme_info
+            .as_ref()
+            .cloned()
+            .or_else(detect_theme_info)?;
         let value = format_icons_value(&info)?;
 
         Some(ModuleOutput {
@@ -629,8 +637,12 @@ impl Collector for FontCollector {
         ModuleId::Font
     }
 
-    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
-        let info = detect_theme_info()?;
+    fn collect(&self, ctx: &FetchContext) -> Option<ModuleOutput> {
+        let info = ctx
+            .theme_info
+            .as_ref()
+            .cloned()
+            .or_else(detect_theme_info)?;
         let value = format_font_value(&info)?;
 
         Some(ModuleOutput {
@@ -662,8 +674,12 @@ impl Collector for CursorCollector {
         ModuleId::Cursor
     }
 
-    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
-        let info = detect_theme_info()?;
+    fn collect(&self, ctx: &FetchContext) -> Option<ModuleOutput> {
+        let info = ctx
+            .theme_info
+            .as_ref()
+            .cloned()
+            .or_else(detect_theme_info)?;
         let value = format_cursor_value(&info)?;
 
         Some(ModuleOutput {

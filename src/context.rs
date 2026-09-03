@@ -28,6 +28,10 @@ pub struct FetchContext {
     pub active_modules: Vec<ModuleId>,
     pub logo_override: Option<String>,
     pub no_logo: bool,
+    pub no_plugins: bool,
+    pub uname_info: Option<crate::modules::kernel::UnameInfo>,
+    pub theme_info: Option<crate::modules::theme::ThemeInfo>,
+    pub cpu_info: Option<crate::modules::cpu::CpuInfo>,
     pub config: Config,
 }
 
@@ -53,6 +57,27 @@ impl FetchContext {
 
         let logo_override = cli.logo.clone().or_else(|| config.logo.clone());
         let no_logo = cli.no_logo || config.no_logo.unwrap_or(false);
+        let no_plugins = cli.no_plugins;
+
+        let uname_info = crate::modules::kernel::get_uname_info();
+        let cpu_info = if active_modules
+            .iter()
+            .any(|m| matches!(m, ModuleId::Cpu | ModuleId::Gpu))
+        {
+            crate::modules::cpu::get_cpu_info()
+        } else {
+            None
+        };
+        let theme_info = if active_modules.iter().any(|m| {
+            matches!(
+                m,
+                ModuleId::Theme | ModuleId::Icons | ModuleId::Font | ModuleId::Cursor
+            )
+        }) {
+            crate::modules::theme::detect_theme_info()
+        } else {
+            None
+        };
 
         Self {
             term_width,
@@ -63,6 +88,10 @@ impl FetchContext {
             active_modules,
             logo_override,
             no_logo,
+            no_plugins,
+            uname_info,
+            theme_info,
+            cpu_info,
             config,
         }
     }
@@ -275,6 +304,7 @@ pub fn resolve_active_modules(cli: &Cli, config: &Config) -> Vec<ModuleId> {
     let filtered: Vec<ModuleId> = base_modules
         .into_iter()
         .filter(|m| !disabled_set.contains(m))
+        .filter(|m| !(cli.no_plugins && *m == ModuleId::Plugin))
         .collect();
 
     // Deduplicate while strictly preserving first-seen appearance order
@@ -383,5 +413,18 @@ mod tests {
     #[test]
     fn test_detect_unicode_supported_default() {
         assert!(detect_unicode_supported());
+    }
+
+    #[test]
+    fn test_resolve_active_modules_no_plugins() {
+        let cli = Cli {
+            modules: Some(vec!["os".to_string(), "plugin".to_string()]),
+            no_plugins: true,
+            ..Default::default()
+        };
+        let config = Config::default();
+
+        let active = resolve_active_modules(&cli, &config);
+        assert_eq!(active, vec![ModuleId::Os]);
     }
 }

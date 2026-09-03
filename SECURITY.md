@@ -6,8 +6,8 @@ Security fixes are provided for the current release version of KKFetch.
 
 | Version | Supported          |
 | :---    | :---               |
-| 0.11.x  | :white_check_mark: |
-| < 0.11.0 | :x:                |
+| 0.12.x  | :white_check_mark: |
+| < 0.12.0 | :x:                |
 
 ## Reporting a Vulnerability
 

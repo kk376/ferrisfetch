@@ -1,6 +1,6 @@
 # Maintainer: Kushagra Kumar (kk376) <kk376@archlinux.local>
 pkgname=kkfetch
-pkgver=0.8.5
+pkgver=0.12.0
 pkgrel=1
 pkgdesc="A fast, lightweight Linux system information fetch tool written in Rust"
 arch=('x86_64' 'aarch64')

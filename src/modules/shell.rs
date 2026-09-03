@@ -372,6 +372,7 @@ pub fn detect_shell() -> Option<String> {
 /// Probes process hierarchy or environment to determine active user shell.
 #[cfg(not(windows))]
 pub fn detect_shell() -> Option<String> {
+    // SAFETY: getpid() is a standard POSIX syscall that returns the current process ID without memory safety implications.
     let mut current_pid = unsafe { libc::getpid() as u32 };
 
     // Traverse process parent chain (up to 5 ancestors) to identify the interactive shell that invoked kkfetch

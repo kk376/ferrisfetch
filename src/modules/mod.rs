@@ -266,20 +266,20 @@ impl ModuleRegistry {
                 let mut handles = Vec::with_capacity(active.len());
                 for &module_id in active {
                     if let Some(collector) = self.collectors.iter().find(|c| c.id() == module_id) {
-                        handles.push(s.spawn(move || {
+                        let handle = s.spawn(move || {
                             let start = std::time::Instant::now();
                             let outputs = collector.collect_multiple(ctx);
                             let elapsed = start.elapsed();
                             (outputs, module_id, elapsed)
-                        }));
+                        });
+                        handles.push((module_id, handle));
                     }
                 }
                 handles
                     .into_iter()
-                    .map(|h| {
-                        h.join().unwrap_or_else(|_| {
-                            (Vec::new(), ModuleId::Title, std::time::Duration::ZERO)
-                        })
+                    .map(|(mod_id, h)| {
+                        h.join()
+                            .unwrap_or_else(|_| (Vec::new(), mod_id, std::time::Duration::ZERO))
                     })
                     .collect()
             });
@@ -305,6 +305,7 @@ impl Default for ModuleRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cli::Cli;
 
     #[test]
     fn test_module_id_from_str() {
@@ -329,5 +330,34 @@ mod tests {
     #[test]
     fn test_module_id_all_count() {
         assert_eq!(ModuleId::all().len(), 27);
+    }
+
+    struct PanickingCollector;
+    impl Collector for PanickingCollector {
+        fn id(&self) -> ModuleId {
+            ModuleId::Disk
+        }
+        fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
+            panic!("intentional panic for test");
+        }
+    }
+
+    #[test]
+    fn test_collect_all_timed_handles_panic() {
+        let registry = ModuleRegistry {
+            collectors: vec![Box::new(PanickingCollector)],
+        };
+        let cli = Cli {
+            modules: Some(vec!["disk".to_string()]),
+            ..Default::default()
+        };
+        let ctx = FetchContext::new(&cli);
+        let prev_hook = std::panic::take_hook();
+        std::panic::set_hook(Box::new(|_| {}));
+        let (outputs, timings) = registry.collect_all_timed(&ctx);
+        std::panic::set_hook(prev_hook);
+        assert!(outputs.is_empty());
+        assert_eq!(timings.len(), 1);
+        assert_eq!(timings[0].0, ModuleId::Disk);
     }
 }

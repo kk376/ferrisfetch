@@ -26,13 +26,39 @@ pub fn get_username() -> String {
         }
     }
 
-    // Fallback to POSIX user database entry for effective UID
+    // Fallback to POSIX user database entry for effective UID using thread-safe getpwuid_r
     #[cfg(unix)]
-    unsafe {
-        let uid = libc::geteuid();
-        let pw = libc::getpwuid(uid);
-        if !pw.is_null() {
-            let name = CStr::from_ptr((*pw).pw_name);
+    {
+        let mut pwd = std::mem::MaybeUninit::<libc::passwd>::uninit();
+        let mut result = std::ptr::null_mut();
+        let buf_size = {
+            // SAFETY: sysconf is safe to invoke with valid constant _SC_GETPW_R_SIZE_MAX.
+            let s = unsafe { libc::sysconf(libc::_SC_GETPW_R_SIZE_MAX) };
+            if s > 0 {
+                s as usize
+            } else {
+                1024
+            }
+        };
+        let mut buf = vec![0 as libc::c_char; buf_size];
+
+        // SAFETY: geteuid is always safe to call. pwd points to uninitialized storage for
+        // struct passwd, buf provides allocated storage of at least buf_size bytes, and result
+        // points to a valid pointer location to receive the result.
+        let ret = unsafe {
+            libc::getpwuid_r(
+                libc::geteuid(),
+                pwd.as_mut_ptr(),
+                buf.as_mut_ptr(),
+                buf.len(),
+                &mut result,
+            )
+        };
+
+        if ret == 0 && !result.is_null() {
+            // SAFETY: result is guaranteed non-null and valid. pw_name points to a valid null-terminated
+            // C string whose lifetime is tied to buf.
+            let name = unsafe { CStr::from_ptr((*result).pw_name) };
             return name.to_string_lossy().into_owned();
         }
     }
@@ -102,6 +128,16 @@ pub fn format_title(
     }
 }
 
+/// Retrieves hostname preferring cached uname in FetchContext before probing OS.
+pub fn get_hostname_with_ctx(ctx: &FetchContext) -> String {
+    if let Some(ref uname) = ctx.uname_info {
+        if !uname.hostname.is_empty() && uname.hostname != "(none)" {
+            return uname.hostname.clone();
+        }
+    }
+    get_hostname()
+}
+
 pub struct TitleCollector;
 
 impl Collector for TitleCollector {
@@ -111,7 +147,7 @@ impl Collector for TitleCollector {
 
     fn collect(&self, ctx: &FetchContext) -> Option<ModuleOutput> {
         let user = get_username();
-        let host = get_hostname();
+        let host = get_hostname_with_ctx(ctx);
         let title_plain = format!("{}@{}", user, host);
 
         let logo = match_logo(

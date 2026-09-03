@@ -149,3 +149,48 @@ jobs:
         with:
           files: dist/*
           generate_release_notes: true
+
+  build-macos:
+    name: Build macOS Release Artifacts
+    runs-on: macos-latest
+    needs: [build-and-release]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin,aarch64-apple-darwin
+
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build macOS binaries
+        run: |
+          cargo build --release --bin kkfetch --target x86_64-apple-darwin
+          cargo build --release --bin kkfetch --target aarch64-apple-darwin
+
+      - name: Package macOS artifacts
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG_NAME#v}"
+          mkdir -p dist-macos
+
+          for TARGET in x86_64-apple-darwin aarch64-apple-darwin; do
+            DIR="kkfetch-${VERSION}-${TARGET}"
+            mkdir -p "${DIR}/completions"
+            cp "target/${TARGET}/release/kkfetch" "${DIR}/"
+            cp README.md LICENSE "${DIR}/"
+            [ -f docs/kkfetch.1 ] && cp docs/kkfetch.1 "${DIR}/"
+            [ -f completions/kkfetch.bash ] && cp completions/kkfetch.bash "${DIR}/completions/"
+            [ -f completions/_kkfetch ] && cp completions/_kkfetch "${DIR}/completions/"
+            [ -f completions/kkfetch.fish ] && cp completions/kkfetch.fish "${DIR}/completions/"
+            tar -czf "dist-macos/kkfetch-${VERSION}-${TARGET}.tar.gz" "${DIR}"
+            rm -rf "${DIR}"
+          done
+
+      - name: Upload macOS Release Artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist-macos/*

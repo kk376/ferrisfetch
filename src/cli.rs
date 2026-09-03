@@ -42,4 +42,8 @@ pub struct Cli {
     /// Show execution latency breakdown per module in microseconds
     #[arg(long = "timings")]
     pub timings: bool,
+
+    /// Disable external plugin execution
+    #[arg(long = "no-plugins")]
+    pub no_plugins: bool,
 }

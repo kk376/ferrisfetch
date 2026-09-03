@@ -148,6 +148,7 @@ pub mod ffi {
     pub fn reg_open_key(root: isize, subkey: &str) -> Option<isize> {
         let subkey_w = to_wide(subkey);
         let mut hkey: isize = 0;
+        // SAFETY: RegOpenKeyExW is called with a valid null-terminated UTF-16 subkey string and a valid out-pointer for hkey.
         let res = unsafe { RegOpenKeyExW(root, subkey_w.as_ptr(), 0, KEY_READ, &mut hkey) };
         if res == 0 && hkey != 0 {
             Some(hkey)
@@ -157,6 +158,7 @@ pub mod ffi {
     }
 
     pub fn reg_close_key(hkey: isize) {
+        // SAFETY: hkey is a valid open registry handle to close.
         unsafe {
             RegCloseKey(hkey);
         }
@@ -167,6 +169,7 @@ pub mod ffi {
         let mut val_type: u32 = 0;
         let mut data_size: u32 = 0;
 
+        // SAFETY: RegQueryValueExW is called with null buffer to safely probe data size and type.
         let res = unsafe {
             RegQueryValueExW(
                 hkey,
@@ -221,6 +224,7 @@ pub mod ffi {
         let mut data_size: u32 = 4;
         let mut data: u32 = 0;
 
+        // SAFETY: RegQueryValueExW writes up to 4 bytes into data as u32.
         let res = unsafe {
             RegQueryValueExW(
                 hkey,
@@ -251,6 +255,7 @@ pub mod ffi {
         let mut data_size: u32 = 8;
         let mut data: u64 = 0;
 
+        // SAFETY: RegQueryValueExW writes up to 8 bytes into data as u64.
         let res = unsafe {
             RegQueryValueExW(
                 hkey,
@@ -309,6 +314,7 @@ pub mod ffi {
 
         loop {
             let mut name_len = name_buf.len() as u32;
+            // SAFETY: RegEnumKeyExW writes the subkey name into allocated buffer of name_buf.len() capacity.
             let res = unsafe {
                 RegEnumKeyExW(
                     hkey,
@@ -338,15 +344,18 @@ pub mod ffi {
 
     pub fn get_parent_process_chain(max_depth: usize) -> Vec<(u32, String)> {
         let mut chain = Vec::new();
+        // SAFETY: CreateToolhelp32Snapshot takes a snapshot of all active processes; 0 indicates current process.
         let h_snap = unsafe { CreateToolhelp32Snapshot(0x00000002, 0) };
         if h_snap == 0 || h_snap == -1 {
             return chain;
         }
 
         let mut processes = std::collections::HashMap::new();
+        // SAFETY: PROCESSENTRY32W is a POD Win32 struct that is safe to zero-initialize before passing to Process32FirstW.
         let mut entry = unsafe { std::mem::zeroed::<PROCESSENTRY32W>() };
         entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
 
+        // SAFETY: h_snap is a valid snapshot handle and entry has dwSize properly initialized.
         if unsafe { Process32FirstW(h_snap, &mut entry) } != 0 {
             loop {
                 let name_len = entry
@@ -357,13 +366,16 @@ pub mod ffi {
                 let exe_name = String::from_utf16_lossy(&entry.szExeFile[..name_len]);
                 processes.insert(entry.th32ProcessID, (entry.th32ParentProcessID, exe_name));
 
+                // SAFETY: h_snap is a valid snapshot handle and entry is valid mutable reference.
                 if unsafe { Process32NextW(h_snap, &mut entry) } == 0 {
                     break;
                 }
             }
         }
+        // SAFETY: h_snap is a valid Win32 handle.
         unsafe { CloseHandle(h_snap) };
 
+        // SAFETY: GetCurrentProcessId has no prerequisites or safety invariants.
         let mut curr_pid = unsafe { GetCurrentProcessId() };
         for _ in 0..max_depth {
             if let Some(&(ppid, ref name)) = processes.get(&curr_pid) {

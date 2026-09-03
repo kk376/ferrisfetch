@@ -38,6 +38,8 @@ pub fn parse_windows_kernel_info(
 /// Avoids spawning subprocesses (`uname -r`) and parsing `/proc/version` directly.
 #[cfg(not(windows))]
 pub fn get_uname_info() -> Option<UnameInfo> {
+    // SAFETY: uts points to valid uninitialized storage for struct libc::utsname, which
+    // libc::uname populates on success (returning 0). Strings in uts are null-terminated.
     unsafe {
         let mut uts = MaybeUninit::<libc::utsname>::uninit();
         if libc::uname(uts.as_mut_ptr()) != 0 {
@@ -111,8 +113,8 @@ impl Collector for KernelCollector {
         ModuleId::Kernel
     }
 
-    fn collect(&self, _ctx: &FetchContext) -> Option<ModuleOutput> {
-        let uname = get_uname_info()?;
+    fn collect(&self, ctx: &FetchContext) -> Option<ModuleOutput> {
+        let uname = ctx.uname_info.as_ref().cloned().or_else(get_uname_info)?;
         Some(ModuleOutput {
             id: ModuleId::Kernel,
             label: "Kernel".to_string(),

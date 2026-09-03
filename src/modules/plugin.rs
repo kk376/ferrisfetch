@@ -89,8 +89,8 @@ impl Collector for PluginCollector {
     }
 
     fn collect_multiple(&self, ctx: &FetchContext) -> Vec<ModuleOutput> {
-        // Prevent arbitrary code execution when running with elevated privileges (F1)
-        if is_elevated_context() {
+        // Prevent arbitrary code execution when running with elevated privileges (F1) or if disabled via CLI
+        if is_elevated_context() || ctx.no_plugins {
             return Vec::new();
         }
 

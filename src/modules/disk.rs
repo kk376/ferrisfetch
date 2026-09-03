@@ -24,6 +24,8 @@ pub struct DiskUsage {
 #[allow(clippy::unnecessary_cast)]
 pub fn get_disk_usage(path: &str) -> Option<DiskUsage> {
     let c_path = CString::new(path).ok()?;
+    // SAFETY: c_path is a valid null-terminated C string. stat is an uninitialized
+    // libc::statvfs struct that statvfs initializes on success (return code 0).
     unsafe {
         let mut stat = MaybeUninit::<libc::statvfs>::uninit();
         if libc::statvfs(c_path.as_ptr(), stat.as_mut_ptr()) != 0 {
@@ -72,6 +74,8 @@ pub fn get_disk_usage(path: &str) -> Option<DiskUsage> {
     };
     let wide: Vec<u16> = path_str.encode_utf16().chain(std::iter::once(0)).collect();
 
+    // SAFETY: wide is a null-terminated UTF-16 string representing a valid drive path.
+    // Out parameters are valid mutable references to u64 values.
     unsafe {
         let mut free_avail: u64 = 0;
         let mut total: u64 = 0;
@@ -267,6 +271,8 @@ pub fn get_volume_fs_type(path: &str) -> Option<String> {
     };
     let wide: Vec<u16> = root_path.encode_utf16().chain(std::iter::once(0)).collect();
     let mut fs_name_buf = [0u16; 256];
+    // SAFETY: wide is a null-terminated UTF-16 volume path. fs_name_buf has capacity of 256 u16 elements
+    // which GetVolumeInformationW safely writes into up to fs_name_buf.len() elements.
     unsafe {
         if ffi::GetVolumeInformationW(
             wide.as_ptr(),
@@ -397,6 +403,7 @@ pub fn get_all_disks() -> Vec<PartitionEntry> {
 pub fn get_all_disks() -> Vec<PartitionEntry> {
     use crate::modules::win_util::ffi;
     let mut entries = Vec::new();
+    // SAFETY: GetLogicalDrives is a simple Win32 query that retrieves a bitmask of valid drive letters.
     let drives_mask = unsafe { ffi::GetLogicalDrives() };
 
     for i in 0..26 {
@@ -404,6 +411,7 @@ pub fn get_all_disks() -> Vec<PartitionEntry> {
             let drive_letter = (b'A' + i) as char;
             let root_path = format!("{}:\\", drive_letter);
             let wide: Vec<u16> = root_path.encode_utf16().chain(std::iter::once(0)).collect();
+            // SAFETY: wide is a null-terminated UTF-16 root path string.
             let drive_type = unsafe { ffi::GetDriveTypeW(wide.as_ptr()) };
             // DRIVE_REMOVABLE = 2, DRIVE_FIXED = 3
             if drive_type == 2 || drive_type == 3 {

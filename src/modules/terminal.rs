@@ -540,6 +540,7 @@ pub fn detect_terminal() -> Option<String> {
     }
 
     // 2. Process ancestry traversal: walk up to 8 levels of PPID to jump over subshells, tmux/screen, and sudo wrappers
+    // SAFETY: getpid() is a standard POSIX syscall that returns the current process ID without memory safety implications.
     let mut current_pid = unsafe { libc::getpid() as u32 };
     for _ in 0..8 {
         let status_path = format!("/proc/{}/status", current_pid);

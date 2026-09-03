@@ -1048,10 +1048,13 @@ impl Collector for GpuCollector {
         })
     }
 
-    fn collect_multiple(&self, _ctx: &FetchContext) -> Vec<ModuleOutput> {
+    fn collect_multiple(&self, ctx: &FetchContext) -> Vec<ModuleOutput> {
         let gpus = get_gpu_list();
-        let cpu_sockets = crate::modules::cpu::get_cpu_info()
+        let cpu_sockets = ctx
+            .cpu_info
+            .as_ref()
             .map(|c| c.sockets)
+            .or_else(|| crate::modules::cpu::get_cpu_info().map(|c| c.sockets))
             .unwrap_or(1);
         group_and_index_gpus(&gpus, cpu_sockets)
     }

@@ -251,3 +251,13 @@ fn test_timings_with_json_flag() {
     assert!(stderr.contains("os"));
     assert!(stderr.contains("kernel"));
 }
+
+#[test]
+fn test_no_plugins_flag() {
+    let mut cmd = Command::cargo_bin("kkfetch").unwrap();
+    cmd.args(["--no-plugins", "--modules", "os,plugin", "--json"]);
+    let assert = cmd.assert().success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    assert!(stdout.contains("\"os\":"));
+    assert!(!stdout.contains("\"plugin\":"));
+}
